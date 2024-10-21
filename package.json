@@ -1,26 +1,55 @@
 {
-  "name": "vue2-crud-ui",
+  "name": "super-crud",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs",
+    "lib": "vue-cli-service build --target lib --dest lib src/index.js",
+    "dev": "cross-env TARGET=dev gulp watch",
+    "build": "cross-env TARGET=prod gulp build"
   },
   "dependencies": {
-    "core-js": "^3.6.5",
-    "register-service-worker": "^1.7.1",
+    "el-table-virtual-scroll": "^1.4.6",
+    "element-ui": "^2.15.14",
+    "lodash-es": "^4.17.21",
     "vue": "^2.6.11",
+    "vue-contextmenujs": "^1.4.11",
+    "vue-highlight.js": "^3.1.0",
     "vue-router": "^3.2.0",
-    "vuex": "^3.4.0"
+    "vuedraggable": "^2.24.3",
+    "vuepress": "^1.9.10",
+    "vuepress-plugin-code-copy": "^1.0.6",
+    "xe-utils": "^3.5.28"
   },
   "devDependencies": {
+    "@babel/core": "^7.13.14",
+    "@babel/preset-env": "^7.13.12",
+    "@vue/babel-helper-vue-jsx-merge-props": "^1.4.0",
+    "@vue/babel-preset-jsx": "^1.4.0",
     "@vue/cli-plugin-babel": "~4.5.19",
-    "@vue/cli-plugin-pwa": "~4.5.19",
     "@vue/cli-plugin-router": "~4.5.19",
     "@vue/cli-plugin-vuex": "~4.5.19",
     "@vue/cli-service": "~4.5.19",
+    "babel-loader": "^8.2.2",
+    "babel-plugin-jsx-v-model": "^2.0.3",
+    "cache-loader": "^4.1.0",
+    "cross-env": "^7.0.3",
+    "css-loader": "^5.2.0",
+    "gulp": "^4.0.0",
+    "gulp-autoprefixer": "^4.0.0",
+    "gulp-cssmin": "^0.1.7",
+    "gulp-postcss": "^6.1.1",
+    "gulp-sass": "^5.1.0",
+    "progress-bar-webpack-plugin": "^2.1.0",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
-    "vue-template-compiler": "^2.6.11"
+    "vue-loader": "^15.9.6",
+    "vue-template-compiler": "^2.6.11",
+    "vuepress-plugin-fulltext-search": "^2.2.1",
+    "vuepress-theme-reco": "^1.6.17",
+    "webpack": "^4.27.0",
+    "webpack-merge": "^4.1.4"
   }
 }

@@ -1,0 +1,62 @@
+@import "./crud.scss";
+@import "./group.scss";
+@import "./form.scss";
+@import "./dialog.scss";
+@import "./button.scss";
+:root {
+  --color-text-regular: #606266;
+  --border-color-lighter: #ebeef5;
+  --background-color-base: #fafafa;
+  --color-primary: #409eff;
+}
+.sc-title {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  color: var(--color-text-regular);
+  height: 40px;
+}
+.sc-title::before {
+  content: "";
+  width: 5px;
+  height: 18px;
+  margin-right: 8px;
+  border-radius: 2px;
+  background: var(--color-primary);
+}
+
+.sc-default-formatter {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-text-regular);
+}
+.sc-render-left,
+.sc-render-right {
+  display: inline-flex;
+  align-items: center;
+}
+
+.sc-position {
+  // TODO inline-flex 的行内会引起换行
+  display: inline-flex;
+  align-items: center;
+}
+
+.sc-position__top {
+  margin-bottom: var(--sc-position-margin);
+}
+.sc-position__bottom {
+  margin-top: var(--sc-position-margin);
+}
+.sc-position__left {
+  margin-right: var(--sc-position-margin);
+}
+.sc-position__right {
+  margin-left: var(--sc-position-margin);
+}
+
+.sc-position__center {
+  display: flex;
+  align-items: center;
+}
