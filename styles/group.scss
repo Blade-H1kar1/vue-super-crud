@@ -7,11 +7,14 @@
   .el-collapse-item__header {
     height: inherit;
     border: none;
-    border-bottom: 1px solid #eee;
-    margin-bottom: 20px;
   }
   .el-collapse-item__content {
     padding-bottom: 0;
+  }
+  &--border {
+    .el-collapse-item__header {
+      border-bottom: 1px solid #eee;
+    }
   }
   &--arrow {
     .el-collapse-item__arrow {
@@ -45,12 +48,11 @@
   }
 
   &__header {
-    padding-left: 10px;
     width: 100%;
     display: flex;
     align-items: center;
-    height: 50px;
-    line-height: 50px;
+    height: 40px;
+    line-height: 40px;
     box-sizing: border-box;
   }
   &__icon {
@@ -61,7 +63,7 @@
   &__title {
     display: flex;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
     color: rgba(0, 0, 0, 0.85);
     margin: 0;
   }

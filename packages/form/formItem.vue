@@ -112,7 +112,7 @@ export default create({
         names.push(this.item.class);
       }
       if (this.rules.required) names.push("is-required");
-      if (this.isDetail) names.push("sc--detail");
+      if (this.isDetail) names.push("is-detail");
       if (this.isFirstRow) names.push("is-first-row");
       return names;
     },
@@ -141,14 +141,12 @@ export default create({
           content={
             typeof this.item.contentTip === "string"
               ? this.item.contentTip
-              : this.formCtx.form[this.item.prop]
+              : this.formCtx.value[this.item.prop]
           }
         >
           <Render
-            value={this.formCtx.form[this.item.prop]}
+            value={this.formCtx.value[this.item.prop]}
             onInput={(e) => {
-              this.$set(this.formCtx.form, this.item.prop, e);
-              // 触发外部属性值改变
               this.$set(this.formCtx.value, this.item.prop, e);
             }}
             props={this.item}

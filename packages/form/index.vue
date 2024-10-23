@@ -1,6 +1,6 @@
 <template>
   <div
-    :class="[b(), { 'sc--detail__border': isDetail && isBorder }]"
+    :class="[b(), { 'sc-form--border': isBorder, 'sc-form--group': isGroup }]"
     :style="{ padding: formOptions.gap }"
   >
     <simpleRender
@@ -16,12 +16,17 @@
       v-loading="isLoading"
       :disabled="isDisabled"
       ref="formRef"
-      :model="form"
+      :model="value"
       v-bind="formOptions"
       :key="key"
     >
       <template v-if="isGroup">
-        <group v-for="(item, index) in columns" v-bind="item" :key="index">
+        <group
+          v-for="(item, index) in columns"
+          v-bind="item"
+          :key="index"
+          :border="!isBorder"
+        >
           <component
             v-if="item.children"
             :is="formOptions.layout"
@@ -33,6 +38,7 @@
               :key="idx"
               :col="i"
               v-bind="i"
+              :is-first-row="idx <= firstRowLastCellIndex[index]"
             ></formItem
           ></component>
           <simpleRender
@@ -121,10 +127,7 @@ export default create({
   data() {
     return {
       key: 1,
-      form: {},
-      formatValue: {},
       loadingStatus: false,
-      formCreate: false,
       formBind: {},
     };
   },
@@ -176,22 +179,15 @@ export default create({
       });
       return map;
     },
-    // dataFormatMap() {
-    //   const map = {};
-    //   this.trueRenderColumns.forEach((i) => {
-    //     map[i.prop] = mergeDataFormat(i.format, i);
-    //   });
-    //   return map;
-    // },
     getScope() {
       if (this.scope) {
         return {
           ...this.scope,
-          row: this.form,
+          row: this.value,
         };
       } else {
         return {
-          row: this.form,
+          row: this.value,
         };
       }
     },
@@ -207,31 +203,20 @@ export default create({
       }
     },
     firstRowLastCellIndex() {
-      return this.getFirstRowLastCellIndex(this.columns);
+      if (this.isGroup) {
+        const map = this.columns.reduce((acc, cur, index) => {
+          acc[index] = this.getFirstRowLastCellIndex(cur.children, cur.columns);
+          return acc;
+        }, {});
+        return map || {};
+      }
+      return this.getFirstRowLastCellIndex(
+        this.columns,
+        this.formOptions.columns
+      );
     },
   },
   watch: {
-    value: {
-      handler(val) {
-        if (this.formChange) return;
-        if (this.formCreate) {
-          this.setForm();
-        }
-      },
-      deep: true,
-    },
-    form: {
-      handler(val) {
-        this.formChange = true;
-        if (this.formCreate) {
-          this.setVal();
-        }
-        this.$nextTick(() => {
-          this.formChange = false;
-        });
-      },
-      deep: true,
-    },
     loading: {
       handler(val) {
         val !== undefined && (this.loadingStatus = val);
@@ -281,28 +266,12 @@ export default create({
           }
         }
       });
-      this.$set(this, "form", form);
       this.setControl();
       // 将value未定义的属性变为响应式
-      this.setVal();
+      this.$emit("input", form);
       this.$nextTick(() => {
-        this.formCreate = true;
-        this.setForm();
         this.clearValidate();
       });
-      // setTimeout(() => {
-      //   this.formCreate = true;
-      //   this.setForm();
-      // });
-    },
-    setForm() {
-      Object.keys(this.value).forEach((ele) => {
-        this.$set(this.form, ele, this.value[ele]);
-      });
-    },
-    setVal() {
-      this.$emit("input", this.form);
-      this.$emit("change", this.form);
     },
     setControl() {
       this.trueRenderColumns.forEach((column) => {
@@ -312,15 +281,15 @@ export default create({
           let bindList = [];
           if (bind) {
             // 实际与表单绑定的值还是浅层的值，通过watch，浅层的值改变会修改深层，深层改变也会修改浅层
-            let formProp = this.$watch("form." + prop, (n, o) => {
-              if (n != o) set(this.form, bind, n);
+            let formProp = this.$watch("value." + prop, (n, o) => {
+              if (n != o) set(this.value, bind, n);
             });
-            let formDeep = this.$watch("form." + bind, (n, o) => {
-              if (n != o) this.$set(this.form, prop, n);
+            let formDeep = this.$watch("value." + bind, (n, o) => {
+              if (n != o) this.$set(this.value, prop, n);
             });
             bindList.push(formProp);
             bindList.push(formDeep);
-            this.$set(this.form, prop, get(this.form, bind));
+            this.$set(this.value, prop, get(this.value, bind));
           }
           this.formBind[prop] = bindList;
         }
@@ -358,8 +327,8 @@ export default create({
               }
             }
           } else {
-            callBack && callBack({ form: this.form });
-            resolve({ form: this.form });
+            callBack && callBack({ form: this.value });
+            resolve({ form: this.value });
           }
         });
       });
@@ -376,7 +345,7 @@ export default create({
         () => {
           this.loadingStatus = false;
         },
-        this.form
+        this.value
       );
     },
     reset() {
@@ -388,8 +357,7 @@ export default create({
     refreshForm() {
       this.key = Math.random();
     },
-    getFirstRowLastCellIndex(columns) {
-      const columnsNumber = this.formOptions.columns;
+    getFirstRowLastCellIndex(columns, columnsNumber) {
       let widthSize = 0;
       const lastIndex = columns.findIndex((item, idx) => {
         widthSize += item.widthSize || 1;

@@ -4,6 +4,7 @@ import { omit, pick, mergeWith, isFunction } from "lodash-es";
 import { batchMerge } from "utils/mergeTemp";
 import config from "src/config/dialog";
 import Render from "core/components/render";
+import scButton from "pak/button";
 
 export const vnodes = {};
 export default (options = {}) => {
@@ -131,6 +132,9 @@ export default (options = {}) => {
         if (!this.dialogOptions.cache) {
           this.destroy();
         }
+        if (isFunction(this.dialogOptions.closed)) {
+          this.dialogOptions.closed(this);
+        }
       },
       destroy() {
         this.$destroy();
@@ -206,15 +210,14 @@ export default (options = {}) => {
             ]}
           >
             {this.footerButtons.map((item) => (
-              <el-button
+              <scButton
+                props={item}
+                attrs={omit(item, ["onClick"])}
                 loading={this.loading}
                 size={this.dialogOptions.size}
-                type={item.type}
-                icon={item.icon}
                 onClick={() => item.onClick(this)}
-              >
-                {item.label}
-              </el-button>
+                scope={this}
+              ></scButton>
             ))}
           </div>
         );

@@ -1,5 +1,8 @@
 <template>
-  <div v-if="!hidden" :class="[b({ header: !isHeader, arrow: disabled })]">
+  <div
+    v-if="!hidden"
+    :class="[b({ header: !isHeader, arrow: disabled, border: border })]"
+  >
     <slot name="tabs" />
     <el-collapse v-model="activeName" :value="text" @change="handleChange">
       <el-collapse-item :name="1" :disabled="disabled">
@@ -34,6 +37,10 @@ export default create({
     };
   },
   props: {
+    border: {
+      type: Boolean,
+      default: true,
+    },
     disabled: {
       type: Boolean,
       default: false,

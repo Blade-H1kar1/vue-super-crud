@@ -24,19 +24,19 @@ export default {
         let regulars = batchMerge("rules", config.regular, {
           item,
         });
-        regulars = this.handleRegularRule(regulars);
+        regulars = this.handleRegularRule(regulars, scope);
         rules.push(...regulars);
       }
       if (config.rules) {
         let mergeRules = batchMerge("rules", config.rules, {
           item,
         });
-        mergeRules = this.handleRegularRule(mergeRules);
+        mergeRules = this.handleRegularRule(mergeRules, scope);
         rules.push(...mergeRules);
       }
       return rules;
     },
-    handleRegularRule(rules) {
+    handleRegularRule(rules, scope) {
       return rules.map((item) => {
         if (item.regular && item.msg) {
           return {
@@ -51,6 +51,10 @@ export default {
             message: item.msg,
           };
         } else {
+          if (item.validator) {
+            const validator = item.validator;
+            item.validator = (...args) => validator(...args, scope);
+          }
           return item;
         }
       });
