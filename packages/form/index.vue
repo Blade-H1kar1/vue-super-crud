@@ -136,7 +136,6 @@ export default create({
   },
   mounted() {
     this.extendMethod(this.$refs.formRef);
-    this.clearValidate();
   },
   computed: {
     formOptions() {
@@ -217,6 +216,10 @@ export default create({
     },
   },
   watch: {
+    value() {
+      // value重新赋值时需要再初始化
+      this.initFormValue();
+    },
     loading: {
       handler(val) {
         val !== undefined && (this.loadingStatus = val);
@@ -256,6 +259,8 @@ export default create({
     },
     //初始化表单
     initFormValue() {
+      if (this.isInitValue) return;
+      this.isInitValue = true;
       let form = { ...this.value };
       this.trueRenderColumns.forEach((col) => {
         if (form[col.prop] === undefined) {
@@ -271,6 +276,7 @@ export default create({
       this.$emit("input", form);
       this.$nextTick(() => {
         this.clearValidate();
+        this.isInitValue = false;
       });
     },
     setControl() {
