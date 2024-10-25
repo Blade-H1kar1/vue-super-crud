@@ -8,4 +8,5 @@ module.exports = {
       },
     ],
   ],
+  plugins: ["./vue-jsx-sync"],
 };

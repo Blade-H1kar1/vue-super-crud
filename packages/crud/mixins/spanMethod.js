@@ -74,6 +74,7 @@ export default {
         }
         groupMap[key].push({ item, index });
       });
+      let index = 0;
       // 计算每个分组的 firstIndex 和 span
       for (const key in groupMap) {
         if (groupMap.hasOwnProperty(key)) {
@@ -84,6 +85,7 @@ export default {
           map[key] = {
             firstIndex,
             span,
+            spanIndex: index++,
           };
         }
       }

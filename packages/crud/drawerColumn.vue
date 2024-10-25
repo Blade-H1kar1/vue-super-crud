@@ -1,81 +1,3 @@
-<template>
-  <el-drawer
-    :class="b('drawer-column')"
-    title="列设置"
-    :visible.sync="active"
-    size="300px"
-    append-to-body
-  >
-    <div class="wrapper">
-      <el-card shadow="never">
-        <div class="header">
-          <el-checkbox
-            :indeterminate="isIndeterminate"
-            v-model="checkAll"
-            @change="handleCheckedChange"
-            >{{ show.length }} / {{ columns.length }}</el-checkbox
-          >
-          <span class="title">固定 / 排序</span>
-        </div>
-        <el-checkbox-group
-          class="col-list"
-          v-model="show"
-          @change="handleCheckedChange"
-        >
-          <draggable
-            ghost-class="ghost"
-            handle=".sort-drag"
-            filter=".unMover"
-            animation="150"
-            v-model="currentValue"
-            @end="onEnd"
-          >
-            <div class="col-item" v-for="(i, index) in columns" :key="index">
-              <el-checkbox
-                class="col-item--left"
-                :label="i.prop"
-                :title="i.label"
-              >
-                {{ i.label }}
-              </el-checkbox>
-              <div class="col-item--right">
-                <el-button-group>
-                  <el-button
-                    class="fixed-btn"
-                    icon="el-icon-arrow-left"
-                    :type="fixed[i.prop] === 'left' ? 'primary' : 'default'"
-                    @click="changeFixed(i.prop, 'left')"
-                  ></el-button>
-                  <el-button
-                    class="fixed-btn"
-                    icon="el-icon-close"
-                    :type="!fixed[i.prop] ? 'primary' : 'default'"
-                    @click="changeFixed(i.prop, false)"
-                  ></el-button>
-                  <el-button
-                    class="fixed-btn"
-                    icon="el-icon-arrow-right"
-                    :type="fixed[i.prop] === 'right' ? 'primary' : 'default'"
-                    @click="changeFixed(i.prop, 'right')"
-                  ></el-button>
-                </el-button-group>
-                <div :class="['el-icon-sort', 'sort-drag', 'mover']"></div>
-              </div>
-            </div>
-          </draggable>
-        </el-checkbox-group>
-      </el-card>
-      <el-button
-        class="reset-btn"
-        size="default"
-        icon="el-icon-refresh"
-        @click="reset"
-        >重置</el-button
-      >
-    </div>
-  </el-drawer>
-</template>
-
 <script>
 import create from "core/create";
 import draggable from "vuedraggable";
@@ -92,8 +14,27 @@ export default create({
     };
   },
   computed: {
+    action() {
+      if (this.ctx.crudOptions.action || this.ctx.rowEdit) {
+        return [
+          {
+            prop: "action",
+            label: "操作",
+          },
+        ];
+      }
+      return [];
+    },
+    defaultColumns() {
+      return this.ctx.defaultColumns || [];
+    },
     columns() {
-      return this.ctx.columns.filter((item) => !item.hiddenList);
+      const columns = [...this.defaultColumns, ...this.listColumns];
+      if (this.action.length) columns.push(...this.action);
+      return columns;
+    },
+    listColumns() {
+      return this.ctx.columns.filter((item) => !item.hiddenList) || [];
     },
     fixed() {
       return this.ctx.setOptions.fixed;
@@ -163,8 +104,8 @@ export default create({
     },
     onEnd({ newIndex, oldIndex }) {
       const sort = this.ctx.setOptions.sort;
-      const endProp = this.columns[newIndex].prop;
-      const prop = this.columns[oldIndex].prop;
+      const endProp = this.listColumns[newIndex].prop;
+      const prop = this.listColumns[oldIndex].prop;
       let startIndex, endIndex, adjustment;
       if (oldIndex < newIndex) {
         startIndex = oldIndex + 1;
@@ -177,7 +118,7 @@ export default create({
       } else {
         return;
       }
-      const clipColumns = this.columns.slice(startIndex, endIndex);
+      const clipColumns = this.listColumns.slice(startIndex, endIndex);
       clipColumns.forEach((item) => {
         if (item.prop !== prop) {
           this.$set(sort, item.prop, item.order + adjustment);
@@ -185,7 +126,99 @@ export default create({
       });
       this.$set(sort, prop, newIndex);
       this.ctx.saveLocalCache();
+      this.ctx.initColumnsHandler();
     },
+    renderColumnItems(columns, isDraggable = false) {
+      return columns.map((i, index) => (
+        <div class="col-item" key={index}>
+          <el-checkbox class="col-item--left" label={i.prop} title={i.label}>
+            {i.label}
+          </el-checkbox>
+          <div class="col-item--right">
+            {this.renderFixedButtons(i.prop)}
+            {isDraggable && !i.type ? (
+              <div class={["el-icon-sort", "sort-drag", "mover"]}></div>
+            ) : (
+              <div style="width: 22px; background: #fff;"></div>
+            )}
+          </div>
+        </div>
+      ));
+    },
+    renderFixedButtons(prop) {
+      return (
+        <el-button-group>
+          {["left", false, "right"].map((direction) => (
+            <el-button
+              class="fixed-btn"
+              icon={direction ? `el-icon-arrow-${direction}` : "el-icon-close"}
+              type={
+                direction
+                  ? this.fixed[prop] === direction
+                    ? "primary"
+                    : "default"
+                  : !this.fixed[prop]
+                  ? "primary"
+                  : "default"
+              }
+              onClick={() => this.changeFixed(prop, direction)}
+            />
+          ))}
+        </el-button-group>
+      );
+    },
+  },
+  render(h) {
+    return (
+      <el-drawer
+        class={this.b("drawer-column")}
+        title="列设置"
+        visible_sync={this.active}
+        size="300px"
+        appendToBody
+      >
+        <div class="wrapper">
+          <el-card shadow="never">
+            <div class="header">
+              <el-checkbox
+                indeterminate={this.isIndeterminate}
+                vModel={this.checkAll}
+                onChange={this.handleCheckedChange}
+              >
+                {this.show.length} / {this.columns.length}
+              </el-checkbox>
+              <span class="title">固定 / 排序</span>
+            </div>
+            <el-checkbox-group
+              class="col-list"
+              vModel={this.show}
+              onChange={this.handleCheckedChange}
+            >
+              {this.renderColumnItems(this.defaultColumns)}
+              <draggable
+                ghostClass="ghost"
+                handle=".sort-drag"
+                filter=".unMover"
+                animation={150}
+                vModel={this.currentValue}
+                onEnd={this.onEnd}
+              >
+                {this.renderColumnItems(this.listColumns, true)}
+              </draggable>
+              {this.renderColumnItems(this.action)}
+            </el-checkbox-group>
+          </el-card>
+          <el-button
+            class="reset-btn"
+            size="default"
+            icon="el-icon-refresh"
+            onClick={this.reset}
+          >
+            重置
+          </el-button>
+        </div>
+      </el-drawer>
+    );
   },
 });
 </script>

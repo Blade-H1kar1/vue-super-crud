@@ -71,7 +71,29 @@ module.exports = {
     },
   },
   configureWebpack: {
-    module: {},
+    module: {
+      rules: [
+        {
+          test: /\.js$/,
+          exclude: /node_modules/,
+          use: {
+            loader: "babel-loader",
+            options: {
+              presets: [
+                "@vue/cli-plugin-babel/preset",
+                [
+                  "@vue/babel-preset-jsx",
+                  {
+                    injectH: false,
+                  },
+                ],
+              ],
+              plugins: ["./vue-jsx-sync"],
+            },
+          },
+        },
+      ],
+    },
     resolve: {
       alias: {
         "core-js/library/fn": "core-js/features",

@@ -1,7 +1,6 @@
 export default () => ({
   normal: {
     size: "small",
-    defaultHeight: 400,
     local: true,
     refreshAfterOperation: true, // 操作后刷新表格
     editOpacity: true, // 是否开启编辑透明主题

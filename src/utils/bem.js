@@ -7,22 +7,22 @@
  * b(['disabled', 'primary']) // 'button button--disabled button--primary'
  */
 
-const ELEMENT = '__';
-const MODS = '--';
+const ELEMENT = "__";
+const MODS = "--";
 
-const join = (name, el, symbol) => el ? name + symbol + el : name;
+const join = (name, el, symbol) => (el ? name + symbol + el : name);
 
 const prefix = (name, mods) => {
-  if (typeof mods === 'string') {
+  if (typeof mods === "string") {
     return join(name, mods, MODS);
   }
 
   if (Array.isArray(mods)) {
-    return mods.map(item => prefix(name, item));
+    return mods.map((item) => prefix(name, item));
   }
 
   const ret = {};
-  Object.keys(mods || {}).forEach(key => {
+  Object.keys(mods || {}).forEach((key) => {
     ret[name + MODS + key] = mods[key];
   });
   return ret;
@@ -30,16 +30,18 @@ const prefix = (name, mods) => {
 
 export default {
   methods: {
-    b (el, mods) {
+    b(el, mods, onlyPrefix) {
       const { name } = this.$options;
 
-      if (el && typeof el !== 'string') {
+      if (el && typeof el !== "string") {
         mods = el;
-        el = '';
+        el = "";
       }
       el = join(name, el, ELEMENT);
-
+      if (onlyPrefix && mods) {
+        return prefix(el, mods);
+      }
       return mods ? [el, prefix(el, mods)] : el;
-    }
-  }
+    },
+  },
 };

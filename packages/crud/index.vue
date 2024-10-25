@@ -74,32 +74,16 @@
           </div>
         </template>
         <slot></slot>
-        <el-table-column
-          v-if="crudOptions.expand"
-          type="expand"
-          key="expand"
-          prop="expand"
-          :fixed="defaultFixed"
-          v-bind="crudOptions.expand"
-        >
-        </el-table-column>
-        <el-table-column
-          v-if="crudOptions.index"
-          type="index"
-          key="index"
-          prop="index"
-          :fixed="defaultFixed"
-          v-bind="crudOptions.index"
-        ></el-table-column>
-        <el-table-column
-          v-if="crudOptions.selection"
-          type="selection"
-          key="selection"
-          prop="selection"
-          :fixed="defaultFixed"
-          v-bind="crudOptions.selection"
-        ></el-table-column>
-        <column v-for="(col, index) in columns" :col="col" :key="index" />
+        <defaultColumn
+          v-for="col in defaultColumns"
+          :col="col"
+          :key="col.type"
+        />
+        <column
+          v-for="col in columns"
+          :col="col"
+          :key="col.prop || col.label"
+        />
         <columnAction />
       </el-table>
       <el-tooltip
@@ -146,6 +130,7 @@ import search from "./search.vue";
 import menuBar from "./menuBar.vue";
 import columnAction from "./columnAction.vue";
 import column from "./column.vue";
+import defaultColumn from "./defaultColumn.vue";
 import pagination from "./pagination.vue";
 import group from "../group/index.vue";
 import {
@@ -164,6 +149,7 @@ export default create({
   components: {
     columnAction,
     column,
+    defaultColumn,
     menuBar,
     pagination,
     search,
@@ -303,6 +289,16 @@ export default create({
       }
       return props;
     },
+    defaultColumns() {
+      const columns = [];
+      const options = pick(this.crudOptions, ["expand", "index", "selection"]);
+      Object.keys(options).forEach((key) => {
+        if (options[key]) {
+          columns.push({ type: key, ...options[key] });
+        }
+      });
+      return filterColumns(columns.sort((a, b) => a.order - b.order));
+    },
     columns() {
       return this.resultColumns;
     },
@@ -318,11 +314,6 @@ export default create({
         map[i.prop] = i;
       });
       return map;
-    },
-    defaultFixed() {
-      const fixed = this.setOptions.fixed;
-      const hasLeft = Object.keys(fixed).some((i) => fixed[i] === "left");
-      return hasLeft;
     },
     extendsScopedSlots() {
       const slots = { ...this.$scopedSlots };
@@ -630,6 +621,7 @@ export default create({
         this.setOptions,
         cacheData[this.$route.path]
       );
+      this.resetInit();
     },
     resetLocalCache() {
       this.setOptions.fixed = {};
@@ -642,6 +634,7 @@ export default create({
       let cacheData = cache.local.getJSON("tableOptions") || {};
       cacheData[this.$route.path] = this.setOptions;
       cache.local.setJSON("tableOptions", cacheData);
+      this.resetInit();
       refresh && this.refreshTable();
     },
     isDefaultColumn(col) {

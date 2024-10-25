@@ -196,7 +196,7 @@ export default {
         this.runBefore(
           ["batchSave"],
           callBack,
-          this.list.filter((i) => i.$edit || i.$add)
+          this.list.filter((i) => i.$edit || i.$add, this.changeLoading)
         );
       });
     },

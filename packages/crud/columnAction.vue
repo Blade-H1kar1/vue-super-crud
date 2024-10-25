@@ -1,11 +1,13 @@
 <template>
   <!-- 操作栏 -->
   <el-table-column
+    ref="column"
     v-if="showAction"
     v-bind="action"
     :fixed="defaultFixed"
     :width="actionWidth || action.width"
     :min-width="actionMinWidth || action.minWidth"
+    @hook:mounted="handleMounted"
   >
     <template v-slot="scope">
       <div :class="b('action-column')" ref="actionRef">
@@ -52,6 +54,11 @@ export default create({
     this.calcAutoWidth = debounce(calcAutoWidth, 100);
   },
   computed: {
+    fixed() {
+      if (this.col.fixed) return this.col.fixed;
+      const fixed = this.ctx.setOptions.fixed[this.col.prop];
+      if (fixed) return fixed;
+    },
     action() {
       return (
         this.ctx.crudOptions.action || {
@@ -65,15 +72,15 @@ export default create({
       );
     },
     showAction() {
+      if (this.ctx.setOptions.hidden.includes(this.action.prop)) return false;
       if (this.ctx.crudOptions.action === false) return false;
       if (this.actionButtons.length > 0) return true;
       return false;
     },
     defaultFixed() {
       if (this.action.fixed) return this.action.fixed;
-      const fixed = this.ctx.setOptions.fixed;
-      const hasRight = Object.keys(fixed).some((i) => fixed[i] === "right");
-      return hasRight ? "right" : false;
+      const fixed = this.ctx.setOptions.fixed[this.action.prop];
+      if (fixed) return fixed;
     },
     actionButtons() {
       const action = cloneDeep(this.action);
@@ -153,6 +160,12 @@ export default create({
     },
   },
   methods: {
+    handleMounted() {
+      const columnConfig = this.$refs.column?.columnConfig;
+      if (columnConfig) {
+        columnConfig.col = this.action;
+      }
+    },
     isRowEdit(scope) {
       return scope.row.$edit || scope.row.$add;
     },

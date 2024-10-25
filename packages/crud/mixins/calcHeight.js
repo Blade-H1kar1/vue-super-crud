@@ -19,7 +19,7 @@ export default {
   },
   computed: {
     defaultHeight() {
-      return this.crudOptions.defaultHeight || 400;
+      return this.crudOptions.defaultHeight || 200;
     },
     isAutoHeight() {
       return this.crudOptions.height === "auto";

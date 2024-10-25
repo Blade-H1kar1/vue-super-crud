@@ -148,11 +148,6 @@ export default {
       };
     },
   },
-  mounted() {
-    if (this.$refs.column && this.$refs.column.columnConfig) {
-      this.$refs.column.columnConfig.col = this.col;
-    }
-  },
   render(h) {
     const {
       col,
@@ -217,6 +212,14 @@ export default {
         min-width={colMinWidth}
         show-overflow-tooltip={showOverflowTooltip}
         scopedSlots={scopedSlots}
+        on={{
+          "hook:mounted": () => {
+            const columnConfig = this.$refs.column?.columnConfig;
+            if (columnConfig) {
+              columnConfig.col = this.col;
+            }
+          },
+        }}
       >
         {col.children &&
           col.children.map((sub) => (

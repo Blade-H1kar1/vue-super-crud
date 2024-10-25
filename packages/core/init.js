@@ -27,16 +27,16 @@ export default (optionsKey, config, opts) => {
     },
     watch: {
       initColumns() {
-        this.initColumnsHandler();
+        this.debounceInitColumnsHandler();
       },
       options: {
         handler(newVal, oldVal) {
-          this.initOptionsHandler();
+          this.debounceInitOptionsHandler();
         },
         deep: true,
       },
       $attrs() {
-        this.initOptionsHandler();
+        this.debounceInitOptionsHandler();
       },
     },
     computed: {
@@ -48,8 +48,8 @@ export default (optionsKey, config, opts) => {
     created() {
       this.initColumnsHandler();
       this.initOptionsHandler();
-      this.initColumnsHandler = debounce(this.initColumnsHandler, 300);
-      this.initOptionsHandler = debounce(this.initOptionsHandler, 300);
+      this.debounceInitColumnsHandler = debounce(this.initColumnsHandler, 300);
+      this.debounceInitOptionsHandler = debounce(this.initOptionsHandler, 300);
     },
     methods: {
       initColumnsHandler() {
@@ -65,6 +65,12 @@ export default (optionsKey, config, opts) => {
       },
       initOptionsHandler() {
         this.resultOptions = this.initOptions(config);
+      },
+      debounceInitOptionsHandler() {},
+      debounceInitColumnsHandler() {},
+      resetInit() {
+        this.initColumnsHandler();
+        this.initOptionsHandler();
       },
       mergeOptions() {
         const initConfig = this.getInitConfig();
