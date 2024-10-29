@@ -74,6 +74,8 @@ export default create({
     showAction() {
       if (this.ctx.setOptions.hidden.includes(this.action.prop)) return false;
       if (this.ctx.crudOptions.action === false) return false;
+      if (this.action.hidden) return false;
+      if (this.action.show === false) return false;
       if (this.actionButtons.length > 0) return true;
       return false;
     },

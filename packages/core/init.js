@@ -55,7 +55,7 @@ export default (optionsKey, config, opts) => {
       initColumnsHandler() {
         if (this.initColumns && Array.isArray(this.initColumns)) {
           this.resultColumns = filterColumns(
-            this.initColumns
+            cloneDeep(this.initColumns)
               .map(this.handleInitColumn)
               .sort((a, b) => a.order - b.order)
           );

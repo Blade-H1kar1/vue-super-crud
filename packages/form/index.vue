@@ -1,6 +1,9 @@
 <template>
   <div
-    :class="[b(), { 'sc-form--border': isBorder, 'sc-form--group': isGroup }]"
+    :class="[
+      b(),
+      { 'sc-form--border': isDetail && isBorder, 'sc-form--group': isGroup },
+    ]"
     :style="{ padding: formOptions.gap }"
   >
     <simpleRender
@@ -363,7 +366,7 @@ export default create({
     refreshForm() {
       this.key = Math.random();
     },
-    getFirstRowLastCellIndex(columns, columnsNumber) {
+    getFirstRowLastCellIndex(columns = [], columnsNumber = 1) {
       let widthSize = 0;
       const lastIndex = columns.findIndex((item, idx) => {
         widthSize += item.widthSize || 1;
