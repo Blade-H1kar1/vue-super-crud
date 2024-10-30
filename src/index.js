@@ -8,9 +8,9 @@ import select from "pak/dict/form/select.vue";
 import radio from "pak/dict/form/radio.vue";
 import _switch from "pak/dict/form/switch.vue";
 import checkbox from "pak/dict/form/checkbox.vue";
-// import Contextmenu from "vue-contextmenujs";
+import tabs from "pak/tabs";
+
 import { mergeTemplate } from "./template";
-// import dict from "core/dict";
 import dict from "pak/dict/global";
 import { merge } from "lodash-es";
 import directive from "pak/directive";
@@ -24,6 +24,7 @@ const components = [
   radio,
   _switch,
   checkbox,
+  tabs,
 ];
 
 const install = function (Vue, opts = {}) {
