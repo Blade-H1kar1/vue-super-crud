@@ -201,24 +201,27 @@ export default (options = {}) => {
         );
       };
       const footer = (h) => {
+        if (this.dialogOptions.footer.h) h = this.dialogOptions.footer.h;
         if (this.showFooter === false) return;
+        const buttonRender = () => {
+          return this.footerButtons.map((item) => (
+            <scButton
+              props={item}
+              attrs={omit(item, ["onClick"])}
+              loading={this.loading}
+              size={this.dialogOptions.size}
+              onClick={() => item.onClick(this)}
+              scope={this}
+            ></scButton>
+          ));
+        };
         return (
           <div
-            class={[
-              this.b("footer"),
-              this.b("footer", this.dialogOptions.footer.align || "right"),
-            ]}
+            class={this.b("footer", this.dialogOptions.footer.align || "right")}
           >
-            {this.footerButtons.map((item) => (
-              <scButton
-                props={item}
-                attrs={omit(item, ["onClick"])}
-                loading={this.loading}
-                size={this.dialogOptions.size}
-                onClick={() => item.onClick(this)}
-                scope={this}
-              ></scButton>
-            ))}
+            {isFunction(this.dialogOptions.footer.render)
+              ? this.dialogOptions.footer.render(h, buttonRender)
+              : buttonRender()}
           </div>
         );
       };

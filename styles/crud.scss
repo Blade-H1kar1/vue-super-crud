@@ -188,7 +188,6 @@
     background-color: #fff;
   }
 
-  .sc-crud__search-header,
   .sc-crud__cell,
   .cell,
   .sc-crud__cell .el-form-item__content {
@@ -207,6 +206,26 @@
         .el-input__inner {
           text-align: left;
         }
+      }
+    }
+  }
+}
+
+.sc-crud__search-header {
+  > .el-select,
+  > .el-date-editor,
+  > .el-textarea,
+  > .el-cascader,
+  > .el-input-number {
+    width: 100% !important;
+  }
+
+  > .el-input-number {
+    .el-input {
+      width: inherit;
+
+      .el-input__inner {
+        text-align: left;
       }
     }
   }
