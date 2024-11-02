@@ -164,7 +164,7 @@ export default {
     const scopedSlots = {
       default: !isDefaultColumn
         ? (scope) => {
-            return <columnCell col={col} scope={scope} />;
+            return <columnCell col={this.col} scope={scope} />;
           }
         : null,
       header: () => {

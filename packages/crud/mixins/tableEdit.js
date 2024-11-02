@@ -8,6 +8,7 @@ export default {
       editX: null,
       editY: null,
       noSaveEditList: [],
+      noSaveAddList: [],
     };
   },
   computed: {
@@ -174,6 +175,7 @@ export default {
           this.$set(scope.row, isAdd ? "$add" : "$edit", null);
           // 缓存未保存的行
           this.noSaveEditList = this.list.filter((i) => i.$edit);
+          this.noSaveAddList = this.list.filter((i) => i.$add);
           this.successTip(scope);
           this.refreshAfterOperation && this.getList();
           this.changeLoading();

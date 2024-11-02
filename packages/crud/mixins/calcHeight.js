@@ -5,6 +5,14 @@ export default {
       tableTop: 0,
       wrapperTop: 0,
       innerHeight: innerHeight,
+      observer: new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (this.visibilityCallback) {
+            this.visibilityCallback(entry.isIntersecting);
+          }
+        });
+      }),
+      visibilityCallback: null,
     };
   },
   created() {
@@ -64,12 +72,25 @@ export default {
     getClientTop() {
       if (this.isAutoHeight) {
         this.$nextTick(() => {
-          const tableTop = this.$refs.tableRef.$el.getBoundingClientRect().top;
-          if (this.tableTop !== tableTop) this.tableTop = tableTop;
-          const wrapperTop = this.$refs.wrapper.getBoundingClientRect().top;
-          if (this.wrapperHeight !== wrapperTop) this.wrapperTop = wrapperTop;
+          this.observeVisibility(this.$refs.tableRef.$el, (isVisible) => {
+            if (isVisible) {
+              const tableTop = this.$refs.tableRef.$el.getBoundingClientRect()
+                .top;
+              if (this.tableTop !== tableTop) this.tableTop = tableTop;
+              const wrapperTop = this.$refs.wrapper.getBoundingClientRect().top;
+              if (this.wrapperHeight !== wrapperTop)
+                this.wrapperTop = wrapperTop;
+            }
+            this.$nextTick(() => {
+              this.observer.disconnect();
+            });
+          });
         });
       }
+    },
+    observeVisibility(element, callback) {
+      this.visibilityCallback = callback;
+      this.observer.observe(element);
     },
     handleResize() {
       this.innerHeight = innerHeight;

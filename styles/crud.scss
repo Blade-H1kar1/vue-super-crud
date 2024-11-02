@@ -176,6 +176,7 @@
   }
 
   &__action-column {
+    white-space: nowrap;
     .el-button + .el-dropdown {
       margin-left: 10px;
     }

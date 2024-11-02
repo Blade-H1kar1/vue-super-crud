@@ -419,6 +419,10 @@ export default create({
         });
         this.noSaveEditList = [];
       }
+      if (this.noSaveAddList.length) {
+        list.push(...this.noSaveAddList);
+        this.noSaveAddList = [];
+      }
       if (this.isTree && this.crudOptions.autoLazy) {
         this.lazyTreeData = cloneDeep(list);
         this.handleLocalLazy(list);
