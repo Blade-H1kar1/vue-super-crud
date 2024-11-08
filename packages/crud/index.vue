@@ -31,6 +31,7 @@
       }"
       :show-message="false"
       :size="crudOptions.size"
+      :disabled="crudOptions.disabled"
       ref="tableFormRef"
       @validate="createListError"
       class="height--form"

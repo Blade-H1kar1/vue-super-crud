@@ -17,6 +17,7 @@
           :key="btn.key || btn.title || index"
           :scope="ctx"
           :loading="ctx.loadingStatus"
+          :disabled="ctx.crudOptions.disabled"
       /></simpleRender>
     </div>
     <div :class="b('toolbar')" v-if="ctx.crudOptions.toolbar !== false">
