@@ -149,9 +149,8 @@ export default create({
     toolbarTemps() {
       return {
         batchEdit: {
-          icon: "el-icon-edit",
           label: this.ctx.batchEdit ? "编辑" : "批量编辑",
-          round: true,
+          type: "primary",
           innerHide: this.isBatchEdit,
           onClick: () => {
             this.isBatchEdit = true;
@@ -159,9 +158,8 @@ export default create({
           },
         },
         batchSave: {
-          icon: "el-icon-check",
-          circle: true,
-          type: "success",
+          type: "primary",
+          label: "提交",
           innerHide: !this.isBatchEdit,
           onClick: () => {
             this.ctx.handleBatchRowSave(() => {
@@ -170,9 +168,7 @@ export default create({
           },
         },
         batchCancel: {
-          icon: "el-icon-close",
-          circle: true,
-          type: "info",
+          label: "取消",
           innerHide: !this.isBatchEdit,
           onClick: () => {
             this.resetBatchEdit();

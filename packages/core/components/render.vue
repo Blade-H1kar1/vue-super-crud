@@ -1,7 +1,14 @@
 <script>
 import { isComponent, isVNode } from "utils";
 import Comp from "./comp.vue";
-import { cloneDeep, isFunction, isPlainObject, merge, get } from "lodash-es";
+import {
+  cloneDeep,
+  isFunction,
+  isPlainObject,
+  merge,
+  get,
+  de,
+} from "lodash-es";
 import { mergeTemp } from "utils/mergeTemp";
 import { defaultRender as _defaultRender, initDict } from "core";
 import position from "./position.vue";
@@ -40,22 +47,35 @@ export default {
         return this.value;
       },
       set(value) {
-        const output = this.item.formatData?.output;
-        if (output) {
-          const formatValue = output(value, this.scope, (prop, value) => {
-            this.$set(this.scope.row, prop, value);
-          });
-          if (this.item.formatData.formatValue) {
-            this.scope.row["$" + this.prop] = value;
-          }
-          if (formatValue !== undefined) this.$emit("input", formatValue);
-        } else {
-          this.$emit("input", value);
-        }
+        this._isSettingValue = true;
+        this.setFormatValue(value);
       },
     },
   },
+  created() {
+    if (this.item.formatData) {
+      this.$watch("value", (val) => {
+        if (this._isSettingValue) return (this._isSettingValue = false);
+        this._isSettingValue = true;
+        this.setFormatValue(val);
+      });
+    }
+  },
   methods: {
+    setFormatValue(value) {
+      const output = this.item.formatData?.output;
+      if (output) {
+        const formatValue = output(value, this.scope, (prop, value) => {
+          this.$set(this.scope.row, prop, value);
+        });
+        if (this.item.formatData.formatValue) {
+          this.scope.row["$" + this.prop] = value;
+        }
+        if (formatValue !== undefined) this.$emit("input", formatValue);
+      } else {
+        this.$emit("input", value);
+      }
+    },
     interruptibleCompose(...funcs) {
       return funcs.reduce((f1, f2) => {
         return function (...args) {

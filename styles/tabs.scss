@@ -29,3 +29,20 @@
     height: 1px;
   }
 }
+.sc-tabs__border {
+  .el-tabs__header {
+    margin-bottom: 0;
+  }
+  .el-tabs--card > .el-tabs__header {
+    border-bottom: none;
+  }
+  .sc-tabs__content {
+    overflow: hidden;
+    border: 1px solid #dfe4ed;
+    border-radius: 0 4px 4px 4px;
+    padding: 20px;
+  }
+  .sc-tabs__is-refresh {
+    border: none;
+  }
+}

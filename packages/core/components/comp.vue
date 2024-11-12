@@ -163,6 +163,7 @@ export default {
         size={this.compSize}
         attrs={this.omitProps}
         props={this.omitProps}
+        disabled={this.omitProps.disabled ? true : false}
         value={this.value}
         scope={this.scope}
         on={this._on}

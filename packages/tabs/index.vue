@@ -1,5 +1,12 @@
 <template>
-  <div :class="b()">
+  <div
+    :class="[
+      b(),
+      {
+        [b('border')]: border,
+      },
+    ]"
+  >
     <el-tabs
       v-model="activeName"
       v-if="tabList && tabList.length"
@@ -35,21 +42,28 @@
       </el-tab-pane>
     </el-tabs>
     <slot></slot>
-    <transition name="fade-transform" mode="out-in">
-      <div v-show="isContentVisible">
-        <template v-for="(item, index) in tabList">
-          <div
-            v-show="currentTab === getItemName(item, index)"
-            :key="getItemKey(item, index)"
-          >
-            <slot
-              v-if="shouldShowTab(item, index)"
-              :name="getItemName(item, index)"
-            ></slot>
-          </div>
-        </template>
-      </div>
-    </transition>
+    <div
+      :class="{
+        [b('content')]: true,
+        [b('is-refresh')]: isRefreshing,
+      }"
+    >
+      <transition name="fade-transform" mode="out-in">
+        <div v-show="isContentVisible">
+          <template v-for="(item, index) in tabList">
+            <div
+              v-show="currentTab === getItemName(item, index)"
+              :key="getItemKey(item, index)"
+            >
+              <slot
+                v-if="shouldShowTab(item, index)"
+                :name="getItemName(item, index)"
+              ></slot>
+            </div>
+          </template>
+        </div>
+      </transition>
+    </div>
   </div>
 </template>
 
@@ -71,6 +85,7 @@ export default create({
       default: true,
     },
     all: [Boolean, Object],
+    border: Boolean,
   },
   data() {
     return {
