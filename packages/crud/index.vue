@@ -96,6 +96,13 @@
       >
       </el-tooltip>
     </el-form>
+    <div
+      v-if="crudOptions.lastRowAddBtn"
+      :class="b('add-button')"
+      @click="handleRowAdd({}, 'last')"
+    >
+      <i class="el-icon-plus" /> 新增一行
+    </div>
     <pagination ref="paginationRef" />
   </div>
 </template>

@@ -111,7 +111,6 @@ export default {
     },
     handleRowAdd(params, type = "first") {
       if (this.rowEdit && this.isNotEditable()) return;
-
       let newRow = {};
       this.trueRenderColumns.forEach((col) => {
         if (newRow[col.prop] === undefined) {
@@ -122,12 +121,14 @@ export default {
           }
         }
       });
-      // newRow = this.dataFormat(newRow, this.dataFormatMap);
       this.runBefore(
         ["add"],
-        (data) => {
+        (data, _type) => {
           newRow = Object.assign(newRow, data, params);
           newRow.$add = true;
+
+          type = this.crudOptions.rowAddType || _type || type;
+
           if (type === "first") {
             this.list.unshift(newRow);
           } else if (type === "last") {

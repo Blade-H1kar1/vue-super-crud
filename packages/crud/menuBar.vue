@@ -1,6 +1,16 @@
 <template>
   <div :class="b('menuBar')" v-if="showHeader">
-    <div :class="b('handleRow')">
+    <simpleRender
+      v-if="ctx.crudOptions.menuBarTitle"
+      prop="title"
+      :render="ctx.crudOptions.titleRender"
+      :slots="ctx.$scopedSlots"
+      :position="true"
+      ><div v-if="ctx.crudOptions.menuBarTitle" class="sc-title">
+        {{ ctx.crudOptions.menuBarTitle }}
+      </div></simpleRender
+    >
+    <div v-else :class="b('handleRow')">
       <simpleRender
         prop="handleRow"
         :render="handleRow.render"
@@ -67,10 +77,16 @@ export default create({
       return this.handleRow || this.toolbar;
     },
     handleRow() {
-      return this.ctx.crudOptions.handleRow || {};
+      const handleRow = { ...(this.ctx.crudOptions.handleRow || {}) };
+      return {
+        add: this.ctx.crudOptions.addBtn,
+        rowAdd: this.ctx.crudOptions.rowAddBtn,
+        batchDelete: this.ctx.crudOptions.batchDeleteBtn,
+        ...handleRow,
+      };
     },
     toolbar() {
-      const toolbar = { ...this.ctx.crudOptions.toolbar };
+      const toolbar = { ...(this.ctx.crudOptions.toolbar || {}) };
       if (this.ctx.batchRowEdit || this.ctx.batchEdit) {
         toolbar.batchEdit = true;
         toolbar.batchSave = true;
@@ -159,7 +175,7 @@ export default create({
         },
         batchSave: {
           type: "primary",
-          label: "提交",
+          label: "保存",
           innerHide: !this.isBatchEdit,
           onClick: () => {
             this.ctx.handleBatchRowSave(() => {

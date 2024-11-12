@@ -189,6 +189,30 @@
     background-color: #fff;
   }
 
+  &__add-button {
+    margin-top: 15px;
+    font-size: 14px;
+    height: 32px;
+    background: #ffffff;
+    border: 1px dashed var(--color-primary);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    cursor: pointer;
+    transition: border-style 0.5s;
+    .el-icon-plus {
+      margin-right: 10px;
+    }
+    &:hover {
+      border-style: solid;
+    }
+    &:active {
+      background-color: #ecf5ff;
+    }
+  }
+
   .sc-crud__cell,
   .cell,
   .sc-crud__cell .el-form-item__content {

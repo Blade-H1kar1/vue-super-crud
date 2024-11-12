@@ -85,7 +85,15 @@ export default create({
       if (fixed) return fixed;
     },
     actionButtons() {
-      const action = cloneDeep(this.action);
+      const action = Object.assign(
+        {},
+        {
+          delete: this.ctx.crudOptions.deleteBtn,
+          view: this.ctx.crudOptions.viewBtn,
+          edit: this.ctx.crudOptions.editBtn,
+        },
+        this.action
+      );
       let buttons = [];
       if (this.ctx.rowEdit) {
         action.rowEdit = true;
