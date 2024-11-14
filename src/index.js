@@ -9,6 +9,7 @@ import radio from "pak/dict/form/radio.vue";
 import _switch from "pak/dict/form/switch.vue";
 import checkbox from "pak/dict/form/checkbox.vue";
 import tabs from "pak/tabs";
+import verifyInput from "pak/verifyInput";
 
 import { mergeTemplate } from "./template";
 import dict from "pak/dict/global";
@@ -25,6 +26,7 @@ const components = [
   _switch,
   checkbox,
   tabs,
+  verifyInput,
 ];
 
 const install = function (Vue, opts = {}) {

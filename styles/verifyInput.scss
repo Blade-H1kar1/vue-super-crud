@@ -1,0 +1,56 @@
+.sc-verify-input {
+  input {
+    caret-color: transparent;
+    border-radius: 2px;
+    border: 1px solid #eee;
+    text-align: center;
+    transition: border-color 0.3s ease;
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input:valid {
+    border-color: #dcdfe6;
+  }
+  input:focus-visible {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+}
+
+.sc-verify-input--mini {
+  input {
+    height: 28px;
+    width: 22px;
+    font-size: 12px;
+    margin: 6px;
+  }
+}
+.sc-verify-input--small {
+  input {
+    height: 32px;
+    width: 24px;
+    font-size: 13px;
+    margin: 8px;
+  }
+}
+.sc-verify-input--medium {
+  input {
+    height: 36px;
+    width: 28px;
+    font-size: 14px;
+    margin: 10px;
+  }
+}
+.sc-verify-input--default {
+  input {
+    height: 40px;
+    width: 32px;
+    font-size: 15px;
+    margin: 11px;
+  }
+}
