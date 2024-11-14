@@ -24,6 +24,11 @@ export default (options = {}) => {
         "show",
       ]),
     ],
+    provide() {
+      return {
+        $h: this.$createElement,
+      };
+    },
     data() {
       return {
         fullscreen: false,
@@ -45,6 +50,8 @@ export default (options = {}) => {
         if (isFunction(options.mounted)) {
           options.mounted(this);
         }
+        // 将子组件扩展方法绑定在当前this上
+        this.$refs.target && this.extendMethod(this.$refs.target);
       });
     },
     computed: {
@@ -104,25 +111,28 @@ export default (options = {}) => {
       },
     },
     methods: {
-      confirm(params) {
-        const cb = () => {
+      async confirm(params) {
+        if (this.validate) {
+          await this.validate();
+        }
+        const cb = (p) => {
           this.visible = false;
-          this.confirmCb(params);
+          this.confirmCb(this, p);
         };
         if (typeof this.dialogOptions.confirm === "function") {
-          this.dialogOptions.confirm(cb, params);
+          this.dialogOptions.confirm(cb, this, params);
         } else {
           cb();
         }
         return this;
       },
-      cancel() {
-        const cb = () => {
+      cancel(params) {
+        const cb = (p) => {
           this.visible = false;
-          this.cancelCb();
+          this.cancelCb(this, p);
         };
         if (typeof this.dialogOptions.cancel === "function") {
-          this.dialogOptions.cancel(cb);
+          this.dialogOptions.cancel(cb, this, params);
         } else {
           cb();
         }
@@ -188,6 +198,7 @@ export default (options = {}) => {
           <Render
             v-model={this.value}
             v-loading={this.loading}
+            prop="target"
             props={this.dialogOptions}
             item={this.dialogOptions}
             config={this.dialogOptions}

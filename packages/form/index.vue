@@ -124,6 +124,7 @@ export default create({
   provide() {
     return {
       formCtx: this,
+      $h: this.$createElement,
     };
   },
   mixins: [init("formOptions", config), rules, event],

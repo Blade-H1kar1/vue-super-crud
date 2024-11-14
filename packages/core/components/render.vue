@@ -38,6 +38,11 @@ export default {
     position: Boolean, // 是否渲染位置
     positionGap: Number, // 位置渲染的间隙
   },
+  inject: {
+    $h: {
+      default: undefined,
+    },
+  },
   mixins: [initDict],
   computed: {
     $value: {
@@ -137,6 +142,7 @@ export default {
           <Comp
             v-model={this.$value}
             props={{ ...comp, comp }}
+            prop={this.prop}
             size={this.config.size}
             h={this.config.h}
             config={this.config}
@@ -162,7 +168,7 @@ export default {
   },
   render(h) {
     // 替换为外部的h函数，用于绑定ref
-    if (this.config.h) h = this.config.h;
+    h = this.config.h || this.$h || h;
 
     const chains = this.interruptibleCompose(
       this.getSlot,

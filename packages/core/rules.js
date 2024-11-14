@@ -8,6 +8,7 @@ export default {
         {
           required: item.required,
           regular: item.regular,
+          limit: item.limit,
           rules: item.rules,
         },
         scope
@@ -19,6 +20,17 @@ export default {
         });
         rules.push(required);
         rules.required = true;
+      }
+      if (config.limit) {
+        rules.push({
+          min: config.limit[0],
+          max: config.limit[1],
+          message:
+            config.limit[0] == config.limit[1]
+              ? `请输入 ${config.limit[0]} 个字符`
+              : `请输入 ${config.limit[0]} 到 ${config.limit[1]} 个字符`,
+          trigger: "change",
+        });
       }
       if (config.regular) {
         let regulars = batchMerge("rules", config.regular, {

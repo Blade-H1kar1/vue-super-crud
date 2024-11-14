@@ -7,6 +7,7 @@ export default {
   props: {
     value: {},
     setValue: {},
+    prop: {},
     // 组件名
     name: {
       default: "el-input",
@@ -29,6 +30,11 @@ export default {
     size: {},
     isChildren: Boolean, // 是否子组件
     h: {},
+  },
+  inject: {
+    $h: {
+      default: undefined,
+    },
   },
   components: {
     comp,
@@ -105,11 +111,11 @@ export default {
       return this.omitProps.size || this.size || (this.$ELEMENT || {}).size;
     },
     ref() {
-      return this.comp.ref || "target";
+      return this.comp.ref || this.prop || "target";
     },
   },
   render(h) {
-    if (this.h) h = this.h;
+    h = this.h || this.$h || h;
     const scopedSlots = {};
 
     if (this.scopedSlots || this.slots) {
