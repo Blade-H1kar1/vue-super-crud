@@ -238,6 +238,7 @@ export default create({
       showPopperNum: 0,
       sameRowSpans: [],
       _showSummary: false,
+      treeNodeMap: new Map(),
     };
   },
   created() {
@@ -365,6 +366,7 @@ export default create({
     },
     lazyLoad(tree, treeNode, resolve) {
       if (this.crudOptions.autoLazy) {
+        this.treeNodeMap.set(tree[this.valueKey], { tree, treeNode, resolve });
         const { item } = findTree(
           this.lazyTreeData,
           (item) => item[this.valueKey] === tree[this.valueKey]
@@ -374,7 +376,12 @@ export default create({
           this.handleLocalLazy(list);
           resolve(list);
         } else {
-          resolve([]);
+           // 更新空的懒加载节点
+          this.$set(
+            this.$refs.tableRef.store.states.lazyTreeNodeMap,
+            tree[this.valueKey],
+            []
+          );
         }
       }
       if (this.load) {
@@ -434,6 +441,12 @@ export default create({
       if (this.isTree && this.crudOptions.autoLazy) {
         this.lazyTreeData = cloneDeep(list);
         this.handleLocalLazy(list);
+
+        // 更新懒加载的节点
+        this.treeNodeMap.forEach((value, key) => {
+          const { tree, treeNode, resolve } = value;
+          this.lazyLoad(tree, treeNode, resolve);
+        });
       }
     },
     handleLocalLazy(list) {
