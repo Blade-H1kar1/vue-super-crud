@@ -1,43 +1,3 @@
-<!-- <template>
-  <el-table-column
-    v-if="isShow"
-    v-bind="col"
-    :prop="col.prop"
-    :fixed="fixed"
-    :header-align="col.headerAlign || col.align || 'center'"
-    :align="col.align || 'center'"
-    :width="colWidth"
-    :min-width="colMinWidth"
-    :show-overflow-tooltip="showOverflowTooltip"
-  >
-    <template v-slot:header>
-      <div
-        class="sc-crud__column--header"
-        :style="{ color: isSearch ? 'var(--color-primary)' : '' }"
-      >
-        <simpleRender
-          :prop="`${col.prop}-label`"
-          :render="col.labelRender"
-          :item="col"
-          :slots="ctx.$scopedSlots"
-          :position="true"
-          ><span v-html="col.label"></span
-        ></simpleRender>
-        <searchHeader
-          v-if="showSearchHeader"
-          :isSearch.sync="isSearch"
-          :item="col.searchHeader"
-        />
-      </div>
-    </template>
-    <template v-slot="scope" v-if="!isDefaultColumn">
-      <columnCell :col="col" :scope="scope"> </columnCell>
-    </template>
-    <column v-for="(sub, index) in col.children" :key="sub.label" :col="sub">
-    </column>
-  </el-table-column>
-</template> -->
-
 <script>
 // TODO: 列的宽度默认最小为表头宽
 import create from "core/create";
@@ -48,9 +8,26 @@ import searchHeader from "./searchHeader.vue";
 import simpleRender from "core/components/simpleRender";
 import { set, merge, isFunction } from "lodash-es";
 import { executeFunctionByObject } from "utils";
+// 调试时element-ui导入地址需要改成引入项目下的node_modules地址
+import { TableColumn } from "element-ui";
+// import { TableColumn } from "C:/Users/Administrator/Desktop/jhfCloud2/ruoyi-ui/lib";
 
-export default {
-  name: "column",
+TableColumn.destroyed = function () {
+  if (!this.$parent) return;
+  let parent = this.$parent;
+  if (parent.$options.name === "sc-crud-column") {
+    // 解决children动态变化时el-table的columns被错误删除的问题，因为给el-table-column多套了一层，导致饿了么内部parent取错，所以这里需要再往上取一层
+    parent = parent.$parent;
+  }
+  this.owner.store.commit(
+    "removeColumn",
+    this.columnConfig,
+    this.isSubColumn ? parent.columnConfig : null
+  );
+};
+
+export default create({
+  name: "crud-column",
   props: {
     col: Object,
   },
@@ -61,7 +38,7 @@ export default {
       isSearch: false,
     };
   },
-  components: { columnCell, column, searchHeader, simpleRender },
+  components: { TableColumn, columnCell, column, searchHeader, simpleRender },
   computed: {
     isDefaultColumn() {
       return this.ctx.isDefaultColumn(this.col);
@@ -161,47 +138,45 @@ export default {
       colMinWidth,
     } = this;
     if (!isShow) return null;
-    const scopedSlots = {
-      default: !isDefaultColumn
-        ? (scope) => {
-            return <columnCell col={this.col} scope={scope} />;
-          }
-        : null,
-      header: () => {
-        return (
-          <div
-            class="sc-crud__column--header"
-            style={{ color: this.isSearch ? "var(--color-primary)" : "" }}
+
+    const cellRender = (scope) => {
+      return <columnCell key={Math.random()} col={col} scope={scope} />;
+    };
+    const columnHeader = () => {
+      return (
+        <div
+          class="sc-crud__column--header"
+          style={{ color: this.isSearch ? "var(--color-primary)" : "" }}
+        >
+          <simpleRender
+            prop={`${col.prop}-label`}
+            render={col.labelRender}
+            item={col}
+            slots={ctx.$scopedSlots}
+            position={true}
           >
-            <simpleRender
-              prop={`${col.prop}-label`}
-              render={col.labelRender}
-              item={col}
-              slots={ctx.$scopedSlots}
-              position={true}
-            >
-              <span
-                domProps={{
-                  innerHTML: col.label,
-                }}
-              ></span>
-            </simpleRender>
-            {showSearchHeader && (
-              <searchHeader
-                on={{
-                  "update:isSearch": (val) => {
-                    this.isSearch = val;
-                  },
-                }}
-                item={col.searchHeader}
-              />
-            )}
-          </div>
-        );
-      },
+            <span
+              style="white-space: nowrap;" // 解决动态列因为换行导致el-table中updateElsHeight重新计算有误
+              domProps={{
+                innerHTML: col.label,
+              }}
+            ></span>
+          </simpleRender>
+          {showSearchHeader && (
+            <searchHeader
+              on={{
+                "update:isSearch": (val) => {
+                  this.isSearch = val;
+                },
+              }}
+              item={col.searchHeader}
+            />
+          )}
+        </div>
+      );
     };
     return (
-      <el-table-column
+      <TableColumn
         ref="column"
         props={col}
         prop={col.prop}
@@ -211,7 +186,10 @@ export default {
         width={colWidth}
         min-width={colMinWidth}
         show-overflow-tooltip={showOverflowTooltip}
-        scopedSlots={scopedSlots}
+        scopedSlots={{
+          default: !isDefaultColumn ? (scope) => cellRender(scope) : null,
+          header: columnHeader,
+        }}
         on={{
           "hook:mounted": () => {
             const columnConfig = this.$refs.column?.columnConfig;
@@ -222,11 +200,11 @@ export default {
         }}
       >
         {col.children &&
-          col.children.map((sub) => (
-            <column key={sub.label + sub.prop} col={sub}></column>
-          ))}
-      </el-table-column>
+          col.children.map((sub) => {
+            return <column key={sub.label + sub.prop} col={sub}></column>;
+          })}
+      </TableColumn>
     );
   },
-};
+});
 </script>

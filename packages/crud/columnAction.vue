@@ -25,7 +25,6 @@
 </template>
 
 <script>
-// TODO: 按钮增加 confirm字段 confirm: "确定删除？"，快捷确认操作
 import create from "core/create";
 import { batchMerge } from "utils/mergeTemp";
 import calcColumnWidth from "./mixins/calcColumnWidth";

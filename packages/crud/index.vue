@@ -74,12 +74,12 @@
             ></el-empty>
           </div>
         </template>
-        <slot></slot>
         <defaultColumn
           v-for="col in defaultColumns"
           :col="col"
           :key="col.type"
         />
+        <slot></slot>
         <column
           v-for="col in columns"
           :col="col"
@@ -376,7 +376,7 @@ export default create({
           this.handleLocalLazy(list);
           resolve(list);
         } else {
-           // 更新空的懒加载节点
+          // 更新空的懒加载节点
           this.$set(
             this.$refs.tableRef.store.states.lazyTreeNodeMap,
             tree[this.valueKey],
