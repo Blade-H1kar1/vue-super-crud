@@ -261,6 +261,12 @@ export default create({
   computed: {
     list: {
       get() {
+        if (this.crudOptions.localPagination) {
+          const { pageNum, pageSize } = this.props;
+          const start = (this.query[pageNum] - 1) * this.query[pageSize];
+          const end = start + this.query[pageSize];
+          return this.data.slice(start, end);
+        }
         return this.data;
       },
       set(val) {

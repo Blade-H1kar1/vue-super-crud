@@ -86,10 +86,10 @@ export default create({
       }
       this.ctx.setOptions.pageSize = val;
       this.ctx.saveLocalCache(false);
-      this.ctx.getList();
+      !this.ctx.crudOptions.localPagination && this.ctx.getList();
     },
     handleCurrentChange(val) {
-      this.ctx.getList();
+      !this.ctx.crudOptions.localPagination && this.ctx.getList();
     },
   },
 });

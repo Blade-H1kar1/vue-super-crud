@@ -44,13 +44,11 @@ module.exports = {
   css: {
     extract: false,
   },
-  configureWebpack: {
-    resolve: {
-      alias,
-    },
-  },
   configureWebpack: (config) => {
     config.devtool = "source-map";
-    config.resolve.alias["#"] = resolve("examples");
+    config.resolve.alias = {
+      ...alias,
+      "#": resolve("examples"),
+    };
   },
 };

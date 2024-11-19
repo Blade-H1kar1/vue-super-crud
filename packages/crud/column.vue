@@ -140,7 +140,7 @@ export default create({
     if (!isShow) return null;
 
     const cellRender = (scope) => {
-      return <columnCell key={Math.random()} col={col} scope={scope} />;
+      return <columnCell col={col} scope={scope} />;
     };
     const columnHeader = () => {
       return (
