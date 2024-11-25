@@ -183,8 +183,8 @@ export default create({
         fixed={fixed}
         header-align={col.headerAlign || col.align || "center"}
         align={col.align || "center"}
-        width={colWidth}
-        min-width={colMinWidth}
+        width={col.width}
+        min-width={col.minWidth}
         show-overflow-tooltip={showOverflowTooltip}
         scopedSlots={{
           default: !isDefaultColumn ? (scope) => cellRender(scope) : null,

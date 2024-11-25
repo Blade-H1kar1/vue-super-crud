@@ -27,7 +27,6 @@
 <script>
 import create from "core/create";
 import { batchMerge } from "utils/mergeTemp";
-import calcColumnWidth from "./mixins/calcColumnWidth";
 import button_ from "pak/button";
 import { cloneDeep, debounce, isFunction } from "lodash-es";
 export default create({
@@ -39,7 +38,6 @@ export default create({
     return {};
   },
   inject: ["ctx"],
-  mixins: [calcColumnWidth],
   computed: {},
   data() {
     return {

@@ -108,11 +108,7 @@
 </template>
 
 <script>
-// TODO: 1: 表格配置分组显示
-// group: { aaaa: ['prop1','prop2'], bbbb: ['prop2','prop3','prop4']  }
-// TODO: 2：已知bug，a.某列设置排序后且有children渲染会重复,b.高度固定式，统计栏消失 , c.
-//                  c.columns为动态时变化后白屏
-//
+// TODO: 已知bug，a.某列设置排序后且有children渲染会重复,b.高度固定式，统计栏消失
 import { create, init, event } from "core";
 import config from "src/config/crud";
 import simpleRender from "core/components/simpleRender";
@@ -239,6 +235,7 @@ export default create({
       sameRowSpans: [],
       _showSummary: false,
       treeNodeMap: new Map(),
+      labelMinWidthMap: new Map(),
     };
   },
   created() {
@@ -520,6 +517,24 @@ export default create({
       if (item.summary) {
         this._showSummary = true;
       }
+      if (!item.minWidth && !item.width) {
+        item.minWidth = this.getDefaultColumnMinWidth(item);
+      }
+    },
+    getDefaultColumnMinWidth(col) {
+      if (this.labelMinWidthMap.has(col.label))
+        return this.labelMinWidthMap.get(col.label);
+      const labelSpan = document.createElement("span");
+      labelSpan.innerText = col.label;
+      document.body.appendChild(labelSpan);
+      let labelMinWidth = labelSpan.getBoundingClientRect().width + 20;
+      col.search && (labelMinWidth += 20);
+      col.sortable && (labelMinWidth += 25);
+      document.body.removeChild(labelSpan);
+      labelMinWidth = Math.round(labelMinWidth);
+      labelMinWidth = Math.max(labelMinWidth, 80);
+      this.labelMinWidthMap.set(col.label, labelMinWidth);
+      return labelMinWidth;
     },
     getColumns(mode) {
       const options = this.crudOptions;

@@ -99,7 +99,7 @@
 <<< @/docs/.vuepress/components/crud/baseUse/selection.vue
 </common-code-format>
 
-## 列宽度
+<!-- ## 列宽度
 
 `calcColumnWidth` 配置列宽度自动计算规则 </br>
 `column.width`、`column.minWidth` 设置为`auto`，会自适应列宽度 </br>
@@ -109,7 +109,7 @@
   <crud-baseUse-columnWidth slot="source"></crud-baseUse-columnWidth>
   
 <<< @/docs/.vuepress/components/crud/baseUse/columnWidth.vue
-</common-code-format>
+</common-code-format> -->
 
 
 ## 组件加载
