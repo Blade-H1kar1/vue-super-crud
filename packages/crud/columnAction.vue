@@ -28,7 +28,7 @@
 import create from "core/create";
 import { batchMerge } from "utils/mergeTemp";
 import button_ from "pak/button";
-import { cloneDeep, debounce, isFunction } from "lodash-es";
+import { cloneDeep, debounce, isFunction, merge } from "lodash-es";
 export default create({
   name: "crud",
   components: {
@@ -82,7 +82,7 @@ export default create({
       if (fixed) return fixed;
     },
     actionButtons() {
-      const action = Object.assign(
+      const action = merge(
         {},
         {
           delete: this.ctx.crudOptions.deleteBtn,
