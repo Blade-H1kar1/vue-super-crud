@@ -134,7 +134,7 @@ export default create({
   methods: {
     initActiveName(val) {
       this.activeName =
-        this.$route.query.tabActive ||
+        this.$route?.query.tabActive ||
         val ||
         (this.all && "all") ||
         this.getItemName(this.tabList[0], 0);
@@ -149,7 +149,7 @@ export default create({
       return item?.label || item;
     },
     getItemName(item, index) {
-      return (item?.name || index) + "";
+      return (item?.name || item?.value || index) + "";
     },
     shouldShowTab(item, index) {
       const tabName = this.getItemName(item, index);
@@ -157,7 +157,7 @@ export default create({
       return cache ? this.cacheIndex.has(tabName) : this.currentTab === tabName;
     },
     handleActiveNameChange(val) {
-      this.updateRouteQuery(val);
+      this.$route && this.updateRouteQuery(val);
       this.handleTabTransition(val);
       this.cacheIndex.add(val);
     },
