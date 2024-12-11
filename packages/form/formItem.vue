@@ -220,7 +220,7 @@ export default create({
       );
     };
     return (
-      <this.formCtx.layoutCell props={this.item}>
+      <this.formCtx.layoutCell props={this.item} attrs={this.item}>
         <el-form-item
           class={this.className}
           style={{

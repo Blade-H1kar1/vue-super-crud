@@ -20,8 +20,9 @@
       :disabled="isDisabled"
       ref="formRef"
       :model="value"
-      v-bind="formOptions"
+      v-bind="formProps"
       :key="key"
+      @submit.native.prevent
     >
       <template v-if="isGroup">
         <group
@@ -93,17 +94,18 @@ import {
   cloneDeep,
   merge,
   omit,
+  pick,
 } from "lodash-es";
 import { mergeTemp } from "utils/mergeTemp";
-import { isEmptyData } from "utils";
+import { isEmptyData, toCamelCase } from "utils";
 import simpleRender from "core/components/simpleRender";
+import formProps from "./props";
 export default create({
   name: "form",
   components: { grid, cell, group, formItem, formAction, simpleRender },
   props: {
     value: {
       type: Object,
-      required: true,
       default: () => {
         return {};
       },
@@ -217,6 +219,14 @@ export default create({
         this.columns,
         this.formOptions.columns
       );
+    },
+    formProps() {
+      const obj = {};
+      Object.keys(this.formOptions).forEach((key) => {
+        obj[toCamelCase(key)] = this.formOptions[key];
+      });
+      const props = pick(obj, formProps);
+      return props;
     },
   },
   watch: {

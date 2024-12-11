@@ -1,8 +1,8 @@
 <template>
   <scForm
-    v-show="searchForm"
     :class="[b('search', { 'show-search': ctx.showSearch })]"
     ref="searchForm"
+    :autoFill="true"
     v-model="ctx.query"
     :options="options"
     :loading="ctx.loadingStatus"

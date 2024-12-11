@@ -11,6 +11,7 @@
         :key="index"
         :size="formCtx.formOptions.size"
         :loading="formCtx.loadingStatus"
+        :scope="scope"
         v-bind="item"
       ></button_>
     </el-form-item>
@@ -28,6 +29,12 @@ export default create({
   inject: ["formCtx"],
   components: { Cell, button_ },
   computed: {
+    scope() {
+      return {
+        ctx: this.formCtx,
+        row: this.formCtx.value,
+      };
+    },
     layoutCell() {
       if (this.formCtx.formOptions.layout === "grid") {
         return "cell";
@@ -56,7 +63,7 @@ export default create({
         action,
         {
           ctx: this.formCtx,
-          row: this.formCtx.form,
+          row: this.formCtx.value,
         },
         this.formActionTemps
       );

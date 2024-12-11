@@ -1,4 +1,4 @@
-import { isDom, isVNode, isComponent } from "./getType";
+import { isDom, isVNode, isComponent, getObjectType } from "./getType";
 import { debounce, isFunction, omit } from "lodash-es";
 import toTreeArray from "xe-utils/toTreeArray";
 import findTree from "xe-utils/findTree";
@@ -8,6 +8,7 @@ export {
   isDom,
   isVNode,
   isComponent,
+  getObjectType,
   toTreeArray,
   findTree,
   mergeTemp,
@@ -43,31 +44,6 @@ export function isEmptyData(val) {
       return true;
     }
     return false;
-  }
-  return false;
-}
-
-export function getSlotByNames(slots, names = [], scope) {
-  if (!Array.isArray(names)) names = [names];
-  let slotName = `${names[0]}`;
-  names.shift();
-  names.forEach((s) => {
-    s && (slotName += `-${s}`);
-  });
-  if (slots[slotName]) {
-    return slots[slotName](scope);
-  } else {
-    return false;
-  }
-}
-
-export function getSlot(slots, names, scope) {
-  if (!Array.isArray(names)) names = [names];
-  while (names.length > 0) {
-    let slotName = names.shift();
-    if (slots[slotName]) {
-      return slots[slotName](scope);
-    }
   }
   return false;
 }
@@ -150,4 +126,56 @@ export function filterColumns(columns, scope) {
       }
       return true;
     });
+}
+
+export const setPxSaveSource = (value) => {
+  if (!value && value !== 0) return "0";
+  // 如果是数字类型
+  if (typeof value === "number") {
+    return value === 0 ? "0" : `${value}px`;
+  }
+  // 如果已经是px结尾
+  if (typeof value === "string" && value.endsWith("px")) {
+    return value;
+  }
+  // 判断是否为纯数字字符串
+  if (typeof value === "string" && /^\d+$/.test(value)) {
+    return `${value}px`;
+  }
+  // 其他情况直接返回原值
+  return value;
+};
+
+export const setPx = (value) => {
+  if (!value && value !== 0) return "0";
+  if (typeof value === "string" && value.endsWith("px")) {
+    return value;
+  }
+  const num = parseFloat(value);
+  return num === 0 ? "0" : `${num}px`;
+};
+
+export const isPx = (value) => {
+  if (typeof value === "string" && value.endsWith("px")) {
+    return true;
+  }
+  if (typeof value === "number") {
+    return true;
+  }
+  return false;
+};
+
+export function checkVisibility(item, scope, defaultShow) {
+  const checkVisibility = (prop, invert = false) => {
+    if (item[prop] === undefined) return;
+    const value =
+      typeof item[prop] === "function" ? item[prop](scope) : item[prop];
+    return invert ? !value : value;
+  };
+  const isShow =
+    checkVisibility("innerHide", true) ||
+    checkVisibility("hidden", true) ||
+    checkVisibility("show");
+  if (isShow !== undefined) return isShow;
+  return defaultShow;
 }
