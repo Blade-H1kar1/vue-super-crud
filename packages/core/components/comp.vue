@@ -114,6 +114,21 @@ export default {
       return this.comp.ref || this.prop || "target";
     },
   },
+  created() {
+    this.comp.created && this.comp.created(this.scope);
+  },
+  mounted() {
+    this.comp.mounted && this.comp.mounted(this.scope);
+  },
+  updated() {
+    this.comp.updated && this.comp.updated(this.scope);
+  },
+  beforeDestroy() {
+    this.comp.beforeDestroy && this.comp.beforeDestroy(this.scope);
+  },
+  destroyed() {
+    this.comp.destroyed && this.comp.destroyed(this.scope);
+  },
   render(h) {
     h = this.h || this.$h || h;
     const scopedSlots = {};
@@ -167,9 +182,9 @@ export default {
       <this.compName
         placeholder={this.placeholder}
         size={this.compSize}
+        disabled={this.omitProps.disabled ? true : false}
         attrs={this.omitProps}
         props={this.omitProps}
-        disabled={this.omitProps.disabled ? true : false}
         value={this.value}
         scope={this.scope}
         on={this._on}
@@ -182,6 +197,5 @@ export default {
       </this.compName>
     );
   },
-  methods: {},
 };
 </script>

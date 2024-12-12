@@ -9,8 +9,8 @@
       },
     ]"
     :style="{
-      '--sc-crud-gap': `${crudOptions.gap}px`,
-      height: `${wrapperHeight}`,
+      padding: wrapperPadding,
+      height: wrapperHeight,
     }"
     ref="wrapper"
   >
@@ -335,11 +335,20 @@ export default create({
       this.extendsSlots(slots, "searchHeader", "search");
       return slots;
     },
+    wrapperPadding() {
+      if (this.crudOptions.padding) return this.crudOptions.padding;
+      const { gap = 0 } = this.crudOptions;
+      return this.isAutoHeight ? `${gap}px ${gap}px 0` : `${gap}px`;
+    },
   },
   watch: {
     data: {
-      handler() {
-        this.processList(this.list);
+      handler(newVal, oldVal) {
+        // 是否完全更新数据
+        const isUpdated = newVal !== oldVal;
+        if (isUpdated) {
+          this.processList(this.list);
+        }
       },
       immediate: true,
     },
@@ -419,27 +428,35 @@ export default create({
         if ((this.rowEdit || this.cellEdit) && item.$edit === undefined) {
           this.$set(item, "$edit", null);
         }
-        if (isGenUniqueId) {
-          Object.defineProperty(item, "$uniqueId", {
-            value: uniqueId(),
-            writable: true,
-            enumerable: false,
-          });
+        if (isGenUniqueId && !item.$uniqueId) {
+          item.$uniqueId = uniqueId();
         }
       });
       // this.delayRender(list);
-
-      // 恢复未保存行的编辑状态
-      if (this.noSaveEditMap) {
-        list.forEach((i) => {
-          const editInfo = this.noSaveEditMap[i[this.valueKey]];
-          if (editInfo) Object.assign(i, editInfo);
+      if (this.pendingChanges.size > 0) {
+        // 恢复编辑状态
+        list.forEach((row) => {
+          const key = row[this.valueKey];
+          const pending = this.pendingChanges.get(key);
+          if (pending && pending.type === "edit") {
+            Object.assign(row, pending.data);
+            this.pendingChanges.delete(key);
+          }
         });
-        this.noSaveEditList = [];
-      }
-      if (this.noSaveAddList.length) {
-        list.push(...this.noSaveAddList);
-        this.noSaveAddList = [];
+        // 恢复新增行
+        const pendingAdds = Array.from(this.pendingChanges.values())
+          .filter((item) => item.type === "add")
+          .map((item) => item.data);
+        if (pendingAdds.length) {
+          if (this._processRowAddType === "last") {
+            list.push(...pendingAdds);
+          } else {
+            list.unshift(...pendingAdds);
+          }
+          pendingAdds.forEach((item) => {
+            this.pendingChanges.delete(item.$add);
+          });
+        }
       }
       if (this.isTree && this.crudOptions.autoLazy) {
         this.lazyTreeData = cloneDeep(list);

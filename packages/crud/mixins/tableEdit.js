@@ -1,4 +1,4 @@
-import { isEqual, cloneDeep, isFunction } from "lodash-es";
+import { isEqual, cloneDeep, isFunction, uniqueId } from "lodash-es";
 import { executeFunction } from "utils";
 export default {
   data() {
@@ -7,8 +7,7 @@ export default {
       oldRowData: {},
       editX: null,
       editY: null,
-      noSaveEditList: [],
-      noSaveAddList: [],
+      pendingChanges: new Map(), // 存储所有未保存的更改
     };
   },
   computed: {
@@ -125,10 +124,10 @@ export default {
         ["add"],
         (data, _type) => {
           newRow = Object.assign(newRow, data, params);
-          newRow.$add = true;
+          newRow.$add = "add_" + uniqueId();
 
           type = this.crudOptions.rowAddType || _type || type;
-
+          this._processRowAddType = type;
           if (type === "first") {
             this.list.unshift(newRow);
           } else if (type === "last") {
@@ -175,13 +174,25 @@ export default {
 
           this.$set(scope.row, isAdd ? "$add" : "$edit", null);
           // 缓存未保存的行
-          this.noSaveEditList = this.list.filter((i) => i.$edit);
-          this.noSaveAddList = this.list.filter((i) => i.$add);
-          this.successTip(scope);
+          this.savePendingState();
           this.refreshAfterOperation && this.getList();
           this.changeLoading();
         };
         this.runBefore(["save"], callBack, scope, this.changeLoading);
+      });
+    },
+    // 保存所有未保存的状态
+    savePendingState() {
+      this.list.forEach((row) => {
+        if (row.$edit || row.$add) {
+          const key = row[this.valueKey] || row.$add;
+          if (key) {
+            this.pendingChanges.set(key, {
+              type: row.$add ? "add" : "edit",
+              data: { ...row },
+            });
+          }
+        }
       });
     },
     handleBatchRowSave(changeBatchButton) {
@@ -192,7 +203,6 @@ export default {
             item.$edit && this.$set(item, "$edit", null);
           });
           changeBatchButton();
-          this.successTip();
           this.refreshAfterOperation && this.getList();
           this.changeLoading();
         };
@@ -240,7 +250,6 @@ export default {
           this.list = this.list.filter(
             (item) => !deleteIndex.includes(item.$index)
           );
-          this.successTip();
           this.refreshAfterOperation && this.getList();
           this.changeLoading();
         };
@@ -271,8 +280,6 @@ export default {
         this.changeLoading(true);
         const callBack = () => {
           this.list.splice(scope.$index, 1);
-
-          this.successTip(scope);
           this.refreshAfterOperation && this.getList();
           this.changeLoading();
         };
