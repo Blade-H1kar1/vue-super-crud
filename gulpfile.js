@@ -7,11 +7,37 @@ const webpackConf = require("./build/build.js");
 
 // 构建webpack配置
 gulp.task("webpack", async function () {
-  await webpack(webpackConf, function (err, stats) {
-    if (err) {
-      console.log(err);
+  try {
+    const stats = await new Promise((resolve, reject) => {
+      webpack(webpackConf, (err, stats) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(stats);
+      });
+    });
+
+    // 处理编译过程中的错误和警告
+    const info = stats.toJson();
+
+    if (stats.hasErrors()) {
+      console.error("\x1b[31m%s\x1b[0m", "打包失败！"); // 红色文字
+      console.error(info.errors);
+      throw new Error("Webpack 编译失败");
     }
-  });
+
+    if (stats.hasWarnings()) {
+      console.warn("\x1b[33m%s\x1b[0m", "打包警告："); // 黄色文字
+      console.warn(info.warnings);
+    }
+
+    console.log("\x1b[32m%s\x1b[0m", "打包成功！"); // 绿色文字
+  } catch (error) {
+    console.error("\x1b[31m%s\x1b[0m", "打包过程发生错误："); // 红色文字
+    console.error(error);
+    throw error; // 抛出错误以中断 gulp 任务
+  }
 });
 
 // 处理样式的配置

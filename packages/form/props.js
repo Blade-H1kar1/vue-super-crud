@@ -1,0 +1,15 @@
+export default [
+  "model",
+  "rules",
+  "labelPosition",
+  "labelWidth",
+  "labelSuffix",
+  "inline",
+  "inlineMessage",
+  "statusIcon",
+  "showMessage",
+  "size",
+  "disabled",
+  "validateOnRuleChange",
+  "hideRequiredAsterisk",
+];
