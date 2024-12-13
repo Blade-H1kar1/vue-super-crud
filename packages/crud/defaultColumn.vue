@@ -64,6 +64,18 @@ export default {
         prop={this.col.type}
         fixed={this.defaultFixed}
         props={this.col}
+        scopedSlots={{
+          default: (this.col.render || this.ctx.$scopedSlots[this.col.type])
+            ?  (scope) => {
+                if (this.col.render) {
+                  return this.col.render(scope);
+                }
+            if (this.ctx.$scopedSlots[this.col.type]) {
+              return this.ctx.$scopedSlots[this.col.type](scope);
+                }
+              }
+            : null,
+        }}
         on={{
           "hook:mounted": () => {
             const columnConfig = this.$refs.column?.columnConfig;
