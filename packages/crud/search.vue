@@ -44,7 +44,7 @@ export default create({
             reset: {
               icon: "el-icon-refresh",
               label: "重置",
-              onClick: this.handleReset,
+              onClick: () => this.handleReset(),
             },
           },
           slots: this.ctx.$scopedSlots,

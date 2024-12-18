@@ -48,8 +48,8 @@ export default (optionsKey, config, opts) => {
     created() {
       this.initColumnsHandler();
       this.initOptionsHandler();
-      this.debounceInitColumnsHandler = debounce(this.initColumnsHandler, 300);
-      this.debounceInitOptionsHandler = debounce(this.initOptionsHandler, 300);
+      this.debounceInitColumnsHandler = debounce(this.initColumnsHandler, 0);
+      this.debounceInitOptionsHandler = debounce(this.initOptionsHandler, 0);
     },
     methods: {
       initColumnsHandler() {

@@ -12,6 +12,7 @@
       v-if="tabList && tabList.length"
       v-bind="$attrs"
       v-on="omitListeners"
+      @tab-click="handleTabClick"
     >
       <el-tab-pane v-if="all" :label="allConfig.label" name="all">
       </el-tab-pane>
@@ -86,6 +87,10 @@ export default create({
     },
     all: [Boolean, Object],
     border: Boolean,
+    cacheActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
@@ -115,10 +120,13 @@ export default create({
       },
       immediate: true,
     },
+    tabList() {
+      this.initActiveName(this.value);
+    },
   },
   computed: {
     omitListeners() {
-      return omit(this.$listeners, "input");
+      return omit(this.$listeners, ["tab-click", "input"]);
     },
     allConfig() {
       const defaultConfig = {
@@ -131,13 +139,23 @@ export default create({
       return defaultConfig;
     },
   },
+  mounted() {
+    if (this.cacheActive && this.$route?.query.tabActive) {
+      this.activeName = this.$route?.query.tabActive;
+    }
+  },
   methods: {
+    handleTabClick(...args) {
+      this.$nextTick(() => {
+        this.cacheActive && this.updateRouteQuery(this.activeName);
+        this.$emit("tab-click", ...args);
+      });
+    },
     initActiveName(val) {
-      this.activeName =
-        this.$route?.query.tabActive ||
-        val ||
-        (this.all && "all") ||
-        this.getItemName(this.tabList[0], 0);
+      if (this.tabList.length) {
+        this.activeName =
+          val || (this.all && "all") || this.getItemName(this.tabList[0], 0);
+      }
     },
     getItem(item) {
       return isPlainObject(item) ? item : {};
@@ -157,18 +175,19 @@ export default create({
       return cache ? this.cacheIndex.has(tabName) : this.currentTab === tabName;
     },
     handleActiveNameChange(val) {
-      this.$route && this.updateRouteQuery(val);
       this.handleTabTransition(val);
       this.cacheIndex.add(val);
     },
     updateRouteQuery(val) {
-      this.$router.replace({
-        path: this.$route.path,
-        query: {
-          ...this.$route.query,
-          tabActive: val,
-        },
-      });
+      if (this.$route) {
+        this.$router.replace({
+          path: this.$route.path,
+          query: {
+            ...this.$route.query,
+            tabActive: val,
+          },
+        });
+      }
     },
     handleTabTransition(val) {
       this.isContentVisible = false;
