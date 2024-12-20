@@ -4,5 +4,9 @@ export default {
     resetBatchEdit() {
       this.$refs.menuBar && this.$refs.menuBar.resetBatchEdit();
     },
+    handleSearch() {
+      this.$refs.searchRef.handleSearch();
+      this.$emit("closeSearchPopover");
+    },
   },
 };

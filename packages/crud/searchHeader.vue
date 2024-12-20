@@ -42,6 +42,9 @@ export default create({
   },
   created() {
     this.$emit("update:isSearch", this.isSearch);
+    this.ctx.$on("closeSearchPopover", () => {
+      this.closePopover();
+    });
   },
   computed: {
     isSearch() {
@@ -64,14 +67,82 @@ export default create({
       }
       return customProps;
     },
+    componentStrategy() {
+      return [
+        {
+          rule: "*input",
+          comp: {
+            nativeOn: {
+              keyup: (e) => {
+                if (e.keyCode === 13) {
+                  this.search();
+                }
+              },
+            },
+            on: {
+              clear: () => {
+                this.search();
+              },
+            },
+          },
+        },
+        {
+          rule: "*select",
+          comp: {
+            on: {
+              change: (val) => {
+                this.isChange = true;
+              },
+              "visible-change": (val) => {
+                if (!val && this.isChange) {
+                  this.isChange = false;
+                  this.search();
+                }
+              },
+            },
+          },
+        },
+        {
+          rule: "*cascaderPanel",
+          comp: {
+            on: {
+              change: (val) => {
+                this.isChange = true;
+              },
+              "visible-change": (val) => {
+                if (!val && this.isChange) {
+                  this.isChange = false;
+                  this.search();
+                }
+              },
+            },
+          },
+        },
+        {
+          rule: "*date-picker",
+          comp: {
+            on: {
+              change: (val) => {
+                this.search();
+              },
+            },
+          },
+        },
+      ];
+    },
   },
   methods: {
     closePopover() {
       this.$refs.popover && this.$refs.popover.doClose();
     },
     search(val) {
+      if (this.justSearched) return;
+      this.justSearched = true;
       this.ctx.$refs.searchRef.handleSearch();
       this.closePopover();
+      setTimeout(() => {
+        this.justSearched = false;
+      }, 200);
     },
     reset() {
       if (isFunction(this.item.reset)) this.item.reset();
@@ -95,7 +166,18 @@ export default create({
           }}
           mode="searchHeader"
           config={this.ctx.crudOptions}
-          defaultRender={this.searchHeader.defaultRender}
+          compStrategy={this.componentStrategy}
+          commonCompStrategy={{
+            mounted: (scope, ref) => {
+              this.instance = ref;
+            },
+          }}
+          defaultComp={{
+            name: "el-input",
+            props: {
+              clearable: true,
+            },
+          }}
           controlDefault={(defaultRender, scope) => {
             return defaultRender.input;
           }}
@@ -104,20 +186,12 @@ export default create({
     };
     const footer = () => {
       return (
-        <div style="float: right;">
-          <el-button
-            type="primary"
-            icon="el-icon-search"
-            size="mini"
-            onClick={this.search}
-            style="margin-top: 5px;"
-          ></el-button>
-          <el-button
-            icon="el-icon-refresh-right"
-            size="mini"
-            onClick={this.reset}
-          ></el-button>
-        </div>
+        <el-button
+          icon="el-icon-refresh-right"
+          size={this.ctx.crudOptions.size}
+          onClick={this.reset}
+          style="margin-left: 10px;"
+        ></el-button>
       );
     };
     return (
@@ -127,6 +201,14 @@ export default create({
         placement="bottom"
         trigger="click"
         props={this.customProps}
+        onShow={() => {
+          this.$nextTick(() => {
+            this.instance?.$el.querySelector("input")?.focus();
+          });
+        }}
+        onHide={() => {
+          this.isSearch && this.search();
+        }}
         scopedSlots={{
           reference: () => (
             <i class="el-icon-search search-btn" onClick={this.popClick}></i>

@@ -48,7 +48,7 @@ export default create({
   },
   created() {
     const calcAutoWidth = this.calcAutoWidth;
-    this.calcAutoWidth = debounce(calcAutoWidth, 100);
+    this.calcAutoWidth = debounce(calcAutoWidth, 0);
   },
   computed: {
     fixed() {

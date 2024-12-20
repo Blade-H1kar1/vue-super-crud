@@ -24,10 +24,11 @@
 import input from "./input";
 import { create } from "core";
 import { omit } from "lodash-es";
+import extendMethod from "./extendMethod";
 // 字典选择器
 export default create({
   name: "select",
-  mixins: [input],
+  mixins: [input, extendMethod],
   props: {
     // 值
     value: { type: [Number, String, Boolean, Array], require: false },

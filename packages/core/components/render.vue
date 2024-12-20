@@ -37,6 +37,9 @@ export default {
     defaultRender: Function, // 自定义默认渲染
     position: Boolean, // 是否渲染位置
     positionGap: Number, // 位置渲染的间隙
+    compStrategy: Array, // 渲染策略
+    commonCompStrategy: Object, // 公共组件策略
+    defaultComp: Object, // 默认组件
   },
   inject: {
     $h: {
@@ -64,6 +67,9 @@ export default {
         this._isSettingValue = true;
         this.setFormatValue(val);
       });
+    }
+    if (this.compStrategy) {
+      this.matcher = this.createMatcher(this.compStrategy);
     }
   },
   methods: {
@@ -129,14 +135,58 @@ export default {
       if (isPlainObject(t) && isFunction(s)) return Object.assign(s(scope), t);
       return t;
     },
+    createMatcher(strategies) {
+      const exactMatches = new Map();
+      const suffixMatches = new Map();
+      const functionMatches = [];
+      strategies.forEach(({ rule, comp }) => {
+        if (typeof rule === "string") {
+          if (rule.startsWith("*")) {
+            suffixMatches.set(rule.slice(1).toLowerCase(), comp);
+          } else {
+            exactMatches.set(rule, comp);
+          }
+        } else if (typeof rule === "function") {
+          functionMatches.push({ rule, comp });
+        }
+      });
+      return (name, comp, scope) => {
+        if (typeof name === "string") {
+          // 精确匹配
+          const exactMatch = exactMatches.get(name);
+          if (exactMatch) return exactMatch;
+
+          // 后缀匹配
+          const nameLower = name.toLowerCase();
+          for (const [suffix, comp] of suffixMatches) {
+            if (nameLower.endsWith(suffix)) {
+              return comp;
+            }
+          }
+        }
+        // 函数匹配
+        if (isFunction(name)) {
+          return functionMatches.find(({ rule }) => rule(name, comp, scope))
+            ?.comp;
+        }
+      };
+    },
     getComponent(h, scope) {
-      if (this.comp) {
-        let comp = {};
-        if (typeof this.comp == "string" || isComponent(this.comp)) {
-          comp.name = this.comp;
-        } else {
-          // 如果存在一方为函数时，执行函数再将comp与未加工raw.comp重新合并
-          comp = this.mergeFunctionAndObject(this.comp, this.raw?.comp, scope);
+      if (this.comp || this.defaultComp) {
+        let comp = this.comp || this.defaultComp;
+        comp =
+          typeof comp === "string" || isComponent(comp)
+            ? { name: comp }
+            : this.mergeFunctionAndObject(comp, this.raw?.comp, scope);
+        if (this.compStrategy) {
+          const strategy = this.matcher(
+            isComponent(comp.name) ? comp.name.name : comp.name,
+            comp,
+            scope
+          );
+          if (strategy || this.commonCompStrategy) {
+            comp = merge(comp, this.commonCompStrategy, strategy);
+          }
         }
         return (
           <Comp

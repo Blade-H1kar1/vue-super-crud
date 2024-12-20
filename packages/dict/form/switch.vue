@@ -20,10 +20,11 @@
 import inputBase from "./input-base";
 import { create } from "core";
 import { omit } from "lodash-es";
+import extendMethod from "./extendMethod";
 // 字典switch
 export default create({
   name: "switch",
-  mixins: [inputBase],
+  mixins: [inputBase, extendMethod],
   props: {
     value: { require: false },
     scope: Object,

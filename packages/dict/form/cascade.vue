@@ -13,10 +13,11 @@
 import input from "./input";
 import { create } from "core";
 import { omit } from "lodash-es";
+import extendMethod from "./extendMethod";
 // 级联选择器
 export default create({
   name: "cascader",
-  mixins: [input],
+  mixins: [input, extendMethod],
   props: {
     // 值
     value: {

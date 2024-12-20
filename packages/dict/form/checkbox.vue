@@ -22,10 +22,11 @@
 import input from "./input";
 import { create } from "core";
 import { omit } from "lodash-es";
+import extendMethod from "./extendMethod";
 // 字典radio选择器
 export default create({
   name: "checkbox",
-  mixins: [input],
+  mixins: [input, extendMethod],
   props: {
     value: { type: [Number, String, Boolean, Array], require: false },
     // value的分隔符<br/>

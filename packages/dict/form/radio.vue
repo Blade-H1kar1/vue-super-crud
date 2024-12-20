@@ -22,10 +22,11 @@
 import input from "./input";
 import { create } from "core";
 import { omit } from "lodash-es";
+import extendMethod from "./extendMethod";
 // 字典radio选择器
 export default create({
   name: "radio",
-  mixins: [input],
+  mixins: [input, extendMethod],
   props: {
     // 值
     value: { require: false },

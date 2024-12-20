@@ -13,15 +13,13 @@ export default {
       default: "el-input",
     },
     // 组件参数
-    comp: {
-      default: undefined,
-    },
+    comp: Object,
     bind: [Object, Function],
     // 监听组件事件
     on: Object,
     // 插槽
-    scopedSlots: {},
-    slots: {},
+    scopedSlots: Object,
+    slots: Object,
     // 子元素
     children: {},
     // 传入的数据
@@ -29,6 +27,13 @@ export default {
     // 组件尺寸
     size: {},
     isChildren: Boolean, // 是否子组件
+    nativeOn: Object, // 原生事件
+    directives: Object, // 指令
+    created: Function, // 创建
+    mounted: Function, // 挂载
+    updated: Function, // 更新
+    beforeDestroy: Function, // 销毁前
+    destroyed: Function, // 销毁
     h: {},
   },
   inject: {
@@ -80,9 +85,6 @@ export default {
       if (this.comp.placeholder) {
         return this.comp.placeholder;
       }
-      if (this.$scOpt.genPlaceholder) {
-        return this.$scOpt.genPlaceholder(this.scope);
-      }
       if (this.name === "el-input") {
         return "请输入" + this.scope.item.label;
       }
@@ -115,19 +117,19 @@ export default {
     },
   },
   created() {
-    this.comp.created && this.comp.created(this.scope);
+    this.created && this.created(this.scope);
   },
   mounted() {
-    this.comp.mounted && this.comp.mounted(this.scope);
+    this.mounted && this.mounted(this.scope, this.$refs[this.ref]);
   },
   updated() {
-    this.comp.updated && this.comp.updated(this.scope);
+    this.updated && this.updated(this.scope, this.$refs[this.ref]);
   },
   beforeDestroy() {
-    this.comp.beforeDestroy && this.comp.beforeDestroy(this.scope);
+    this.beforeDestroy && this.beforeDestroy(this.scope, this.$refs[this.ref]);
   },
   destroyed() {
-    this.comp.destroyed && this.comp.destroyed(this.scope);
+    this.destroyed && this.destroyed(this.scope, this.$refs[this.ref]);
   },
   render(h) {
     h = this.h || this.$h || h;
@@ -188,9 +190,11 @@ export default {
         value={this.value}
         scope={this.scope}
         on={this._on}
+        nativeOn={this.nativeOn}
         scopedSlots={scopedSlots}
         clearable={this.clearable}
         ref={this.ref}
+        directives={this.directives}
       >
         {renderChildren(this.children)}
         {fakeSlot()}
