@@ -3,7 +3,7 @@ import create from "core/create";
 import { rules } from "core";
 import Render from "core/components/render";
 export default create({
-  name: "crud",
+  name: "crud-cell",
   props: {
     col: Object,
     scope: Object,

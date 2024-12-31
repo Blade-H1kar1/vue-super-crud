@@ -15,7 +15,6 @@ export default {
       loading: false,
       options: {
         columns: 2,
-        colon: true,
         hiddenLabel: false,
         labelOverTip: false,
         renderColumns: [
@@ -41,6 +40,7 @@ export default {
             label: "超出隐藏标签超出超出超出",
             prop: "over",
             labelOverTip: true,
+            position: true,
           },
         ],
       },

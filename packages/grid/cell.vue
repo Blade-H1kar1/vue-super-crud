@@ -23,6 +23,10 @@ export default create({
     left: {},
     top: {},
     center: {},
+    cellStyle: {
+      type: Object,
+      default: () => ({}),
+    },
   },
   computed: {
     mergeStyle() {
@@ -37,8 +41,9 @@ export default create({
         textAlign:
           this.center !== undefined && this.center !== null && "center",
         ...this.middleStyle(this.center),
-        ...this.$attrs,
         boxSizing: "border-box",
+        ...this.$attrs,
+        ...this.cellStyle,
       };
     },
   },

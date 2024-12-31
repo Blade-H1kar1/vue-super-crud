@@ -13,15 +13,12 @@
       height: wrapperHeight,
     }"
     ref="wrapper"
+    @click="handleWrapperClick"
   >
-    <simpleRender
-      prop="title"
-      :render="crudOptions.titleRender"
-      :slots="$scopedSlots"
-      :position="true"
+    <position slotName="title" :slots="$scopedSlots"
       ><div v-if="crudOptions.title" class="sc-title">
         {{ crudOptions.title }}
-      </div></simpleRender
+      </div></position
     >
     <search ref="searchRef" />
     <menuBar ref="menuBar" />
@@ -64,8 +61,8 @@
         :show-summary="showSummary"
       >
         <template slot="empty">
-          <div :class="b('empty')" v-if="$slots.empty || crudOptions.empty">
-            <slot name="empty" v-if="$slots.empty"></slot>
+          <div :class="b('empty')" v-if="showEmpty">
+            <slot name="empty" v-if="$scopedSlots.empty"></slot>
             <el-empty
               v-else
               :image="crudOptions.empty.image"
@@ -110,8 +107,7 @@
 <script>
 // TODO: 已知bug，a.某列设置排序后且有children渲染会重复,b.高度固定式，统计栏消失
 import { create, init, event } from "core";
-import config from "src/config/crud";
-import simpleRender from "core/components/simpleRender";
+import position from "core/components/position";
 import {
   uniqueId,
   pick,
@@ -122,7 +118,6 @@ import {
   isPlainObject,
 } from "lodash-es";
 import tableEdit from "./mixins/tableEdit.js";
-import api from "./mixins/api.js";
 import validate from "./mixins/validate.js";
 import contextMenu from "./mixins/contextMenu";
 import dialog from "./mixins/dialog.js";
@@ -147,6 +142,7 @@ import {
 } from "utils";
 import tableProps from "./mixins/props";
 import cache from "utils/cache.js";
+import { checkVisibility } from "utils";
 
 export default create({
   name: "crud",
@@ -158,12 +154,11 @@ export default create({
     pagination,
     search,
     group,
-    simpleRender,
+    position,
   },
   mixins: [
-    init("crudOptions", config),
+    init("crudOptions"),
     tableEdit,
-    api,
     dialog,
     validate,
     contextMenu,
@@ -242,24 +237,16 @@ export default create({
     this.getLocalCache();
   },
   mounted() {
-    if (this.searchParams) {
-      this.query = Object.assign({}, this.query, this.searchParams);
-    }
-    setTimeout(() => {
-      this.crudOptions.init !== false && this.getList();
-    }, 0);
+    this.crudOptions.init && this.initQuery();
     this.extendMethod(this.$refs.tableFormRef, ["validate", "clearValidate"]);
     this.extendMethod(this.$refs.tableRef);
     this.refactorTableHeaderClick();
-  },
-  beforeDestroy() {
-    this.cancelObserver && this.cancelObserver();
   },
   computed: {
     list: {
       get() {
         if (this.crudOptions.localPagination) {
-          const { pageNum, pageSize } = this.props;
+          const { pageNum, pageSize } = this.crudOptions.props;
           const start = (this.query[pageNum] - 1) * this.query[pageSize];
           const end = start + this.query[pageSize];
           return this.data.slice(start, end);
@@ -305,7 +292,7 @@ export default create({
       const columns = [];
       const options = pick(this.crudOptions, ["expand", "index", "selection"]);
       Object.keys(options).forEach((key) => {
-        if (options[key]) {
+        if (checkVisibility(options[key])) {
           columns.push({ type: key, ...options[key] });
         }
       });
@@ -340,6 +327,13 @@ export default create({
       const { gap = 0 } = this.crudOptions;
       return this.isAutoHeight ? `${gap}px ${gap}px 0` : `${gap}px`;
     },
+    showEmpty() {
+      return checkVisibility(
+        this.crudOptions.empty,
+        null,
+        this.$scopedSlots.empty
+      );
+    },
   },
   watch: {
     data: {
@@ -348,6 +342,10 @@ export default create({
         const isUpdated = newVal !== oldVal;
         if (isUpdated) {
           this.processList(this.list);
+          // 数据变化时高度更新，防止统计栏不显示
+          this.$nextTick(() => {
+            this.$refs.tableRef.layout.updateElsHeight();
+          });
         }
       },
       immediate: true,
@@ -362,10 +360,17 @@ export default create({
       this.$emit("update:loading", val);
     },
     showPopperNum() {
-      this.$emit("update:showPopperNum", this.showPopperNum);
+      this.$emit("update:showPopper", this.showPopperNum !== 0);
     },
   },
   methods: {
+    initQuery() {
+      this.query = Object.assign({}, this.query, this.searchParams);
+      this.getList();
+    },
+    getList() {
+      this.$emit("getList");
+    },
     // 重写表头点击事件
     refactorTableHeaderClick() {
       const tableHeader = this.$refs.tableRef.$refs.tableHeader;
@@ -548,8 +553,7 @@ export default create({
       col.search && (labelMinWidth += 20);
       col.sortable && (labelMinWidth += 25);
       document.body.removeChild(labelSpan);
-      labelMinWidth = Math.round(labelMinWidth);
-      labelMinWidth = Math.max(labelMinWidth, 80);
+      labelMinWidth = Math.max(Math.round(labelMinWidth), 80);
       this.labelMinWidthMap.set(col.label, labelMinWidth);
       return labelMinWidth;
     },
@@ -714,6 +718,11 @@ export default create({
         return false;
       }
       return true;
+    },
+    handleWrapperClick() {
+      if (this.showPopperNum > 0) {
+        this.$emit("closeSearchPopover");
+      }
     },
   },
 });

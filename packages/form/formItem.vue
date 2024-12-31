@@ -4,7 +4,7 @@ import { omit } from "lodash-es";
 import grid from "../grid/index.vue";
 import cell from "pak/grid/cell.vue";
 import formItem from "./formItem";
-import simpleRender from "core/components/simpleRender";
+import position from "core/components/position";
 import Render from "core/components/render";
 import tooltip from "../tooltip/tooltip.vue";
 export default create({
@@ -101,10 +101,6 @@ export default create({
       if (this.formCtx.isBorder || this.formOptions.shrinkLabel) {
         names.push("shrink-label");
       }
-      // 标签超出隐藏
-      if (this.labelOverTip) {
-        names.push("label-over-tip");
-      }
       if (this.hasFormChildren) {
         names.push("has-form-children");
       }
@@ -181,17 +177,15 @@ export default create({
           }
           overflow={true}
         >
-          <simpleRender
+          <position
             class="form-label"
-            prop={`${this.item.prop}-label`}
+            ellipsis={this.labelOverTip ? true : false}
+            slotName={`${this.item.prop}-label`}
             render={this.item.labelRender}
-            item={this.item}
-            slots={this.formCtx.slots}
             scope={this.formCtx.getScope}
-            position={true}
           >
             {this.item.label}
-          </simpleRender>
+          </position>
         </tooltip>
       );
       const hasTooltip =
@@ -200,16 +194,15 @@ export default create({
         this.formCtx.slots[`${this.item.prop}-tooltip`];
       const tooltipVNode = (
         <el-tooltip effect="dark" placement="top">
-          <simpleRender
+          <position
             slot="content"
-            prop={`${this.item.prop}-tooltip`}
+            slotName={`${this.item.prop}-tooltip`}
             render={this.item.tooltipRender}
-            item={this.item}
             slots={this.formCtx.slots}
             scope={this.formCtx.getScope}
           >
             {this.item.tooltip}
-          </simpleRender>
+          </position>
           <i class="el-icon-question" />
         </el-tooltip>
       );

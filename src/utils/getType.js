@@ -28,21 +28,7 @@ export function isComponent(options) {
       typeof options.render === "function")
   );
 }
-export default function getType(obj) {
-  let type = Object.prototype.toString
-    .call(obj)
-    .match(/\s([a-zA-Z]+)/)[1]
-    .toLowerCase();
+export function getObjectType(obj) {
+  let type = Object.prototype.toString.call(obj).match(/\s([a-zA-Z]+)/)[1];
   return type;
-}
-export function isObject(obj) {
-  return getType(obj) === "object";
-}
-
-export function isFunction(obj) {
-  return getType(obj) === "function";
-}
-
-export function isArray(obj) {
-  return getType(obj) === "array";
 }

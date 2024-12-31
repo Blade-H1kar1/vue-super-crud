@@ -102,29 +102,7 @@ export function filterColumns(columns, scope) {
       return item;
     })
     .filter((item) => {
-      if (item.hidden !== undefined) {
-        if (typeof item.hidden === "function") {
-          return !item.hidden(scope);
-        } else {
-          return !item.hidden;
-        }
-      }
-      // innerHide内部专用，不被外部hidden影响
-      if (item.innerHide !== undefined) {
-        if (typeof item.innerHide === "function") {
-          return !item.innerHide(scope);
-        } else {
-          return !item.innerHide;
-        }
-      }
-      if (item.show !== undefined) {
-        if (typeof item.show === "function") {
-          return item.show(scope);
-        } else {
-          return item.show;
-        }
-      }
-      return true;
+      return checkVisibility(item, scope, true);
     });
 }
 
@@ -167,15 +145,14 @@ export const isPx = (value) => {
 
 export function checkVisibility(item, scope, defaultShow) {
   const checkVisibility = (prop, invert = false) => {
-    if (item[prop] === undefined) return;
     const value =
       typeof item[prop] === "function" ? item[prop](scope) : item[prop];
     return invert ? !value : value;
   };
-  const isShow =
-    checkVisibility("innerHide", true) ||
-    checkVisibility("hidden", true) ||
-    checkVisibility("show");
-  if (isShow !== undefined) return isShow;
-  return defaultShow;
+  const result = [];
+  if (item.hidden !== undefined) result.push(checkVisibility("hidden", true));
+  if (item.innerHide !== undefined)
+    result.push(checkVisibility("innerHide", true));
+  if (item.show !== undefined) result.push(checkVisibility("show"));
+  return result.length > 0 ? result.every((item) => item) : defaultShow;
 }

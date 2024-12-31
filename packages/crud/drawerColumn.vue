@@ -126,7 +126,6 @@ export default create({
       });
       this.$set(sort, prop, newIndex);
       this.ctx.saveLocalCache();
-      this.ctx.initColumnsHandler();
     },
     renderColumnItems(columns, isDraggable = false) {
       return columns.map((i, index) => (

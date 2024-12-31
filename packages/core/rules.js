@@ -65,7 +65,10 @@ export default {
         } else {
           if (item.validator) {
             const validator = item.validator;
-            item.validator = (...args) => validator(...args, scope);
+            return {
+              ...item,
+              validator: (...args) => validator(...args, scope),
+            };
           }
           return item;
         }

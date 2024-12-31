@@ -1,4 +1,5 @@
 import { debounce } from "lodash-es";
+import { checkVisibility } from "utils";
 export default {
   data() {
     return {
@@ -57,8 +58,11 @@ export default {
       );
     },
     footerHeight() {
-      if (this.crudOptions.pagination === false) return 0;
-      if (!this.total) return 0;
+      if (
+        checkVisibility(this.crudOptions.pagination, null, this.total > 0) ===
+        false
+      )
+        return 0;
       return 50;
     },
   },
@@ -72,10 +76,10 @@ export default {
     getClientTop() {
       if (this.isAutoHeight) {
         this.$nextTick(() => {
-          this.observeVisibility(this.$refs.tableRef.$el, (isVisible) => {
+          const tableRef = this.$refs.tableRef?.$el;
+          this.observeVisibility(tableRef, (isVisible) => {
             if (isVisible) {
-              const tableTop = this.$refs.tableRef.$el.getBoundingClientRect()
-                .top;
+              const tableTop = tableRef.getBoundingClientRect().top;
               if (this.tableTop !== tableTop) this.tableTop = tableTop;
               const wrapperTop = this.$refs.wrapper.getBoundingClientRect().top;
               if (this.wrapperHeight !== wrapperTop)

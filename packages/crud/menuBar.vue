@@ -1,24 +1,10 @@
 <template>
-  <div :class="b('menuBar')" v-if="showHeader">
-    <simpleRender
-      v-if="ctx.crudOptions.menuBarTitle"
-      prop="title"
-      :render="ctx.crudOptions.titleRender"
-      :slots="ctx.$scopedSlots"
-      :position="true"
-      ><div v-if="ctx.crudOptions.menuBarTitle" class="sc-title">
-        {{ ctx.crudOptions.menuBarTitle }}
-      </div></simpleRender
-    >
-    <div v-else :class="b('handleRow')">
-      <simpleRender
-        prop="handleRow"
-        :render="handleRow.render"
-        :item="handleRow"
+  <div :class="b('menuBar')">
+    <div v-if="showHandleRow" :class="b('handleRow')">
+      <position
+        slotName="handleRow"
         :slots="ctx.$scopedSlots"
         :scope="ctx.crudOptions"
-        :positionGap="handleRow.positionGap"
-        :position="true"
         ><button_
           v-for="(btn, index) in handleRowButtons"
           :type="btn.type || 'text'"
@@ -28,19 +14,14 @@
           :scope="ctx"
           :loading="ctx.loadingStatus"
           :disabled="ctx.crudOptions.disabled"
-      /></simpleRender>
+      /></position>
     </div>
-    <div :class="b('toolbar')" v-if="ctx.crudOptions.toolbar !== false">
-      <simpleRender
-        prop="toolbar"
-        :render="toolbar.render"
-        :item="toolbar"
+    <div v-if="showToolbar" :class="b('toolbar')">
+      <position
+        slotName="toolbar"
         :slots="ctx.$scopedSlots"
         :scope="ctx.crudOptions"
-        :positionGap="toolbar.positionGap"
-        :position="true"
-      >
-        <button_
+        ><button_
           v-for="(btn, index) in toolbarButtons"
           :type="btn.type"
           :size="ctx.crudOptions.size"
@@ -48,8 +29,7 @@
           :key="btn.key || btn.title || index"
           :scope="ctx"
           :loading="ctx.loadingStatus"
-        />
-      </simpleRender>
+      /></position>
     </div>
     <drawerColumn v-if="showDrawer" ref="drawerColumn" />
   </div>
@@ -60,12 +40,12 @@ import create from "core/create";
 import { batchMerge } from "utils/mergeTemp";
 import drawerColumn from "./drawerColumn.vue";
 import button_ from "pak/button";
-import simpleRender from "core/components/simpleRender";
-// TODO 批量编辑
+import position from "core/components/position";
+import { checkVisibility } from "utils";
 export default create({
   name: "crud",
   inject: ["ctx"],
-  components: { drawerColumn, button_, simpleRender },
+  components: { drawerColumn, button_, position },
   data() {
     return {
       isBatchEdit: false,
@@ -73,8 +53,11 @@ export default create({
     };
   },
   computed: {
-    showHeader() {
-      return this.handleRow || this.toolbar;
+    showHandleRow() {
+      return checkVisibility(this.handleRow, null, true);
+    },
+    showToolbar() {
+      return checkVisibility(this.toolbar, null, true);
     },
     handleRow() {
       const handleRow = { ...(this.ctx.crudOptions.handleRow || {}) };
@@ -87,15 +70,18 @@ export default create({
     },
     toolbar() {
       const toolbar = { ...(this.ctx.crudOptions.toolbar || {}) };
-      if (this.ctx.batchRowEdit || this.ctx.batchEdit) {
-        toolbar.batchEdit = true;
-        toolbar.batchSave = true;
-        toolbar.batchCancel = true;
-      }
-      if (!this.hasSearch || !this.ctx.crudOptions.searchForm) {
-        toolbar.search = false;
-      }
-      return toolbar;
+      const isBatchEdit = this.ctx.batchRowEdit || this.ctx.batchEdit;
+      return {
+        batchEdit: isBatchEdit,
+        batchSave: isBatchEdit,
+        batchCancel: isBatchEdit,
+        search: this.hasSearch,
+        zoom: true,
+        refresh: true,
+        reset: true,
+        column: true,
+        ...toolbar,
+      };
     },
     hasSearch() {
       return this.ctx.trueRenderColumns.some((i) => i.search);

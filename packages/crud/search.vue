@@ -79,17 +79,18 @@ export default create({
         });
       },
       deep: true,
+      immediate: true,
     },
   },
   created() {
-    this.saveInitSearch();
+    // this.saveInitSearch();
     if (this.searchForm && this.searchForm.initShow) {
       this.ctx.showSearch = true;
     }
   },
   mounted() {
     this.ctx.$refs.searchForm = this.$refs.searchForm;
-    this.setInitSearch();
+    // this.setInitSearch();
   },
   methods: {
     saveInitSearch() {

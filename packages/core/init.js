@@ -4,9 +4,12 @@ import {
   isFunction,
   isPlainObject,
   debounce,
+  isEqual,
 } from "lodash-es";
 import { mergeTemp, singleMerge, filterColumns } from "utils";
-export default (optionsKey, config, opts) => {
+import configManager from "core/configManager";
+
+export default (optionsKey, opts) => {
   return {
     props: {
       scope: {}, // 防止scope携带vue实例导致的问题
@@ -27,16 +30,18 @@ export default (optionsKey, config, opts) => {
     },
     watch: {
       initColumns() {
-        this.debounceInitColumnsHandler();
+        this.debounceInitHandler();
       },
       options: {
-        handler(newVal, oldVal) {
-          this.debounceInitOptionsHandler();
+        handler() {
+          this.debounceInitHandler();
         },
         deep: true,
       },
-      $attrs() {
-        this.debounceInitOptionsHandler();
+      $attrs(v, oldVal) {
+        if (!isEqual(v, oldVal)) {
+          this.debounceInitHandler();
+        }
       },
     },
     computed: {
@@ -46,71 +51,41 @@ export default (optionsKey, config, opts) => {
       },
     },
     created() {
-      this.initColumnsHandler();
-      this.initOptionsHandler();
-      this.debounceInitColumnsHandler = debounce(this.initColumnsHandler, 0);
-      this.debounceInitOptionsHandler = debounce(this.initOptionsHandler, 0);
+      this.initHandler();
+      this.debounceInitHandler = debounce(this.initHandler, 0);
     },
     methods: {
-      initColumnsHandler() {
-        if (this.initColumns && Array.isArray(this.initColumns)) {
+      initHandler() {
+        this.resultOptions = configManager.getInstance().mergeConfig(
+          Object.assign(this.getUserOptions(), {
+            renderColumns: this.initColumns,
+          }),
+          {
+            type: optionsKey,
+          }
+        );
+        if (
+          this.resultOptions.renderColumns &&
+          Array.isArray(this.resultOptions.renderColumns)
+        ) {
           this.resultColumns = filterColumns(
-            cloneDeep(this.initColumns)
+            cloneDeep(this.resultOptions.renderColumns)
               .map(this.handleInitColumn)
               .sort((a, b) => a.order - b.order)
           );
-        } else {
-          console.error("initColumns must be an array");
         }
+        // console.log(this.resultOptions, this.resultColumns, "resultColumns");
       },
-      initOptionsHandler() {
-        this.resultOptions = this.initOptions(config);
-      },
-      debounceInitOptionsHandler() {},
-      debounceInitColumnsHandler() {},
       resetInit() {
-        this.initColumnsHandler();
-        this.initOptionsHandler();
-      },
-      mergeOptions() {
-        const initConfig = this.getInitConfig();
-        let userOptions = this.getUserOptions();
-        userOptions = this.mergeUserOptions(userOptions);
-        return this.convertKeysToCamelCase(merge(initConfig, userOptions));
-      },
-      getInitConfig() {
-        let initConfig = cloneDeep(this.$scOpt[optionsKey]) || {};
-        initConfig.size = this.$scOpt.size || (this.$ELEMENT || {}).size;
-        return initConfig;
+        this.initHandler();
       },
       getUserOptions() {
         let userOptions = opts || this.options;
-        return cloneDeep(userOptions);
-      },
-      mergeUserOptions(userOptions) {
-        userOptions = mergeTemp("options", userOptions.presetType, userOptions);
-        Object.assign(userOptions, this.$attrs);
-        return userOptions;
-      },
-      initOptions(conf) {
-        const config = conf();
-        const resultOptions = merge(config.normal, this.mergeOptions());
-        this.mergeShowConfig(resultOptions, config.showConfig);
-        return resultOptions;
-      },
-      mergeShowConfig(resultOptions, showConfig) {
-        Object.keys(resultOptions).forEach((key) => {
-          const resOpt = resultOptions[key];
-          if (showConfig[key] && resOpt) {
-            if (isPlainObject(resOpt)) {
-              resultOptions[key] = merge(showConfig[key], resOpt);
-            } else if (Array.isArray(resOpt) && showConfig[key].handles) {
-              resultOptions[key] = { handles: resOpt };
-            } else {
-              resultOptions[key] = showConfig[key];
-            }
-          }
-        });
+        userOptions = cloneDeep(userOptions);
+        userOptions.size = userOptions.size || (this.$ELEMENT || {}).size;
+        return this.convertKeysToCamelCase(
+          Object.assign(userOptions, this.$attrs)
+        );
       },
       handleInitColumn(col, index) {
         let item = { ...col };
@@ -142,7 +117,6 @@ export default (optionsKey, config, opts) => {
           }
         }
       },
-      // 下划线分隔的格式转换为驼峰式格式
       convertKeysToCamelCase(obj) {
         const result = {};
         for (const key in obj) {

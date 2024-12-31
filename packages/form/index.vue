@@ -6,72 +6,72 @@
     ]"
     :style="{ padding: formOptions.gap }"
   >
-    <simpleRender
-      prop="title"
-      :render="formOptions.titleRender"
-      :slots="$scopedSlots"
-      :position="true"
-      ><div v-if="formOptions.title" class="sc-title">
-        {{ formOptions.title }}
-      </div></simpleRender
-    >
-    <el-form
-      v-loading="isLoading"
-      :disabled="isDisabled"
-      ref="formRef"
-      :model="value"
-      v-bind="formProps"
-      :key="key"
-      @submit.native.prevent
-    >
-      <template v-if="isGroup">
-        <group
-          v-for="(item, index) in columns"
-          v-bind="item"
-          :key="index"
-          :border="!isBorder"
-        >
-          <component
-            v-if="item.children"
-            :is="formOptions.layout"
-            v-bind="item"
-            :style="{ padding: `0 ${item.gap}px` }"
-          >
-            <formItem
-              v-for="(i, idx) in item.children"
-              :key="idx"
-              :col="i"
-              v-bind="i"
-              :is-first-row="idx <= firstRowLastCellIndex[index]"
-            ></formItem
-          ></component>
-          <simpleRender
-            v-else
-            :prop="item.prop"
-            :render="item.render"
-            :col="item"
-            :slots="slots"
-            :scope="getScope"
-          />
-        </group>
-        <formAction />
-      </template>
-      <component
-        v-else
-        :is="formOptions.layout"
-        v-bind="formOptions"
-        :style="{ padding: `0 ${formOptions.gap}px` }"
+    <div style="min-height: 0;">
+      <position
+        slotName="title"
+        :render="formOptions.titleRender"
+        :slots="$scopedSlots"
+        ><div v-if="formOptions.title" class="sc-title">
+          {{ formOptions.title }}
+        </div></position
       >
-        <formItem
-          v-for="(item, index) in columns"
-          :key="index"
-          :col="item"
-          v-bind="item"
-          :is-first-row="index <= firstRowLastCellIndex"
-        ></formItem
-        ><formAction
-      /></component>
-    </el-form>
+      <el-form
+        v-loading="isLoading"
+        :disabled="isDisabled"
+        ref="formRef"
+        :model="value"
+        v-bind="formProps"
+        :key="key"
+        @submit.native.prevent
+      >
+        <template v-if="isGroup">
+          <group
+            v-for="(item, index) in columns"
+            v-bind="item"
+            :key="index"
+            :border="!isBorder"
+          >
+            <component
+              v-if="item.children"
+              :is="formOptions.layout"
+              v-bind="item"
+              :style="{ padding: `0 ${item.gap}px` }"
+            >
+              <formItem
+                v-for="(i, idx) in item.children"
+                :key="idx"
+                :col="i"
+                v-bind="i"
+                :is-first-row="idx <= firstRowLastCellIndex[index]"
+              ></formItem
+            ></component>
+            <position
+              v-else
+              :slotName="item.prop"
+              :render="item.render"
+              :slots="slots"
+              :scope="getScope"
+            />
+          </group>
+          <formAction />
+        </template>
+        <component
+          v-else
+          :is="formOptions.layout"
+          v-bind="formOptions"
+          :style="{ padding: `0 ${formOptions.gap}px` }"
+        >
+          <formItem
+            v-for="(item, index) in columns"
+            :key="index"
+            :col="item"
+            v-bind="item"
+            :is-first-row="index <= firstRowLastCellIndex"
+          ></formItem
+          ><formAction
+        /></component>
+      </el-form>
+    </div>
   </div>
 </template>
 
@@ -80,7 +80,6 @@
 // TODO 提交清除hidden 字段
 import { create, rules, init, event } from "core";
 import formItem from "./formItem.vue";
-import config from "src/config/form";
 import grid from "../grid/index.vue";
 import cell from "pak/grid/cell.vue";
 import group from "../group/index.vue";
@@ -98,11 +97,11 @@ import {
 } from "lodash-es";
 import { mergeTemp } from "utils/mergeTemp";
 import { isEmptyData, toCamelCase } from "utils";
-import simpleRender from "core/components/simpleRender";
+import position from "core/components/position";
 import formProps from "./props";
 export default create({
   name: "form",
-  components: { grid, cell, group, formItem, formAction, simpleRender },
+  components: { grid, cell, group, formItem, formAction, position },
   props: {
     value: {
       type: Object,
@@ -129,7 +128,7 @@ export default create({
       $h: this.$createElement,
     };
   },
-  mixins: [init("formOptions", config), rules, event],
+  mixins: [init("formOptions"), rules, event],
   data() {
     return {
       key: 1,

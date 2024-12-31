@@ -4,9 +4,8 @@
     ref="column"
     v-if="showAction"
     v-bind="action"
-    :fixed="defaultFixed"
-    :width="actionWidth || action.width"
-    :min-width="actionMinWidth || action.minWidth"
+    :width="width"
+    :fixed="fixed"
     @hook:mounted="handleMounted"
   >
     <template v-slot="scope">
@@ -27,23 +26,19 @@
 <script>
 import create from "core/create";
 import { batchMerge } from "utils/mergeTemp";
+import { checkVisibility } from "utils";
 import button_ from "pak/button";
-import { cloneDeep, debounce, isFunction, merge } from "lodash-es";
+import { cloneDeep, debounce, isFunction, merge, omit } from "lodash-es";
 export default create({
   name: "crud",
   components: {
     button_,
   },
-  data() {
-    return {};
-  },
   inject: ["ctx"],
-  computed: {},
   data() {
     return {
       buttonList: [],
       actionWidth: "",
-      actionMinWidth: "",
     };
   },
   created() {
@@ -51,55 +46,36 @@ export default create({
     this.calcAutoWidth = debounce(calcAutoWidth, 0);
   },
   computed: {
+    width() {
+      if (this.action.width === "auto")
+        return Math.max(this.actionWidth, this.action.defaultWidth);
+      if (this.action.width) return this.action.width;
+      return this.action.defaultWidth;
+    },
     fixed() {
-      if (this.col.fixed) return this.col.fixed;
-      const fixed = this.ctx.setOptions.fixed[this.col.prop];
-      if (fixed) return fixed;
+      if (this.action.fixed) return this.action.fixed;
+      return this.ctx.setOptions.fixed[this.action.prop];
     },
     action() {
-      return (
-        this.ctx.crudOptions.action || {
-          prop: "action",
-          label: "操作",
-          align: "center",
-          width: "auto",
-          calcWidth: 20,
-          defaultMinWidth: 50,
-        }
-      );
+      return {
+        delete: this.ctx.crudOptions.deleteBtn,
+        view: this.ctx.crudOptions.viewBtn,
+        edit: this.ctx.crudOptions.editBtn,
+        rowEdit: this.ctx.rowEdit,
+        rowSave: this.ctx.rowEdit,
+        rowCancel: this.ctx.rowEdit,
+        ...cloneDeep(this.ctx.crudOptions.action),
+      };
     },
     showAction() {
       if (this.ctx.setOptions.hidden.includes(this.action.prop)) return false;
-      if (this.ctx.crudOptions.action === false) return false;
-      if (this.action.hidden) return false;
-      if (this.action.show === false) return false;
-      if (this.actionButtons.length > 0) return true;
-      return false;
-    },
-    defaultFixed() {
-      if (this.action.fixed) return this.action.fixed;
-      const fixed = this.ctx.setOptions.fixed[this.action.prop];
-      if (fixed) return fixed;
+      return checkVisibility(this.action, null, this.actionButtons.length > 0);
     },
     actionButtons() {
-      const action = merge(
-        {},
-        {
-          delete: this.ctx.crudOptions.deleteBtn,
-          view: this.ctx.crudOptions.viewBtn,
-          edit: this.ctx.crudOptions.editBtn,
-        },
-        this.action
-      );
       let buttons = [];
-      if (this.ctx.rowEdit) {
-        action.rowEdit = true;
-        action.rowSave = true;
-        action.rowCancel = true;
-      }
       const merges = batchMerge(
         "btn.crud.action",
-        action,
+        this.action,
         {
           ctx: this.ctx,
         },
@@ -189,8 +165,8 @@ export default create({
       return buttons;
     },
     calcAutoWidth() {
-      if (this.action.width === "auto" || this.action.minWidth === "auto") {
-        let width = this.actionWidth || this.actionMinWidth;
+      if (this.action.width === "auto") {
+        let width = this.actionWidth;
         let list = document.querySelectorAll(".sc-crud__action-column");
         list.forEach((ele) => {
           let childList = ele.children;
@@ -201,11 +177,7 @@ export default create({
           }
           if (allWidth >= width) width = allWidth;
         });
-        if (this.action.width === "auto") {
-          this.actionWidth = Math.max(width, this.action.defaultMinWidth);
-        } else {
-          this.actionMinWidth = Math.max(width, this.action.defaultMinWidth);
-        }
+        this.actionWidth = width;
       }
     },
   },

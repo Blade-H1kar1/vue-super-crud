@@ -1,6 +1,6 @@
 <template>
   <component
-    v-if="action"
+    v-if="showAction"
     :class="b('action', [action.align])"
     :is="layoutCell"
     :widthSize="widthSize"
@@ -23,12 +23,22 @@ import create from "core/create";
 import { batchMerge } from "utils/mergeTemp";
 import Cell from "../grid/cell.vue";
 import button_ from "pak/button";
-import { merge } from "lodash-es";
+import { checkVisibility } from "utils";
 export default create({
   name: "form",
   inject: ["formCtx"],
   components: { Cell, button_ },
   computed: {
+    showAction() {
+      return checkVisibility(
+        this.action,
+        null,
+        this.formActionButtons.length > 0
+      );
+    },
+    action() {
+      return this.formCtx.formOptions.action;
+    },
     scope() {
       return {
         ctx: this.formCtx,
@@ -42,9 +52,6 @@ export default create({
       if (this.formCtx.formOptions.layout === "el-row") {
         return "el-col";
       }
-    },
-    action() {
-      return this.formCtx.formOptions.action;
     },
     widthSize() {
       if (this.action.widthSize) {

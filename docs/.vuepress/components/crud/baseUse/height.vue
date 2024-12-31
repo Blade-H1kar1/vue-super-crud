@@ -13,7 +13,6 @@ export default {
       options: {
         height: "300px", // 设置为`auto`，会自适应窗口高度，配合calcHeight参数去调节范围
         calcHeight: 0, // 值为应减去的底部高度
-        delayCalc: 500, // 由于文档自身特性，高度需要延迟计算，实际使用中不需要
         renderColumns: [
           { prop: "name", label: "昵称", search: true },
           {

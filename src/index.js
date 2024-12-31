@@ -15,6 +15,9 @@ import { mergeTemplate } from "./template";
 import dict from "pak/dict/global";
 import { merge } from "lodash-es";
 import directive from "pak/directive";
+import configManager from "core/configManager";
+import config from "src/config";
+
 const components = [
   crud,
   form,
@@ -37,9 +40,15 @@ const install = function (Vue, opts = {}) {
   Vue.prototype.$scDialog = dialog;
   Vue.prototype.$scOpt = opts;
   Vue.prototype.$scDicts = dict(Vue, opts.dict || {});
+  Vue.prototype.$sc = {
+    dialog,
+    dicts: dict(Vue, opts.dict || {}),
+  };
   if (opts.template) {
     mergeTemplate(opts.template);
   }
+
+  configManager.create(config, opts);
   // Vue.use(Contextmenu);
   // 遍历注册全局组件
   components.forEach((component) => {

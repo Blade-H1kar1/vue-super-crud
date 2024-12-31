@@ -40,26 +40,36 @@
   align-items: center;
 }
 
+.sc-over-ellipsis {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .sc-position {
-  // TODO inline-flex 的行内会引起换行
-  display: inline-flex;
-  align-items: center;
-}
-
-.sc-position__top {
-  margin-bottom: var(--sc-position-margin);
-}
-.sc-position__bottom {
-  margin-top: var(--sc-position-margin);
-}
-.sc-position__left {
-  margin-right: var(--sc-position-margin);
-}
-.sc-position__right {
-  margin-left: var(--sc-position-margin);
-}
-
-.sc-position__center {
-  display: flex;
-  align-items: center;
+  display: grid;
+  .top {
+    grid-area: top;
+    display: flex;
+    align-items: center;
+  }
+  .left {
+    grid-area: left;
+    display: flex;
+    align-items: center;
+  }
+  .content {
+    grid-area: content;
+  }
+  .right {
+    grid-area: right;
+    display: flex;
+    align-items: center;
+  }
+  .bottom {
+    grid-area: bottom;
+    display: flex;
+    align-items: center;
+  }
 }

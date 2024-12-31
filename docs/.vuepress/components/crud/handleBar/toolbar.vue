@@ -17,7 +17,6 @@ export default {
       options: {
         // 不需要自定义内置按钮时可以简写为数组 toolbar: [{label: "自定义按钮"...}]
         toolbar: {
-          position: "left",
           search: {
             label: "自定义搜索显隐", // 自定义 hover 提示词
           },

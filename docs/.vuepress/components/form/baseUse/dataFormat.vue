@@ -7,7 +7,6 @@
       ref="form"
       :options="options"
       :loading.sync="loading"
-      :formatValue.sync="formatValue"
       v-model="data"
       @submit="submit"
     >
@@ -34,7 +33,6 @@ export default {
       data: {
         strToArr: "1,2",
       },
-      formatValue: {},
     };
   },
   computed: {

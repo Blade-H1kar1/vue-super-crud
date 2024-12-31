@@ -36,7 +36,6 @@ export default {
     controlDefault: Function, // 控制已有的默认渲染
     defaultRender: Function, // 自定义默认渲染
     position: Boolean, // 是否渲染位置
-    positionGap: Number, // 位置渲染的间隙
     compStrategy: Array, // 渲染策略
     commonCompStrategy: Object, // 公共组件策略
     defaultComp: Object, // 默认组件
@@ -114,7 +113,6 @@ export default {
       }
     },
     getRender(h, scope) {
-      // render: (h) =>  (<div ref="ref"></div>)如果外部render函数接收了内部实例h函数再渲染的虚拟dom时，注册的ref是注册在内部实例上。render: () => (<div ref="ref"></div>) 如果没有接收内部实例h函数，jsx插件会默认使用外部实例的h函数渲染虚拟dom，所以注册的ref会注册到外部实例的ref上
       const render = this.render;
       if (render) {
         const VNode = isFunction(render) ? this.render(h, scope) : render;
@@ -194,7 +192,6 @@ export default {
             props={{ ...comp, comp }}
             prop={this.prop}
             size={this.config.size}
-            h={this.config.h}
             config={this.config}
             scope={scope}
           />
@@ -217,9 +214,6 @@ export default {
     },
   },
   render(h) {
-    // 替换为外部的h函数，用于绑定ref
-    h = this.config.h || this.$h || h;
-
     const chains = this.interruptibleCompose(
       this.getSlot,
       this.getRender,
@@ -237,11 +231,9 @@ export default {
     if (this.position) {
       return (
         <position
-          prop={this.prop}
-          item={this.item}
+          slotName={this.prop}
           slots={this.slots}
           scope={this.scope}
-          gap={this.positionGap}
         >
           {VNode}
         </position>

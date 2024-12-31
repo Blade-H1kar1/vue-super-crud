@@ -12,6 +12,7 @@ export default {
       loading: false,
       options: {
         layout: "grid",
+        autoFill: true,
         columnWidth: "200px",
         renderColumns: [
           {

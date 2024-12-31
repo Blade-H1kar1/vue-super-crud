@@ -81,7 +81,16 @@ export default create({
   methods: {
     beforeClick(cb, confirm) {
       if (confirm) {
-        if (typeof confirm === "string") {
+        if (isPlainObject(confirm)) {
+          this.$scDialog({
+            presetType: "confirmTip",
+            label: confirm.label,
+            content: confirm.content,
+          }).show(cb);
+        } else {
+          if (isFunction(confirm)) confirm = confirm(this.scope);
+          if (confirm === true) confirm = "确定要执行此操作吗？";
+          if (typeof confirm !== "string") return;
           this.$confirm(confirm, "提示", {
             confirmButtonText: "确定",
             cancelButtonText: "取消",
@@ -89,13 +98,6 @@ export default create({
           }).then(() => {
             cb();
           });
-        }
-        if (isPlainObject(confirm)) {
-          this.$scDialog({
-            presetType: "confirmTip",
-            label: confirm.label,
-            content: confirm.content,
-          }).show(cb);
         }
       } else {
         cb();

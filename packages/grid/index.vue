@@ -39,8 +39,11 @@ export default create({
     rows: {},
     justifyContent: {},
     flow: {},
-    children: {},
     height: { default: "auto" },
+    gridStyle: {
+      type: Object,
+      default: () => ({}),
+    },
   },
   computed: {
     mergeStyle() {
@@ -56,6 +59,7 @@ export default create({
         gap: this.gap, // 设置每个子元素之间的间距
         alignContent: this.alignContent, // 决定整个内容区域的垂直位置(上中下)
         ...this.$attrs,
+        ...this.gridStyle,
       };
     },
     gridTemplateColumns() {

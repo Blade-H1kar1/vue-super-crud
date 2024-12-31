@@ -3,13 +3,12 @@ import create from "core/create";
 export default create({
   name: "position",
   props: {
-    prop: String,
-    // item: {
-    //   type: Object,
-    //   default() {
-    //     return {};
-    //   },
-    // },
+    inline: {
+      type: Boolean,
+      default: true,
+    },
+    slotName: String,
+    render: Function,
     slots: {
       type: Object,
       default() {
@@ -17,117 +16,100 @@ export default create({
       },
     },
     scope: {},
-    gap: {
-      type: Number,
-      default: 10,
-    },
+    ellipsis: Boolean,
   },
   computed: {
-    renderType() {
-      const position = {
-        left: this.getPosType("left").type,
-        right: this.getPosType("right").type,
-        top: this.getPosType("top").type,
-        bottom: this.getPosType("bottom").type,
-      };
-      if (
-        (position.left || position.right) &&
-        (position.top || position.bottom)
-      ) {
-        return "all";
-      }
-      if (position.left || position.right) {
-        return "x";
-      }
-      if (position.top || position.bottom) {
-        return "y";
-      }
+    leftSlot() {
+      return this.slots[`${this.slotName}-left`];
     },
-  },
-  methods: {
-    getPosType(pos) {
-      const slotName = `${this.prop}-${pos}`;
-      if (this.slots[slotName]) {
-        return {
-          type: "slot",
-          render: this.slots[slotName],
-        };
-      }
-      // if (this.item[pos + "Render"]) {
-      //   return {
-      //     type: "render",
-      //     render: this.item[pos + "Render"],
-      //   };
-      // }
+    rightSlot() {
+      return this.slots[`${this.slotName}-right`];
+    },
+    topSlot() {
+      return this.slots[`${this.slotName}-top`];
+    },
+    bottomSlot() {
+      return this.slots[`${this.slotName}-bottom`];
+    },
+    contentSlot() {
+      return this.slots[`${this.slotName}`];
+    },
+    hasPosition() {
+      return this.topSlot || this.bottomSlot || this.leftSlot || this.rightSlot;
+    },
+    contentStyle() {
+      if (!this.ellipsis) return {};
       return {
-        type: null,
-        render: null,
+        "white-space": "nowrap",
+        overflow: "hidden",
+        "text-overflow": "ellipsis",
       };
     },
-    getPositionRender(h, pos) {
-      const compName = pos === "top" || pos === "bottom" ? "div" : "span";
-      const posObj = this.getPosType(pos);
-      if (!posObj.type) return;
-      // if (posObj.type === "render") {
-      //   return (
-      //     <compName class={this.b(pos)}>
-      //       {posObj.render(h, this.scope)}
-      //     </compName>
-      //   );
-      // }
-      if (posObj.type === "slot") {
-        return (
-          <compName class={this.b(pos)}>{posObj.render(this.scope)}</compName>
-        );
+    // 动态计算grid布局样式
+    gridStyle() {
+      const areas = [];
+      if (this.topSlot) {
+        areas.push('"top top top"');
       }
+      const middleRow = [
+        this.leftSlot ? "left" : ".",
+        "content",
+        this.rightSlot ? "right" : ".",
+      ].join(" ");
+      areas.push(`"${middleRow}"`);
+
+      if (this.bottomSlot) {
+        areas.push('"bottom bottom bottom"');
+      }
+      const columns = [
+        this.leftSlot ? "auto" : "0",
+        "1fr",
+        this.rightSlot ? "auto" : "0",
+      ].join(" ");
+      return {
+        display: this.inline ? "inline-grid" : "grid",
+        "grid-template-areas": areas.join("\n"),
+        "grid-template-columns": columns,
+      };
     },
   },
   render(h) {
     const defaultSlot = this.$slots.default;
-    if (this.renderType === "all") {
-      return (
-        <span
-          class={this.b()}
-          style={{ "--sc-position-margin": `${this.gap}px` }}
-        >
-          {this.getPositionRender(h, "top")}
-          <div class={this.b("center")}>
-            {this.getPositionRender(h, "left")}
-            {defaultSlot}
-            {this.getPositionRender(h, "right")}
+    const renderContent = () => {
+      if (this.contentSlot) {
+        return this.contentSlot(this.scope);
+      }
+      if (this.render) {
+        return this.render(h, this.scope);
+      }
+      return defaultSlot;
+    };
+    const content = renderContent();
+    if (
+      !content &&
+      !this.topSlot &&
+      !this.leftSlot &&
+      !this.rightSlot &&
+      !this.bottomSlot
+    )
+      return null;
+    return (
+      <div class={this.b()} style={this.gridStyle}>
+        {this.topSlot && <div class="top">{this.topSlot(this.scope)}</div>}
+        {this.leftSlot && <div class="left">{this.leftSlot(this.scope)}</div>}
+        {content && (
+          <div class="content" style={this.contentStyle}>
+            {content}
           </div>
-          {this.getPositionRender(h, "bottom")}
-        </span>
-      );
-    }
-    if (this.renderType === "x") {
-      return (
-        <span
-          class={this.b()}
-          style={{ "--sc-position-margin": `${this.gap}px` }}
-        >
-          {this.getPositionRender(h, "left")}
-          {defaultSlot}
-          {this.getPositionRender(h, "right")}
-        </span>
-      );
-    }
-    if (this.renderType === "y") {
-      return (
-        <span
-          class={this.b()}
-          style={{ "--sc-position-margin": `${this.gap}px` }}
-        >
-          {this.getPositionRender(h, "top")}
-          {defaultSlot}
-          {this.getPositionRender(h, "bottom")}
-        </span>
-      );
-    }
-    if (Array.isArray(defaultSlot) && defaultSlot.length > 1) {
-      return <span class={this.b()}>{this.$slots.default}</span>;
-    }
-    return this.$slots.default;
+        )}
+        {this.rightSlot && (
+          <div class="right">{this.rightSlot(this.scope)}</div>
+        )}
+        {this.bottomSlot && (
+          <div class="bottom">{this.bottomSlot(this.scope)}</div>
+        )}
+      </div>
+    );
   },
 });
 </script>

@@ -60,8 +60,5 @@ Vue.use(superCrud, {
     dict: { // 字典模板
       ...
     },
-    dataFormat: { // 数据格式化模板
-      ...
-    }
   }})
 ```

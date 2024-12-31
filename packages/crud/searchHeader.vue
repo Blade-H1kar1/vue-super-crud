@@ -20,21 +20,6 @@ export default create({
       active: false,
     };
   },
-  mounted() {
-    this.$watch(
-      () => this.$refs.popover.showPopper,
-      (val) => {
-        this.active = val;
-        if (val) {
-          this.ctx.showPopperNum++;
-        } else {
-          if (this.ctx.showPopperNum > 0) {
-            this.ctx.showPopperNum--;
-          }
-        }
-      }
-    );
-  },
   watch: {
     isSearch() {
       this.$emit("update:isSearch", this.isSearch);
@@ -42,7 +27,8 @@ export default create({
   },
   created() {
     this.$emit("update:isSearch", this.isSearch);
-    this.ctx.$on("closeSearchPopover", () => {
+    this.ctx.$on("closeSearchPopover", (prop) => {
+      if (prop === this.item.prop) return;
       this.closePopover();
     });
   },
@@ -60,12 +46,12 @@ export default create({
     searchHeader() {
       return this.ctx.crudOptions.searchHeader;
     },
-    customProps() {
-      let customProps = merge({}, this.searchHeader, this.item);
-      if (customProps && typeof customProps.width === "string") {
-        customProps.width = parseInt(customProps.width);
+    mergeConfig() {
+      let mergeConfig = merge({}, this.searchHeader, this.item);
+      if (mergeConfig && typeof mergeConfig.width === "string") {
+        mergeConfig.width = parseInt(mergeConfig.width);
       }
-      return customProps;
+      return mergeConfig;
     },
     componentStrategy() {
       return [
@@ -150,7 +136,7 @@ export default create({
       this.closePopover();
     },
     popClick(e) {
-      // e.stopPropagation();
+      e.stopPropagation();
     },
   },
   render(h) {
@@ -178,20 +164,30 @@ export default create({
               clearable: true,
             },
           }}
-          controlDefault={(defaultRender, scope) => {
-            return defaultRender.input;
-          }}
         ></Render>
       );
     };
     const footer = () => {
       return (
-        <el-button
-          icon="el-icon-refresh-right"
-          size={this.ctx.crudOptions.size}
-          onClick={this.reset}
-          style="margin-left: 10px;"
-        ></el-button>
+        <div style="display: flex; align-items: center;">
+          {this.mergeConfig.searchBtn && (
+            <el-button
+              icon="el-icon-search"
+              type="primary"
+              size={this.ctx.crudOptions.size}
+              onClick={this.search}
+              style="margin-left: 10px;"
+            ></el-button>
+          )}
+          {this.mergeConfig.resetBtn && (
+            <el-button
+              icon="el-icon-refresh-right"
+              size={this.ctx.crudOptions.size}
+              onClick={this.reset}
+              style="margin-left: 10px;"
+            ></el-button>
+          )}
+        </div>
       );
     };
     return (
@@ -200,14 +196,19 @@ export default create({
         ref="popover"
         placement="bottom"
         trigger="click"
-        props={this.customProps}
+        props={this.mergeConfig}
         onShow={() => {
+          this.ctx.$emit("closeSearchPopover", this.item.prop);
+          this.ctx.showPopperNum++;
           this.$nextTick(() => {
             this.instance?.$el.querySelector("input")?.focus();
           });
         }}
         onHide={() => {
           this.isSearch && this.search();
+          if (this.ctx.showPopperNum > 0) {
+            this.ctx.showPopperNum--;
+          }
         }}
         scopedSlots={{
           reference: () => (

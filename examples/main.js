@@ -8,8 +8,8 @@ import "element-ui/lib/theme-chalk/index.css";
 import "#/styles/index.scss";
 import "../styles/index.scss";
 
-import Package from "../lib/super-crud.min.js";
-// import Package from "../src/index";
+// import Package from "../lib/super-crud.min.js";
+import Package from "../src/index";
 
 Vue.use(ElementUI);
 Vue.use(Package, {

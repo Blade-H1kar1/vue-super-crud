@@ -12,7 +12,7 @@ export default {
     defaultFixed() {
       return this.fixed;
     },
-    isShow() {
+    showColumn() {
       if (this.ctx.setOptions.hidden.includes(this.col.prop)) return false;
       return true;
     },
@@ -23,7 +23,7 @@ export default {
     },
   },
   render(h) {
-    if (!this.isShow) return null;
+    if (!this.showColumn) return null;
     if (isFunction(this.col.index) || this.col.sameRowSpan) {
       return (
         <el-table-column

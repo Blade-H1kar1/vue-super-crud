@@ -22,9 +22,6 @@ export default {
       options: {
         init: true,
         border: true,
-        toolbar: {
-          position: "bottom",
-        },
         renderColumns: [
           {
             prop: "number",

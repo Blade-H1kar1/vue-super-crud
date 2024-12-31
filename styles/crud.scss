@@ -1,5 +1,4 @@
 .sc-crud {
-  
   //header
   .el-table thead th,
   .el-table thead.is-group th {
@@ -61,10 +60,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    .sc-crud__toolbar {
-      margin-bottom: 10px;
-    }
-    .sc-crud__handleRow {
+    .sc-crud__handleRow:not(:empty),
+    .sc-crud__toolbar:not(:empty) {
       margin-bottom: 10px;
     }
   }

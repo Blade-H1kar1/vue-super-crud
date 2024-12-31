@@ -18,17 +18,16 @@
 
 <script>
 import create from "core/create";
+import { checkVisibility } from "utils";
 export default create({
   name: "crud",
   inject: ["ctx"],
   computed: {
     showPagination() {
-      if (!this.pagination) return false;
-      if (!this.total) return false;
-      return true;
+      return checkVisibility(this.pagination, null, this.total > 0);
     },
     pagination() {
-      return this.ctx.crudOptions.pagination || {};
+      return this.ctx.crudOptions.pagination;
     },
     paginationOn() {
       return this.pagination?.on;

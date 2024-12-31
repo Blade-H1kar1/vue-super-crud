@@ -5,9 +5,9 @@ import calcColumnWidth from "./mixins/calcColumnWidth";
 import columnCell from "./columnCell.vue";
 import column from "./column.vue";
 import searchHeader from "./searchHeader.vue";
-import simpleRender from "core/components/simpleRender";
+import position from "core/components/position";
 import { set, merge, isFunction } from "lodash-es";
-import { executeFunctionByObject } from "utils";
+import { checkVisibility } from "utils";
 // 调试时element-ui导入地址需要改成引入项目下的node_modules地址
 import { TableColumn } from "element-ui";
 // import { TableColumn } from "C:/Users/Administrator/Desktop/jhfCloud2/ruoyi-ui/lib";
@@ -38,7 +38,7 @@ export default create({
       isSearch: false,
     };
   },
-  components: { TableColumn, columnCell, column, searchHeader, simpleRender },
+  components: { TableColumn, columnCell, column, searchHeader, position },
   computed: {
     isDefaultColumn() {
       return this.ctx.isDefaultColumn(this.col);
@@ -102,10 +102,8 @@ export default create({
     showSearchHeader() {
       if (this.col.search?.hidden) return false;
       if (this.col.searchHeader?.hidden) return false;
-      return (
-        (this.col.search && this.ctx.crudOptions.searchHeader) ||
-        (this.col.searchHeader && this.ctx.crudOptions.searchHeader)
-      );
+      const show = checkVisibility(this.ctx.crudOptions.searchHeader);
+      return (this.col.search && show) || (this.col.searchHeader && show);
     },
   },
   methods: {
@@ -148,12 +146,10 @@ export default create({
           class="sc-crud__column--header"
           style={{ color: this.isSearch ? "var(--color-primary)" : "" }}
         >
-          <simpleRender
-            prop={`${col.prop}-label`}
-            render={col.labelRender}
-            item={col}
+          <position
+            slotName={`${col.prop}-header`}
+            render={col.labelRender || col.headerRender}
             slots={ctx.$scopedSlots}
-            position={true}
           >
             <span
               style="white-space: nowrap;" // 解决动态列因为换行导致el-table中updateElsHeight重新计算有误
@@ -161,7 +157,7 @@ export default create({
                 innerHTML: col.label,
               }}
             ></span>
-          </simpleRender>
+          </position>
           {showSearchHeader && (
             <searchHeader
               on={{

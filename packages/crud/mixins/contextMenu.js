@@ -1,5 +1,6 @@
 import { batchMerge } from "utils/mergeTemp";
 import { isFunction } from "lodash-es";
+import { checkVisibility } from "utils";
 export default {
   computed: {
     ctxMenu() {
@@ -11,7 +12,7 @@ export default {
   },
   methods: {
     openContextMenu(row, column, event) {
-      if (!this.ctxMenu) return;
+      if (checkVisibility(this.ctxMenu) === false) return;
       const items = [];
       const scope = {
         row,
@@ -19,8 +20,7 @@ export default {
         column,
         ctx: this,
       };
-      if (this.ctxMenu.handles && this.ctxMenu.handles.length > 0) {
-        const col = column.col;
+      if (this.ctxMenu) {
         let merges = batchMerge("btn.crud.contextMenu", this.ctxMenu, {
           ...scope,
           event,

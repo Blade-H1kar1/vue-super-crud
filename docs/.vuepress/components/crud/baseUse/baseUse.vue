@@ -20,9 +20,6 @@ export default {
       searchForm: {},
       options: {
         init: true,
-        toolbar: {
-          position: "bottom",
-        },
         renderColumns: [
           {
             prop: "name",

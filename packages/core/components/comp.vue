@@ -28,7 +28,10 @@ export default {
     size: {},
     isChildren: Boolean, // 是否子组件
     nativeOn: Object, // 原生事件
-    directives: Object, // 指令
+    directives: {
+      type: Object,
+      default: () => ({}),
+    }, // 指令
     created: Function, // 创建
     mounted: Function, // 挂载
     updated: Function, // 更新
@@ -132,7 +135,6 @@ export default {
     this.destroyed && this.destroyed(this.scope, this.$refs[this.ref]);
   },
   render(h) {
-    h = this.h || this.$h || h;
     const scopedSlots = {};
 
     if (this.scopedSlots || this.slots) {

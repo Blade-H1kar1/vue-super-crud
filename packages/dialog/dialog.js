@@ -2,16 +2,16 @@ import create from "core/create";
 import init from "core/init";
 import { omit, pick, mergeWith, isFunction } from "lodash-es";
 import { batchMerge } from "utils/mergeTemp";
-import config from "src/config/dialog";
 import Render from "core/components/render";
 import scButton from "pak/button";
+import { checkVisibility, setPx } from "utils";
 
 export const vnodes = {};
 export default (options = {}) => {
   return create({
     name: "dialog",
     mixins: [
-      init("dialog", config, options),
+      init("dialogOptions", options),
       omit(options, [
         "created",
         "mounted",
@@ -101,10 +101,11 @@ export default (options = {}) => {
         return buttons;
       },
       showFooter() {
-        if (this.dialogOptions.footer === false) return false;
-        if (this.dialogOptions.footer.hidden) return false;
-        if (this.dialogOptions.footer.show === false) return false;
-        return this.footerButtons.length > 0;
+        return checkVisibility(
+          this.dialogOptions.footer,
+          null,
+          this.footerButtons.length > 0
+        );
       },
       omitProps() {
         return omit(this.dialogOptions, ["size", "beforeClose", "title"]);
@@ -241,8 +242,8 @@ export default (options = {}) => {
           v-scDialogDrag={this.dialogOptions.drag}
           v-scDialogDragHeight={this.dialogOptions.dragSize}
           class={[this.b(), this.dialogOptions.class]}
-          size={this.dialogOptions.width || "600px"}
-          width={this.dialogOptions.width || "600px"}
+          size={setPx(this.dialogOptions.width)}
+          width={setPx(this.dialogOptions.width)}
           fullscreen={this.fullscreen}
           visible={this.visible}
           beforeClose={this.cancel}

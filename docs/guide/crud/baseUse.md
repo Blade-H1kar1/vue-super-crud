@@ -155,13 +155,25 @@
 
 ## sc-crud 属性
 
-| 属性名       | 说明               | 类型                 | 默认值 |
-| :----------- | :----------------- | :------------------- | :----- |
-| data.sync    | 表格数据绑定值     | `array`              | —      |
-| search.sync  | 搜索表单绑定值     | `object`             | —      |
-| loading.sync | 加载绑定值         | `boolean`            | —      |
-| init         | 初始化是否立即调用 | `boolean`            | true   |
-| pagination   | 分页配置           | `boolean` / `object` | true   |
-| title        | 表格标题           | `string`             | —      |
-| handleRow    | 操作栏配置         | `boolean` / `object` | —      |
-| toolbar      | 工具栏配置         | `boolean` / `object` | true   |
+| 属性名                | 说明                | 类型                 | 可选值 | 默认值 |
+| :-------------------- | :------------------ | :------------------- | :----- | :----- |
+| data.sync             | 表格数据绑定值      | `array`              | —      | —      |
+| options               | 表格全部配置        | `object`             | —      | —      |
+| renderColumns         | 表格列配置          | `array` / `function` | —      | —      |
+| search.sync           | 搜索表单绑定值      | `object`             | —      | —      |
+| loading.sync          | 加载绑定值          | `boolean`            | —      | —      |
+| init                  | 初始化是否立即调用  | `boolean`            | —      | true   |
+| pagination            | 分页配置            | `boolean` / `object` | —      | —      |
+| title                 | 表格标题            | `string`             | —      | —      |
+| handleRow             | 操作栏配置          | `boolean` / `object` | —      | —      |
+| toolbar               | 工具栏配置          | `boolean` / `object` | —      | —      |
+| action                | 操作列配置          | `boolean` / `object` | —      | —      |
+| height                | 表格高度配置        | `string`/`number`    | `auto` | —      |
+| calcHeight            | 表格高度计算减去值  | `number`             | —      | —      |
+| index                 | 索引列配置          | `boolean` / `object` | —      | —      |
+| expand                | 展开列配置          | `boolean` / `object` | —      | —      |
+| selection             | 选择列配置          | `boolean` / `object` | —      | —      |
+| selection.ctrlSelect  | ctrl键选中整行配置  | `boolean`            | —      | true   |
+| selection.shiftSelect | shift键批量多选配置 | `boolean`            | —      | true   |
+| columnWidth           | 列宽度配置          | `object`             | —      | —      |
+
