@@ -22,7 +22,7 @@ export default {
     }
     return {
       input: (value, { row }) => {
-        return row[props[0]] || row[props[1]]
+        return row[props[0]] !== undefined || row[props[1]] !== undefined
           ? [row[props[0]] || "", row[props[1]] || ""]
           : [];
       },

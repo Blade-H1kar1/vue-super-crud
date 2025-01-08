@@ -60,13 +60,15 @@ export default {
     },
   },
   created() {
-    if (this.item.formatData) {
-      this.$watch("value", (val) => {
-        if (this._isSettingValue) return (this._isSettingValue = false);
-        this._isSettingValue = true;
-        this.setFormatValue(val);
-      });
-    }
+    // if (this.item.formatData) {
+    //   setTimeout(() => {
+    //     this.$watch("value", (val) => {
+    //       if (this._isSettingValue) return (this._isSettingValue = false);
+    //       this._isSettingValue = true;
+    //       this.setFormatValue(val);
+    //     });
+    //   }, 0);
+    // }
     if (this.compStrategy) {
       this.matcher = this.createMatcher(this.compStrategy);
     }
@@ -75,13 +77,16 @@ export default {
     setFormatValue(value) {
       const output = this.item.formatData?.output;
       if (output) {
-        const formatValue = output(value, this.scope, (prop, value) => {
-          this.$set(this.scope.row, prop, value);
+        const outputValue = output(value, this.scope, (prop, val) => {
+          this.$set(this.scope.row, prop, val);
         });
-        if (this.item.formatData.formatValue) {
+        const getFormatValue = this.item.formatData.getFormatValue;
+        if (getFormatValue && typeof getFormatValue === "string") {
+          this.scope.row[getFormatValue] = value;
+        } else if (getFormatValue) {
           this.scope.row["$" + this.prop] = value;
         }
-        if (formatValue !== undefined) this.$emit("input", formatValue);
+        if (outputValue !== undefined) this.$emit("input", outputValue);
       } else {
         this.$emit("input", value);
       }
@@ -230,11 +235,7 @@ export default {
     });
     if (this.position) {
       return (
-        <position
-          slotName={this.prop}
-          slots={this.slots}
-          scope={this.scope}
-        >
+        <position slotName={this.prop} slots={this.slots} scope={this.scope}>
           {VNode}
         </position>
       );
