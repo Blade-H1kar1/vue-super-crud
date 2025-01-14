@@ -100,7 +100,9 @@
     >
       <i class="el-icon-plus" /> 新增一行
     </div>
-    <pagination ref="paginationRef" />
+    <position slotName="pagination" :slots="$scopedSlots"
+      ><pagination ref="paginationRef"
+    /></position>
   </div>
 </template>
 

@@ -47,6 +47,7 @@ module.exports = {
           title: "crud组件",
           collapsable: true,
           children: [
+            "crud/config",
             "crud/baseUse",
             "crud/renderType",
             "crud/search",

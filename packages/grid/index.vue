@@ -1,12 +1,5 @@
 <template>
-  <div
-    :class="b()"
-    :style="{
-      ...mergeStyle,
-      'column-gap': columnGap,
-      'row-gap': rowGap,
-    }"
-  >
+  <div :class="b()" :style="mergeStyle">
     <slot></slot>
   </div>
 </template>
@@ -29,7 +22,7 @@ export default create({
     columnWidth: [String, Number],
     minColumnWidth: [String, Number],
     maxColumnWidth: [String, Number],
-    gap: {},
+    gap: {}, // 防止覆盖column-gap
     columnGap: {},
     rowGap: {},
     areas: {},
@@ -56,7 +49,8 @@ export default create({
         gridTemplateColumns: this.gridTemplateColumns,
         areas: this.formatAreas(this.areas), // 传递一个字符串数组，例如 [“a a”，“b c”]。 默认不提供。
         justifyContent: this.justifyContent, // 决定整个内容区域在容器里面的水平位置(左中右)
-        gap: this.gap, // 设置每个子元素之间的间距
+        columnGap: this.columnGap,
+        rowGap: this.rowGap,
         alignContent: this.alignContent, // 决定整个内容区域的垂直位置(上中下)
         ...this.$attrs,
         ...this.gridStyle,

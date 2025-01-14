@@ -102,7 +102,7 @@
 `formatData.input` 将外部后端接口的数据格式转化成内部表单所需的格式</br>
 `formatData.output` 将内部表单的数据格式反转回原来的格式</br>
 `formatData` 接收字符串时则匹配预设的全局格式化模板</br>
-`formatData.formatValue` 可获取格式化后的值，绑定在 `scope.row[$ + prop]` 上
+`formatData.getFormatValue = true` 可获取格式化后的值，默认绑定在 `scope.row[$ + prop]` 上，如果配置`getFormatValue`为字符串则绑定在 `scope.row[getFormatValue]` 上
 
 <common-code-format>
   <form-baseUse-dataFormat slot="source"></form-baseUse-dataFormat>

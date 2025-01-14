@@ -8,7 +8,7 @@ import position from "core/components/position";
 import Render from "core/components/render";
 import tooltip from "../tooltip/tooltip.vue";
 export default create({
-  name: "form",
+  name: "form-item",
   props: {
     col: Object,
     isFirstRow: Boolean,
@@ -56,7 +56,7 @@ export default create({
         return {
           elForm: {
             ...this.elForm,
-            disabled: this.isDetail,
+            disabled: true,
           },
         };
       }
