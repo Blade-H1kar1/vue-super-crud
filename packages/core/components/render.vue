@@ -10,7 +10,8 @@ import {
   de,
 } from "lodash-es";
 import { mergeTemp } from "utils/mergeTemp";
-import { defaultRender as _defaultRender, initDict } from "core";
+import { defaultRender as _defaultRender } from "core";
+import DictMixin from "../dict/mixin";
 import position from "./position.vue";
 export default {
   name: "render",
@@ -45,7 +46,7 @@ export default {
       default: undefined,
     },
   },
-  mixins: [initDict],
+  mixins: [DictMixin],
   computed: {
     $value: {
       get() {
@@ -230,7 +231,7 @@ export default {
       item: this.item,
       mode: this.mode,
       config: this.config,
-      dict: this.dictProxy,
+      dict: this.dictData,
       self: this,
     });
     if (this.position) {

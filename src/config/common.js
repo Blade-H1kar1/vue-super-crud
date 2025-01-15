@@ -7,7 +7,26 @@ export const renderItem = {
     // 预设类型
     type: String,
   },
-  dict: [String, Object], // 字典配置
+  dict: {
+    strict: true,
+    type: [String, Object],
+    properties: {
+      request: Function,
+      label: String, // 数据字典中label字段的属性名
+      value: String, // 数据字典中value字段的属性名
+      color: String, // 数据字典中color字段的属性名
+      children: String, // 数据字典中children字段的属性名
+      params: [Object, Function], // 请求参数，支持函数形式监听响应式数据变化
+      immediate: Boolean, // 是否立即加载，默认为懒加载，即使用时才加载
+      cache: Boolean, // 是否启用缓存
+      dataPath: String, // 字典数组的路径
+      transform: Function, // 数据转换函数
+      otherPath: [String, Array], // 需要额外获取的数据路径
+      debounceTime: Number, // 防抖时间（毫秒）
+      enhanceDict: Object, // 自定义增强方法
+      local: Boolean, // 是否启用局部字典
+    },
+  }, // 字典配置
   comp: {
     type: [Object, Function],
     properties: {

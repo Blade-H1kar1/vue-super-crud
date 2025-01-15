@@ -12,11 +12,10 @@ import tabs from "pak/tabs";
 import verifyInput from "pak/verifyInput";
 
 import { mergeTemplate } from "./template";
-import dict from "pak/dict/global";
-import { merge } from "lodash-es";
 import directive from "pak/directive";
 import configManager from "core/configManager";
 import config from "src/config";
+import globalDict from "core/dict/global";
 
 const components = [
   crud,
@@ -36,17 +35,14 @@ const install = function (Vue, opts = {}) {
   // 判断是否安装
   if (install.installed) return;
   install.installed = true;
-  window.Vue = Vue;
-  Vue.prototype.$scDialog = dialog;
-  Vue.prototype.$scOpt = opts;
-  Vue.prototype.$scDicts = dict(Vue, opts.dict || {});
-  Vue.prototype.$sc = {
-    dialog,
-    dicts: dict(Vue, opts.dict || {}),
-  };
   if (opts.template) {
     mergeTemplate(opts.template);
   }
+  window.Vue = Vue;
+
+  Vue.prototype.$scOpt = opts;
+  Vue.prototype.$scDialog = dialog;
+  Vue.prototype.$scDict = globalDict(Vue, opts.dict || {});
 
   configManager.create(config, opts);
   // Vue.use(Contextmenu);

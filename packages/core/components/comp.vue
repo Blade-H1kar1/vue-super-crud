@@ -100,6 +100,7 @@ export default {
         "el-checkbox-group": "sc-checkbox",
         "el-radio-group": "sc-radio",
         "el-switch": "sc-switch",
+        "el-cascader": "sc-cascader",
       };
       if (this.comp.options && this.name === "el-input") {
         return "sc-select";

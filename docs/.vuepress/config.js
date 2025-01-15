@@ -44,6 +44,11 @@ module.exports = {
           ],
         },
         {
+          title: "字典管理",
+          collapsable: true,
+          children: ["dict/config", "dict/component", "dict/baseUse"],
+        },
+        {
           title: "crud组件",
           collapsable: true,
           children: [
@@ -54,7 +59,6 @@ module.exports = {
             "crud/tableEdit",
             "crud/validate",
             "crud/contextMenu",
-            "crud/dict",
             "crud/buttons",
           ],
         },

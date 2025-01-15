@@ -15,7 +15,7 @@ export default ({ Vue }) => {
   Vue.use(Package, {
     size: "small",
     dict: {
-      request: (key, done) => {
+      request: (key) => {
         const data = {
           cascade: [
             {
@@ -58,9 +58,7 @@ export default ({ Vue }) => {
             },
           ],
         };
-        setTimeout(() => {
-          done(data[key]);
-        }, 500);
+        return Promise.resolve({ data: data[key] });
       },
     },
     template: {

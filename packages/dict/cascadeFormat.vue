@@ -37,6 +37,7 @@ export default create({
     // 是否多选
     multiple: { type: Boolean, default: false },
     scope: Object,
+    options: Array,
     props: {
       type: Object,
       default() {
@@ -68,8 +69,8 @@ export default create({
       }
       return arr;
     },
-    options() {
-      return this.scope.dict.options;
+    _options() {
+      return this.options || this.scope.dict;
     },
   },
   methods: {
@@ -156,8 +157,8 @@ export default create({
       }
       const labelArr = [];
 
-      if (this.options && this.options.length > 0) {
-        let dict = this.options;
+      if (this._options && this._options.length > 0) {
+        let dict = this._options;
         const deepMatch = arr.length === 1;
         for (const value of arr) {
           if (dict != null) {

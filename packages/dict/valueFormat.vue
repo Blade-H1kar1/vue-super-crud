@@ -111,7 +111,7 @@ export default create({
       if (this.$attrs.options) {
         return this.formatMap(this.$attrs.options);
       }
-      return this.scope.dict.map;
+      return this.scope.dict.toMap();
     },
   },
   methods: {

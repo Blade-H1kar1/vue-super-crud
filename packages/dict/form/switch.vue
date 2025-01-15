@@ -45,7 +45,7 @@ export default create({
   },
   computed: {
     _options() {
-      return this.options || this.scope.dict.options;
+      return this.options || this.scope.dict;
     },
     _active() {
       if (this._options.length > 0) {
@@ -66,7 +66,7 @@ export default create({
   methods: {
     onElInput(value) {
       // 字典没有加载完成之前，屏蔽switch发来的input事件
-      if (this._active[this.dict.value] == null) {
+      if (this._active[this.props.value] == null) {
         return;
       }
 
