@@ -1,5 +1,5 @@
 <template>
-  <el-form :model="form" label-width="80px">
+  <el-form v-if="isMounted" :model="form" label-width="80px">
     <!-- 省份选择 -->
     <el-form-item label="省份">
       <el-select v-model="form.province" placeholder="请选择省份" clearable>
@@ -47,17 +47,20 @@ export default {
         province: "",
         city: "",
       },
+      isMounted: false,
     };
   },
   computed: {
     selectedAddress() {
+      if (!this.isMounted) return;
       if (!this.form.province) return "未选择";
       const province = this.$scDict.provinces.findLabel(this.form.province);
       const city = this.$scDict.cities.findLabel(this.form.city);
       return city ? `${province} - ${city}` : province;
     },
   },
-  created() {
+  mounted() {
+    this.isMounted = true;
     // 注册省份字典
     this.$scDict.register("provinces", {
       request: mockApi.getProvinces,

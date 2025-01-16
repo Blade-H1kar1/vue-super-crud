@@ -8,7 +8,8 @@
     "docs:build": "vuepress build docs",
     "lib": "vue-cli-service build --target lib --dest lib src/index.js",
     "dev": "cross-env TARGET=dev gulp watch",
-    "build": "cross-env TARGET=prod gulp build"
+    "build": "cross-env TARGET=prod gulp build",
+    "deploy": "deploy.bat"
   },
   "dependencies": {
     "el-table-virtual-scroll": "^1.4.6",

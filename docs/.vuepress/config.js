@@ -4,9 +4,8 @@ module.exports = {
   title: "VueSuperCrud",
   description: "基于element-ui二次封装，快速crud组件库",
   theme: "reco",
-  base: "/",
+  base: "/vue-super-crud/",
   port: 1235,
-  // dest: './dist',   // 设置输出目录
   head: [
     [
       "link",
@@ -76,6 +75,9 @@ module.exports = {
     },
   },
   configureWebpack: {
+    output: {
+      publicPath: "/vue-super-crud/", // 修改为根路径
+    },
     module: {
       rules: [
         {

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="isMounted">
     <el-select v-model="form.country">
       <el-option
         v-for="item in $scDict.countries"
@@ -22,9 +22,11 @@ export default {
     return {
       form: {},
       tableData: [],
+      isMounted: false,
     };
   },
-  async created() {
+  mounted() {
+    this.isMounted = true;
     this.$scDict.register("countries", {
       request: mockApi.getProvinces,
     });

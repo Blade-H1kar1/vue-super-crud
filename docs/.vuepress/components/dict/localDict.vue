@@ -1,5 +1,5 @@
 <template>
-  <sc-crud :data.sync="data" :options="options"> </sc-crud>
+  <sc-crud v-if="isMounted" :data.sync="data" :options="options"> </sc-crud>
 </template>
 
 <script>
@@ -8,6 +8,7 @@ export default {
   name: "AddressSelect",
   data() {
     return {
+      isMounted: false,
       data: [
         {
           province: "",
@@ -20,7 +21,8 @@ export default {
       ],
     };
   },
-  created() {
+  mounted() {
+    this.isMounted = true;
     this.$scDict.register("provinces", {
       request: mockApi.getProvinces,
       immediate: true,
@@ -28,6 +30,7 @@ export default {
   },
   computed: {
     options() {
+      if (!this.isMounted) return {};
       return {
         renderColumns: [
           {
