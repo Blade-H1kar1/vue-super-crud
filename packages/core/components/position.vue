@@ -8,6 +8,7 @@ export default create({
       default: true,
     },
     slotName: String,
+    className: String,
     render: Function,
     slots: {
       type: Object,
@@ -94,7 +95,10 @@ export default create({
     )
       return null;
     return (
-      <div class={this.b()} style={this.gridStyle}>
+      <div
+        class={[this.b([this.className || this.slotName])]}
+        style={this.gridStyle}
+      >
         {this.topSlot && <div class="top">{this.topSlot(this.scope)}</div>}
         {this.leftSlot && <div class="left">{this.leftSlot(this.scope)}</div>}
         {content && (

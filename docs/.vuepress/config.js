@@ -2,7 +2,7 @@ const alias = require("../../build/alias");
 
 module.exports = {
   title: "VueSuperCrud",
-  description: "基于element-ui二次封装，快速crud组件库",
+  description: "基于element-ui二次封装，快速开发CRUD业务组件库",
   theme: "reco",
   base: "/vue-super-crud/",
   port: 1235,

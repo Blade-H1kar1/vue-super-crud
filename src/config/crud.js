@@ -81,6 +81,8 @@ export default {
     disabled: Boolean,
     // 是否开启初始化
     init: Boolean,
+    // 是否开启表格底部追加行新增按钮
+    footerAddBtn: Boolean,
     // 是否开启新增按钮
     addBtn: Boolean,
     // 是否开启删除按钮

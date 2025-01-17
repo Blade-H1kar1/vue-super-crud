@@ -18,6 +18,7 @@
 | gap           | 表格外间距                                                       | Number/String    | -                  | 20                         |
 | uniqueId      | 是否本地生成唯一标识                                             | Boolean          | true/false         | false                      |
 | valueKey      | 唯一值的Key                                                      | String           | -                  | "id"                       |
+| handleRow     | [操作行配置](/guide/crud/config.html#handlerow-操作行配置)       | Object           | -                  | {}                         |
 | action        | [操作列配置](/guide/crud/config.html#action-操作列配置)          | Object           | -                  | {}                         |
 | toolbar       | [工具栏配置](/guide/crud/config.html#toolbar-工具栏配置)         | Object           | -                  | {}                         |
 | pagination    | [分页配置](/guide/crud/config.html#pagination-分页配置)          | Object           | -                  | {}                         |
@@ -29,15 +30,16 @@
 
 ## 按钮控制配置
 
-| 属性名         | 说明                 | 类型    | 可选值     | 默认值 |
-| :------------- | :------------------- | :------ | :--------- | :----- |
-| rowAddBtn      | 是否显示行新增按钮   | Boolean | true/false | false  |
-| rowAddType     | 行新增类型           | String  | first/last | first  |
-| deleteBtn      | 是否显示删除按钮     | Boolean | true/false | false  |
-| batchDeleteBtn | 是否显示批量删除按钮 | Boolean | true/false | false  |
-| addBtn         | 是否显示弹窗新增按钮 | Boolean | true/false | false  |
-| editBtn        | 是否显示弹窗编辑按钮 | Boolean | true/false | false  |
-| viewBtn        | 是否显示弹窗查看按钮 | Boolean | true/false | false  |
+| 属性名         | 说明                     | 类型    | 可选值     | 默认值 |
+| :------------- | :----------------------- | :------ | :--------- | :----- |
+| footerAddBtn   | 表格底部，追加行新增按钮 | Boolean | true/false | false  |
+| rowAddType     | 行新增类型               | String  | first/last | first  |
+| rowAddBtn      | 是否显示行新增按钮       | Boolean | true/false | false  |
+| deleteBtn      | 是否显示删除按钮         | Boolean | true/false | false  |
+| batchDeleteBtn | 是否显示批量删除按钮     | Boolean | true/false | false  |
+| addBtn         | 是否显示弹窗新增按钮     | Boolean | true/false | false  |
+| editBtn        | 是否显示弹窗编辑按钮     | Boolean | true/false | false  |
+| viewBtn        | 是否显示弹窗查看按钮     | Boolean | true/false | false  |
 
 
 ## 编辑模式配置
@@ -79,6 +81,16 @@
 | index     | 序号列配置 | Boolean/Object | -      | {label: "序号", width: 50, align: "center"} |
 | expand    | 展开列配置 | Boolean/Object | -      | {width: 50, align: "center"}                |
 
+## handleRow 操作行配置
+
+| 属性名      | 说明             | 类型           | 可选值     | 默认值 |
+| :---------- | :--------------- | :------------- | :--------- | :----- |
+| show        | 是否显示         | Boolean        | true/false | -      |
+| add         | 弹窗新增按钮     | Boolean/Object | -          | {}     |
+| rowAdd      | 行新增按钮       | Boolean/Object | -          | {}     |
+| batchDelete | 批量删除按钮配置 | Boolean/Object | -          | {}     |
+| handles     | 自定义按钮列表   | Array          | -          | []     |
+
 ## action 操作列配置
 
 | 属性名       | 说明           | 类型    | 可选值            | 默认值   |
@@ -95,6 +107,7 @@
 | view         | 查看按钮配置   | Object  | -                 | {}       |
 | edit         | 编辑按钮配置   | Object  | -                 | {}       |
 | rowEdit      | 行编辑按钮配置 | Object  | -                 | {}       |
+| handles      | 自定义按钮列表 | Array   | -                 | []       |
 
 ## toolbar 工具栏配置
 
@@ -108,6 +121,7 @@
 | refresh   | 刷新按钮配置     | Object  | -          | {}     |
 | reset     | 重置按钮配置     | Object  | -          | {}     |
 | column    | 列设置按钮配置   | Object  | -          | {}     |
+| handles   | 自定义按钮列表   | Array   | -          | []     |
 
 ## pagination 分页配置
 
