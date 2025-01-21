@@ -43,7 +43,7 @@
       overflow: hidden;
     }
   }
-  .sc-crud__search {
+  .sc-crud-search {
     display: grid;
     overflow: hidden;
     transition: all 0.3s;
@@ -52,20 +52,20 @@
       min-height: 0;
     }
   }
-  .sc-crud__search--show-search {
+  .sc-crud-search--show-search {
     margin-top: 10px;
     grid-template-rows: 1fr;
   }
-  .sc-crud__menuBar {
+  .sc-crud-menuBar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    .sc-crud__handleRow:not(:empty),
-    .sc-crud__toolbar:not(:empty) {
+    &__handleRow:not(:empty),
+    &__toolbar:not(:empty) {
       margin-bottom: 10px;
     }
   }
-  .sc-crud__column--header {
+  .sc-crud-column--header {
     display: inline-block;
     .search-btn {
       cursor: pointer;
@@ -120,7 +120,7 @@
     transform: rotate(45deg);
   }
   // 单元格编辑样式
-  .sc-crud__cell-edit--active {
+  .sc-crud-cell__edit--active {
     display: flex;
     align-items: center;
     width: 100%;
@@ -130,32 +130,15 @@
       margin-left: 5px;
     }
   }
-  .sc-crud__cell-edit {
+  .sc-crud-cell__edit {
     position: relative;
     .content {
       transition: all 0.3s;
     }
-    .edit-icon {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      transform: translateX(-100px);
-      transition: all 0.3s;
-      .el-button {
-        width: 100%;
-        text-align: left;
-      }
-    }
   }
-  .sc-crud__cell-edit--hover:hover {
+  .sc-crud-cell__edit--hover:hover {
     .content {
       opacity: 0;
-    }
-    .edit-icon {
-      transform: translateX(0);
-      background-color: #f5f7fa;
     }
   }
 
@@ -172,7 +155,7 @@
     margin-bottom: 0;
   }
 
-  &__action-column {
+  .sc-crud-action-column {
     white-space: nowrap;
     .el-button + .el-dropdown {
       margin-left: 10px;
@@ -181,7 +164,7 @@
       margin-left: 10px;
     }
   }
-  &__pagination {
+  .sc-crud-pagination {
     padding: 11px 0;
     background-color: #fff;
   }
@@ -210,9 +193,10 @@
     }
   }
 
-  .sc-crud__cell,
-  .cell,
-  .sc-crud__cell .el-form-item__content {
+  // 单元格表单组件样式
+  .sc-crud-cell,
+  td .cell,
+  .sc-crud-cell .el-form-item__content {
     > .el-select,
     > .el-date-editor,
     > .el-textarea,
@@ -233,7 +217,7 @@
   }
 }
 
-.sc-crud__search-header {
+.sc-crud-search-header {
   > .el-select,
   > .el-date-editor,
   > .el-textarea,
@@ -267,7 +251,7 @@
   border-top-color: #f56c6c;
 }
 
-.sc-crud__drawer-column {
+.sc-crud-drawer {
   .wrapper {
     padding: 0 10px;
     .el-card__body {

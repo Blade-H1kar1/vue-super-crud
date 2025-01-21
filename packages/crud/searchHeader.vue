@@ -4,7 +4,7 @@ import { create } from "core";
 import Render from "core/components/render";
 import { isFunction, merge, isPlainObject } from "lodash-es";
 export default create({
-  name: "crud",
+  name: "crud-search-header",
   props: {
     item: {},
   },
@@ -192,7 +192,7 @@ export default create({
     };
     return (
       <el-popover
-        popper-class={this.b("search-header")}
+        popper-class={this.b()}
         ref="popover"
         placement="bottom"
         trigger="click"

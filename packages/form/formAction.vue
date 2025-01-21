@@ -1,7 +1,7 @@
 <template>
   <component
     v-if="showAction"
-    :class="b('action', [action.align])"
+    :class="b([action.align])"
     :is="layoutCell"
     :widthSize="widthSize"
   >
@@ -25,7 +25,7 @@ import Cell from "../grid/cell.vue";
 import button_ from "pak/button";
 import { checkVisibility } from "utils";
 export default create({
-  name: "form",
+  name: "form-action",
   inject: ["formCtx"],
   components: { Cell, button_ },
   computed: {

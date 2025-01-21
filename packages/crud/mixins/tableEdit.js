@@ -108,7 +108,7 @@ export default {
       }
       return false;
     },
-    handleRowAdd(params, type = "first") {
+    handleRowAdd(params, type) {
       if (this.rowEdit && this.isNotEditable()) return;
       let newRow = {};
       this.trueRenderColumns.forEach((col) => {
@@ -122,11 +122,11 @@ export default {
       });
       this.runBefore(
         ["add"],
-        (data, _type) => {
+        (data) => {
           newRow = Object.assign(newRow, data, params);
           newRow.$add = "add_" + uniqueId();
 
-          type = this.crudOptions.rowAddType || _type || type;
+          type = type || this.crudOptions.rowAddType;
           this._processRowAddType = type;
           if (type === "first") {
             this.list.unshift(newRow);
@@ -177,6 +177,7 @@ export default {
           this.savePendingState();
           this.refreshAfterOperation && this.getList();
           this.changeLoading();
+          this.editY = null;
         };
         this.runBefore(["save"], callBack, scope, this.changeLoading);
       });
@@ -303,6 +304,7 @@ export default {
       if (this.cellEdit) {
         if (this.isNotEditable(row.$index, column.prop)) return;
 
+        if (this.editY) return;
         this.runBefore(
           ["edit"],
           (data) => {

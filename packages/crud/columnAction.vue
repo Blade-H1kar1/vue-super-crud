@@ -9,7 +9,7 @@
     @hook:mounted="handleMounted"
   >
     <template v-slot="scope">
-      <div :class="b('action-column')" ref="actionRef">
+      <div :class="b()" ref="actionRef">
         <button_
           v-for="(btn, index) in handleActionButtons(scope)"
           :type="btn.type || 'text'"
@@ -30,7 +30,7 @@ import { checkVisibility } from "utils";
 import button_ from "pak/button";
 import { cloneDeep, debounce, isFunction, merge, omit } from "lodash-es";
 export default create({
-  name: "crud",
+  name: "crud-action-column",
   components: {
     button_,
   },
@@ -167,7 +167,7 @@ export default create({
     calcAutoWidth() {
       if (this.action.width === "auto") {
         let width = this.actionWidth;
-        let list = document.querySelectorAll(".sc-crud__action-column");
+        let list = document.querySelectorAll(".sc-crud-action-column");
         list.forEach((ele) => {
           let childList = ele.children;
           let allWidth = 0;

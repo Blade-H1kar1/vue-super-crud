@@ -280,6 +280,7 @@ export class DictManager {
         }
         if (meta.transform && typeof meta.transform === "function") {
           data = meta.transform(data);
+          data = this.formatDictData(meta, data);
         } else {
           data = this.formatDictData(meta, data);
         }

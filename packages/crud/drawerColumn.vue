@@ -3,7 +3,7 @@ import create from "core/create";
 import draggable from "vuedraggable";
 import cache from "utils/cache.js";
 export default create({
-  name: "crud",
+  name: "crud-drawer",
   components: { draggable },
   inject: ["ctx"],
   data() {
@@ -170,7 +170,7 @@ export default create({
   render(h) {
     return (
       <el-drawer
-        class={this.b("drawer-column")}
+        class={this.b()}
         title="列设置"
         visible_sync={this.active}
         size="300px"

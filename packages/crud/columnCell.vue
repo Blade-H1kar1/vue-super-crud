@@ -71,36 +71,24 @@ export default create({
     cellEditRender(item, editMode) {
       const calssNames = [];
       if (editMode) {
-        calssNames.push(this.b("cell-edit", "active"));
+        calssNames.push(this.b("edit", "active"));
       } else {
-        calssNames.push(this.b("cell-edit", "hover"));
-        calssNames.push(this.b("cell-edit"));
+        calssNames.push(this.b("edit", "hover"));
+        calssNames.push(this.b("edit"));
       }
       return (
-        <div class={calssNames}>
+        <div
+          class={calssNames}
+          onClick={() => {
+            if (!editMode) {
+              this.ctx.handleCellEdit(this.scope, item);
+            }
+          }}
+        >
           {this.cellRender(item, editMode)}
           {this.cellSaveIcon(item, editMode)}
-          {this.cellEditIcon(item, editMode)}
         </div>
       );
-    },
-    cellEditIcon(item, editMode) {
-      if (!editMode) {
-        return (
-          <div class="edit-icon">
-            <el-button
-              type="text"
-              size="mini"
-              icon="el-icon-edit"
-              onClick={() => {
-                this.ctx.handleCellEdit(this.scope, item);
-              }}
-            >
-              编辑
-            </el-button>
-          </div>
-        );
-      }
     },
     cellSaveIcon(item, editMode) {
       if (editMode) {
@@ -110,7 +98,8 @@ export default create({
               type="text"
               size="mini"
               icon="el-icon-check"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 this.ctx.handleRowSave(this.scope);
               }}
             ></el-button>
@@ -118,7 +107,8 @@ export default create({
               type="text"
               size="mini"
               icon="el-icon-close"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 this.ctx.handleRowCancel(this.scope);
               }}
             ></el-button>
@@ -139,10 +129,7 @@ export default create({
     this.cellVnode = (
       <compName
         key={this.scope.$index + item.prop}
-        class={[
-          rules.required && editMode ? "is-required" : "",
-          this.b("cell"),
-        ]}
+        class={[rules.required && editMode ? "is-required" : "", this.b()]}
         label-width={item.labelWidth}
         size={this.ctx.crudOptions.size}
         prop={formProp}

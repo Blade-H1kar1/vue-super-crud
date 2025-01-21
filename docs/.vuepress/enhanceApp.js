@@ -20,7 +20,7 @@ export default async ({ Vue }) => {
     ] = await Promise.all([
       import("vue-highlight.js"),
       import("element-ui"),
-      import("../../lib/super-crud.min.js"),
+      import("../../src/index"),
       import("vue-contextmenujs"),
     ]);
 

@@ -1,6 +1,6 @@
 <template>
   <scForm
-    :class="[b('search', { 'show-search': ctx.showSearch })]"
+    :class="[b({ 'show-search': ctx.showSearch })]"
     ref="searchForm"
     :autoFill="true"
     v-model="ctx.query"
@@ -16,7 +16,7 @@ import { merge, isFunction } from "lodash-es";
 import defaultRender from "core/defaultRender";
 import { filterColumns } from "utils";
 export default create({
-  name: "crud",
+  name: "crud-search",
   inject: ["ctx"],
   components: { scForm },
   computed: {

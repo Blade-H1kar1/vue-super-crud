@@ -143,7 +143,7 @@ export default create({
     const columnHeader = () => {
       return (
         <div
-          class="sc-crud__column--header"
+          class={this.b(["header"])}
           style={{ color: this.isSearch ? "var(--color-primary)" : "" }}
         >
           <position

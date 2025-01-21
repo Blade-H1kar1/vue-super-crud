@@ -37,4 +37,28 @@ export default {
       },
     };
   },
+  multiPropToArr: (item) => {
+    const props = item.multiProp;
+    if (!Array.isArray(props)) {
+      console.error("multiProp必须为数组");
+      return;
+    }
+    return {
+      input: (value, { row }) => {
+        const hasAnyValue = props.some((prop) => row[prop] !== undefined);
+        return hasAnyValue ? props.map((prop) => row[prop] || "") : [];
+      },
+      output: (value, { row }, setRow) => {
+        if (value && value.length) {
+          props.forEach((prop, index) => {
+            setRow(prop, value[index]);
+          });
+        } else {
+          props.forEach((prop) => {
+            setRow(prop, "");
+          });
+        }
+      },
+    };
+  },
 };

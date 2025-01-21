@@ -94,7 +94,7 @@
       </el-tooltip>
     </el-form>
     <div
-      v-if="crudOptions.lastRowAddBtn"
+      v-if="crudOptions.footerAddBtn"
       :class="b('add-button')"
       @click="handleRowAdd({}, 'last')"
     >

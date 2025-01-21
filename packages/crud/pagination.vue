@@ -1,6 +1,6 @@
 <template>
   <el-pagination
-    :class="b('pagination')"
+    :class="b()"
     :style="{
       'text-align': pagination.align,
     }"
@@ -20,7 +20,7 @@
 import create from "core/create";
 import { checkVisibility } from "utils";
 export default create({
-  name: "crud",
+  name: "crud-pagination",
   inject: ["ctx"],
   computed: {
     showPagination() {

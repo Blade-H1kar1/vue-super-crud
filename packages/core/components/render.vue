@@ -233,6 +233,10 @@ export default {
       config: this.config,
       dict: this.dictData,
       self: this,
+      $value: {
+        get: this.$value,
+        set: this.setFormatValue,
+      },
     });
     if (this.position) {
       return (

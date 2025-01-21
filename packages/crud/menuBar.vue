@@ -1,5 +1,5 @@
 <template>
-  <div :class="b('menuBar')">
+  <div :class="b()">
     <div v-if="showHandleRow" :class="b('handleRow')">
       <position
         slotName="handleRow"
@@ -43,7 +43,7 @@ import button_ from "pak/button";
 import position from "core/components/position";
 import { checkVisibility } from "utils";
 export default create({
-  name: "crud",
+  name: "crud-menuBar",
   inject: ["ctx"],
   components: { drawerColumn, button_, position },
   data() {

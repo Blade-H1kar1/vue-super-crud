@@ -1,6 +1,5 @@
 <template>
   <scForm
-    :class="[b('form')]"
     ref="crudForm"
     v-model="ctx.form"
     :options="options"
@@ -28,7 +27,6 @@ export default create({
     },
     loading: Boolean,
   },
-  name: "crud",
   components: { scForm },
   computed: {
     formOptions() {
