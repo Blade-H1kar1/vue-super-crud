@@ -43,6 +43,7 @@
                 :col="i"
                 v-bind="i"
                 :is-first-row="idx <= firstRowLastCellIndex[index]"
+                :ref="i.prop"
               ></formItem
             ></component>
             <position
@@ -67,6 +68,7 @@
             :col="item"
             v-bind="item"
             :is-first-row="index <= firstRowLastCellIndex"
+            :ref="item.prop"
           ></formItem
           ><formAction
         /></component>
