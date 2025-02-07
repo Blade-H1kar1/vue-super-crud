@@ -6,6 +6,7 @@
     v-bind="$attrs"
     :value-key="props.value"
     @input="onInput"
+    @change="onChange"
     v-on="listeners"
     style="width: 100%;"
   >
@@ -54,7 +55,7 @@ export default create({
       return this.options || this.scope.dict;
     },
     listeners() {
-      return omit(this.$listeners, ["input"]);
+      return omit(this.$listeners, ["input", "change"]);
     },
   },
   methods: {
@@ -96,6 +97,20 @@ export default create({
       if (newVal.length === 1 && newVal[0] == null) {
         this.onInput(val);
       }
+    },
+    onChange(value) {
+      if (value instanceof Array) {
+        this.$emit(
+          "objectChange",
+          this._options.filter((i) => value.includes(i[this.props.value]))
+        );
+      } else {
+        this.$emit(
+          "objectChange",
+          this._options.find((i) => i[this.props.value] === value)
+        );
+      }
+      this.$emit("change", value);
     },
   },
 });

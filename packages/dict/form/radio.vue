@@ -3,6 +3,7 @@
     ref="target"
     :value="currentValue"
     @input="onInput"
+    @change="onChange"
     v-bind="$attrs"
     v-on="listeners"
     style="width: 100%;"
@@ -52,7 +53,16 @@ export default create({
       return this.options || this.scope.dict;
     },
     listeners() {
-      return omit(this.$listeners, ["input"]);
+      return omit(this.$listeners, ["input", "change"]);
+    },
+  },
+  methods: {
+    onChange(value) {
+      this.$emit(
+        "objectChange",
+        this._options.find((i) => i[this.props.value] === value)
+      );
+      this.$emit("change", value);
     },
   },
 });

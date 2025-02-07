@@ -68,11 +68,11 @@ export default {
         ...events,
         input: (event) => {
           this.$emit("input", event);
-          events.input && events.input(event, scope);
+          events.input && events.input(event);
         },
         change: (event) => {
           this.$emit("change", event);
-          events.change && events.change(event, scope);
+          events.change && events.change(event);
         },
       };
     },

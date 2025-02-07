@@ -5,6 +5,7 @@
     v-bind="$attrs"
     style="width: 100%;"
     @input="onInput"
+    @change="onChange"
     v-on="listeners"
   >
     <component
@@ -58,7 +59,7 @@ export default create({
       return this.options || this.scope.dict;
     },
     listeners() {
-      return omit(this.$listeners, ["input"]);
+      return omit(this.$listeners, ["input", "change"]);
     },
   },
   methods: {
@@ -76,6 +77,13 @@ export default create({
         return;
       }
       this.currentValue = newVal;
+    },
+    onChange(value) {
+      this.$emit(
+        "objectChange",
+        this._options.filter((i) => value.includes(i[this.props.value]))
+      );
+      this.$emit("change", value);
     },
   },
 });

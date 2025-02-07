@@ -164,7 +164,12 @@ export class DictManager {
         enumerable: false,
       },
       getOption: {
-        value: (value) => dictData.find((i) => i.value === value),
+        value: (value) => {
+          if (Array.isArray(value)) {
+            return value.map((i) => dictData.find((j) => j.value === i));
+          }
+          return dictData.find((i) => i.value === value);
+        },
         configurable: true,
         enumerable: false,
       },
