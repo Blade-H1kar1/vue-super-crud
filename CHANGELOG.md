@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.0.0...v1.1.0) (2025-02-07)
+
+
+### 🐛 问题修复
+
+* **form:** 修复校验有误不跳转 ([24ce6cb](https://github.com/Blade-H1kar1/vue-super-crud/commit/24ce6cbf2e3a3c8c1c3ec7614c9cb11b6df0cb89))
+
+
+### ✨ 新功能
+
+* **crud:** 增加选中参数selected ([526f31d](https://github.com/Blade-H1kar1/vue-super-crud/commit/526f31d262109e18ac9e8721635628bf93cf7068))
+* **dict:** 增强字典表单组件 ([14927b8](https://github.com/Blade-H1kar1/vue-super-crud/commit/14927b85390d0574b00d3f840d652e90c672a8cb))
+
 ## 1.0.0 (2025-01-21)
 
 

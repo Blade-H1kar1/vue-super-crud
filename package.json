@@ -1,6 +1,6 @@
 {
   "name": "super-crud",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -16,6 +16,7 @@
     "el-table-virtual-scroll": "^1.4.6",
     "element-ui": "^2.15.14",
     "lodash-es": "^4.17.21",
+    "mockjs": "^1.1.0",
     "vue": "^2.6.11",
     "vue-contextmenujs": "^1.4.11",
     "vue-highlight.js": "^3.1.0",
@@ -47,6 +48,7 @@
     "progress-bar-webpack-plugin": "^2.1.0",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
+    "standard-version": "^9.5.0",
     "vue-loader": "^15.9.6",
     "vue-template-compiler": "^2.6.11",
     "vuepress-plugin-fulltext-search": "^2.2.1",
