@@ -49,6 +49,8 @@
         @cell-mouse-leave="cellMouseLeave"
         @row-contextmenu="openContextMenu"
         @selection-change="selectionChange"
+        @select="select"
+        @select-all="selectAll"
         @row-click="rowClick"
         :row-key="valueKey"
         :row-style="defineRowIndex"
@@ -347,6 +349,7 @@ export default create({
           // 数据变化时高度更新，防止统计栏不显示
           this.$nextTick(() => {
             this.$refs.tableRef.layout.updateElsHeight();
+            this.updateSelection();
           });
         }
       },
