@@ -209,3 +209,324 @@
     border-top: 1px solid var(--border-color-lighter);
   }
 }
+
+// 表单工具栏
+.sc-form {
+  &:hover {
+    .sc-form-toolbar {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  .sc-form-toolbar {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    flex-direction: column-reverse;
+    align-items: center;
+    padding: 8px;
+    display: flex;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+
+    // 主按钮
+    .toolbar-trigger {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #409eff;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1;
+
+      i {
+        font-size: 24px;
+        transition: transform 0.3s;
+      }
+
+      &:hover {
+        background: #66b1ff;
+        transform: scale(1.1);
+      }
+    }
+
+    // 工具按钮组
+    .toolbar-items {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 12px;
+      opacity: 0;
+      transform: translateY(10px);
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    // 工具按钮
+    .toolbar-item {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #fff;
+      color: #606266;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
+      transition: all 0.3s;
+
+      i {
+        font-size: 20px;
+      }
+
+      &:hover {
+        background: #f5f7fa;
+        transform: scale(1.1);
+        color: #409eff;
+      }
+    }
+
+    // 展开状态
+    &.is-expanded {
+      .toolbar-items {
+        opacity: 1;
+        transform: translateY(0);
+        visibility: visible;
+      }
+
+      .toolbar-trigger i {
+        transform: rotate(45deg);
+      }
+    }
+  }
+
+  // 适配暗色主题
+  .dark {
+    .sc-form-toolbar {
+      .toolbar-item {
+        background: #363636;
+        color: #e0e0e0;
+
+        &:hover {
+          background: #404040;
+        }
+      }
+    }
+  }
+
+  // 尺寸变量
+  $sizes: (
+    default: (
+      trigger-size: 44px,
+      trigger-icon: 24px,
+      item-size: 36px,
+      item-icon: 18px,
+      gap: 12px,
+    ),
+    medium: (
+      trigger-size: 40px,
+      trigger-icon: 22px,
+      item-size: 32px,
+      item-icon: 16px,
+      gap: 10px,
+    ),
+    small: (
+      trigger-size: 36px,
+      trigger-icon: 20px,
+      item-size: 30px,
+      item-icon: 16px,
+      gap: 10px,
+    ),
+    mini: (
+      trigger-size: 32px,
+      trigger-icon: 18px,
+      item-size: 28px,
+      item-icon: 14px,
+      gap: 8px,
+    ),
+  );
+
+  // 生成尺寸相关样式
+  @each $size, $values in $sizes {
+    $trigger-size: map-get($values, trigger-size);
+    $trigger-icon: map-get($values, trigger-icon);
+    $item-size: map-get($values, item-size);
+    $item-icon: map-get($values, item-icon);
+    $gap: map-get($values, gap);
+
+    .sc-form-toolbar--#{$size} {
+      // 主按钮尺寸
+      .toolbar-trigger {
+        width: $trigger-size;
+        height: $trigger-size;
+
+        i {
+          font-size: $trigger-icon;
+        }
+      }
+
+      // 工具按钮尺寸
+      .toolbar-items {
+        gap: $gap;
+        margin-bottom: $gap;
+      }
+
+      .toolbar-item {
+        width: $item-size;
+        height: $item-size;
+
+        i {
+          font-size: $item-icon;
+        }
+      }
+    }
+  }
+}
+
+// 草稿箱
+.sc-form-draft {
+  padding: 15px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #f5f7fa;
+  .draft-header {
+    padding: 0 0 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #e4e7ed;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &__left {
+      display: flex;
+      gap: 8px;
+      margin-right: 10px;
+    }
+
+    &__right {
+      width: 200px;
+
+      .el-input {
+        .el-input__inner {
+          height: 32px;
+          line-height: 32px;
+        }
+
+        .el-input__prefix {
+          line-height: 32px;
+        }
+      }
+    }
+  }
+
+  .draft-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2px;
+    margin-top: 2px;
+
+    .el-empty {
+      padding: 30px 0;
+    }
+  }
+
+  .draft-item {
+    background: #fff;
+    border-radius: 6px;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+
+    &:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    &__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    &__name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #303133;
+      display: flex;
+      align-items: center;
+      padding-right: 10px;
+
+      &::before {
+        content: "";
+        display: inline-block;
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: var(--color-primary);
+        margin-right: 6px;
+      }
+    }
+
+    &__time {
+      font-size: 12px;
+      color: #909399;
+    }
+
+    &__footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding-top: 10px;
+      border-top: 1px solid #f0f2f5;
+
+      .el-button {
+        padding: 6px 0;
+        font-size: 12px;
+
+        & + .el-button {
+          margin-left: 0;
+        }
+
+        &:hover {
+          color: var(--color-primary);
+        }
+      }
+    }
+  }
+}
+
+// 添加预览对话框样式
+.sc-form-draft__preview-dialog {
+  .el-message-box__content {
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-family: monospace;
+    padding: 20px;
+    background: #f8f9fb;
+    border-radius: 4px;
+    margin: 10px 0;
+    line-height: 1.6;
+    font-size: 13px;
+    color: #444;
+  }
+
+  .el-message-box__header {
+    padding-bottom: 15px;
+    border-bottom: 1px solid #ebeef5;
+  }
+}

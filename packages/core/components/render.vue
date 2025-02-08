@@ -13,6 +13,12 @@ import { mergeTemp } from "utils/mergeTemp";
 import { defaultRender as _defaultRender } from "core";
 import DictMixin from "../dict/mixin";
 import position from "./position.vue";
+import { isEmptyData } from "utils";
+import {
+  getMockConfig,
+  generateMockData,
+  generateCustomMockData,
+} from "../mock/index";
 export default {
   name: "render",
   props: {
@@ -40,10 +46,15 @@ export default {
     compStrategy: Array, // 渲染策略
     commonCompStrategy: Object, // 公共组件策略
     defaultComp: Object, // 默认组件
+    rawRules: Array, // 未加工的rules
   },
   inject: {
     $h: {
       default: undefined,
+    },
+    formCtx: { default: undefined },
+    elForm: {
+      default: "",
     },
   },
   mixins: [DictMixin],
@@ -73,8 +84,29 @@ export default {
     if (this.compStrategy) {
       this.matcher = this.createMatcher(this.compStrategy);
     }
+    if (this.formCtx) {
+      this.formCtx.$on("mockData", () => {
+        if ((this.elForm || {}).disabled || !isEmptyData(this.$value)) return;
+        if (this.item.mock) {
+          const mockValue = generateCustomMockData(this.item.mock, this.scope);
+          mockValue && this.setFormatValue(mockValue);
+          return;
+        }
+        const mockValue = generateMockData(getMockConfig(this.$vnode), {
+          pattern: this.getPattern(),
+        });
+        mockValue && this.setFormatValue(mockValue);
+      });
+    }
   },
   methods: {
+    getPattern() {
+      const rules = this.rawRules;
+      if (rules) {
+        const pattern = rules.find((rule) => rule.regular);
+        if (pattern) return pattern.regular;
+      }
+    },
     setFormatValue(value) {
       const output = this.item.formatData?.output;
       if (output) {
@@ -238,6 +270,7 @@ export default {
         set: this.setFormatValue,
       },
     });
+
     if (this.position) {
       return (
         <position slotName={this.prop} slots={this.slots} scope={this.scope}>

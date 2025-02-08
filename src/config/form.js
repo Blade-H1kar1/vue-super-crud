@@ -97,6 +97,10 @@ export default {
     hiddenLabel: Boolean,
     // 标签超出一行是否隐藏并显示隐藏内容
     labelOverTip: Boolean,
+    // 右键菜单配置
+    contextMenu: {
+      type: Boolean,
+    },
     // 操作按钮配置
     action: {
       type: Object,

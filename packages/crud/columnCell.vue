@@ -1,6 +1,6 @@
 <script>
 import create from "core/create";
-import { rules } from "core";
+import { generateRules } from "core";
 import Render from "core/components/render";
 export default create({
   name: "crud-cell",
@@ -9,7 +9,6 @@ export default create({
     scope: Object,
   },
   inject: ["ctx"],
-  mixins: [rules],
   methods: {
     findTreeProp(tree, targetId, path = "") {
       for (let i = 0; i < tree.length; i++) {
@@ -49,7 +48,7 @@ export default create({
       const props = scopeProps ? Object.assign({}, col, scopeProps) : col;
       return (editMode && props[editMode]) || props;
     },
-    cellRender(item, editMode) {
+    cellRender(item, editMode, rawRules) {
       return (
         <Render
           v-model={this.scope.row[item.prop]}
@@ -59,6 +58,7 @@ export default create({
           mode={editMode}
           scope={this.scope}
           config={this.ctx.crudOptions}
+          rawRules={rawRules}
           defaultRender={this.ctx.crudOptions.defaultRender}
           controlDefault={(defaultRender, scope) => {
             if (editMode === "add" || editMode === "edit") {
@@ -68,7 +68,7 @@ export default create({
         ></Render>
       );
     },
-    cellEditRender(item, editMode) {
+    cellEditRender(item, editMode, rawRules) {
       const calssNames = [];
       if (editMode) {
         calssNames.push(this.b("edit", "active"));
@@ -85,7 +85,7 @@ export default create({
             }
           }}
         >
-          {this.cellRender(item, editMode)}
+          {this.cellRender(item, editMode, rawRules)}
           {this.cellSaveIcon(item, editMode)}
         </div>
       );
@@ -123,13 +123,16 @@ export default create({
     const editMode = this.ctx.validateEdit(this.col, this.scope);
     const item = this.getItem(editMode);
     const formProp = this.getFormProp(item);
-    const rules = this.generateRules(item, this.scope);
+    const { rules, rawRules } = generateRules(item, this.scope);
     const isValidate = editMode && rules.length;
     const compName = isValidate ? "el-form-item" : "div";
     this.cellVnode = (
       <compName
         key={this.scope.$index + item.prop}
-        class={[rules.required && editMode ? "is-required" : "", this.b()]}
+        class={[
+          rules.required && editMode ? "is-required" : "",
+          this.b([this.col.align || "center"]),
+        ]}
         label-width={item.labelWidth}
         size={this.ctx.crudOptions.size}
         prop={formProp}
@@ -137,8 +140,8 @@ export default create({
         style="width:100%"
       >
         {this.ctx.cellEdit
-          ? this.cellEditRender(item, editMode)
-          : this.cellRender(item, editMode)}
+          ? this.cellEditRender(item, editMode, rawRules)
+          : this.cellRender(item, editMode, rawRules)}
       </compName>
     );
     return this.cellVnode;

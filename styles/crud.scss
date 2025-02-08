@@ -215,6 +215,11 @@
       }
     }
   }
+  .sc-crud-cell--center {
+    .el-input__inner {
+      text-align: center;
+    }
+  }
 }
 
 .sc-crud-search-header {

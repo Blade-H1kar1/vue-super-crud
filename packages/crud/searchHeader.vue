@@ -89,7 +89,7 @@ export default create({
           },
         },
         {
-          rule: "*cascaderPanel",
+          rule: "*cascader",
           comp: {
             on: {
               change: (val) => {

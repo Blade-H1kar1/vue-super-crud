@@ -5,8 +5,9 @@
       { 'sc-form--border': isDetail && isBorder, 'sc-form--group': isGroup },
     ]"
     :style="{ padding: formOptions.gap }"
+    @contextmenu.prevent="handleContextMenu"
   >
-    <div style="min-height: 0;">
+    <div style="min-height: 0; position: relative;">
       <position
         slotName="title"
         :render="formOptions.titleRender"
@@ -74,18 +75,21 @@
         /></component>
       </el-form>
     </div>
+    <draftDrawer ref="draftDrawer" />
   </div>
 </template>
 
 <script>
 // TODO 详情模式：增加 detail 配置详情单独渲染的组件
 // TODO 提交清除hidden 字段
-import { create, rules, init, event } from "core";
+import { create, init, event } from "core";
 import formItem from "./formItem.vue";
 import grid from "../grid/index.vue";
 import cell from "pak/grid/cell.vue";
 import group from "../group/index.vue";
 import formAction from "./formAction.vue";
+import draftDrawer from "./draftDrawer.vue";
+import contextMenu from "./contextMenu";
 import {
   isFunction,
   isPlainObject,
@@ -103,7 +107,7 @@ import position from "core/components/position";
 import formProps from "./props";
 export default create({
   name: "form",
-  components: { grid, cell, group, formItem, formAction, position },
+  components: { grid, cell, group, formItem, formAction, position, draftDrawer },
   props: {
     value: {
       type: Object,
@@ -130,7 +134,7 @@ export default create({
       $h: this.$createElement,
     };
   },
-  mixins: [init("formOptions"), rules, event],
+  mixins: [init("formOptions"), event, contextMenu],
   data() {
     return {
       key: 1,
@@ -371,6 +375,7 @@ export default create({
     },
     reset() {
       this.$refs.formRef && this.$refs.formRef.resetFields();
+      this.$emit("reset");
     },
     clearValidate() {
       this.$refs.formRef && this.$refs.formRef.clearValidate();

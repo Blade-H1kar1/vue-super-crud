@@ -7,6 +7,7 @@ import formItem from "./formItem";
 import position from "core/components/position";
 import Render from "core/components/render";
 import tooltip from "../tooltip/tooltip.vue";
+import { generateRules } from "core";
 export default create({
   name: "form-item",
   props: {
@@ -77,8 +78,14 @@ export default create({
     formOptions() {
       return this.formCtx.formOptions;
     },
+    generateRules() {
+      return generateRules(this.item, this.formCtx.getScope);
+    },
     rules() {
-      return this.formCtx.generateRules(this.item, this.formCtx.getScope);
+      return this.generateRules.rules;
+    },
+    rawRules() {
+      return this.generateRules.rawRules;
     },
     mode() {
       return this.item.mode || this.formOptions.mode;
@@ -151,6 +158,7 @@ export default create({
             mode={this.formOptions.mode}
             scope={this.formCtx.getScope}
             config={this.formOptions}
+            rawRules={this.rawRules}
             defaultRender={this.formOptions.defaultRender}
             controlDefault={(defaultRender, scope) => {
               if (

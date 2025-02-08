@@ -16,6 +16,7 @@ const externals = {
     amd: "element-ui",
   },
   axios: "axios",
+  mockjs: "mockjs",
 };
 const resolve = (p) => {
   const base = p.split("/")[0];
@@ -59,7 +60,7 @@ function genConfig(name) {
       globalObject: "this",
     },
     externals: opts.externals,
-    devtool: name === "dev" ? "cheap-module-eval-source-map" : false, 
+    devtool: name === "dev" ? "cheap-module-eval-source-map" : false,
   };
   config.mode = builds[name].env;
   return config;

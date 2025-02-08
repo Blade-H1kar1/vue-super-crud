@@ -1,5 +1,4 @@
 <script>
-// TODO: 列的宽度默认最小为表头宽
 import create from "core/create";
 import calcColumnWidth from "./mixins/calcColumnWidth";
 import columnCell from "./columnCell.vue";
