@@ -27,21 +27,31 @@ export default create({
     return {};
   },
   created() {
-    this.formCtx.$on("handleChild", (method, prop) => {
+    this.formCtx.$on("handleChild", (method, prop, callBack) => {
       if (!method) return;
       if (prop) {
         if (prop !== this.item.prop) return;
         if (!this[method])
           return console.error(`不存在方法${method},prop-${this.item.prop}`);
-        this[method]();
+        this[method](callBack);
       } else {
-        this[method]();
+        this[method](callBack);
       }
     });
   },
   methods: {
     resetField() {
-      this.$refs.formItem.resetField();
+      const config = this.getComponentConfig();
+
+      if (config?.disabled || this.disabled) {
+        return;
+      }
+      this.$refs.formItem?.resetField();
+    },
+    getComponentConfig(callBack) {
+      const config = this.$refs.render?.getComponentConfig();
+      callBack && callBack(config);
+      return config;
     },
   },
   watch: {
@@ -63,11 +73,11 @@ export default create({
       }
     },
     disabled() {
-      return this.isDetail;
+      return this.isDetail || this.item.disabled || this.elForm?.disabled;
     },
     isDetail() {
       if (this.col.isDetail === false) return false;
-      return this.formCtx.isDetail || this.col.isDetail;
+      return this.formCtx.isDetail || this.col.detail;
     },
     item() {
       if (this.isDetail) {
@@ -148,6 +158,7 @@ export default create({
           }
         >
           <Render
+            ref="render"
             value={this.formCtx.value[this.item.prop]}
             onInput={(e) => {
               this.$set(this.formCtx.value, this.item.prop, e);

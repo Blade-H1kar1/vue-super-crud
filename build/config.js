@@ -17,6 +17,7 @@ const externals = {
   },
   axios: "axios",
   mockjs: "mockjs",
+  vuedraggable: "vuedraggable",
 };
 const resolve = (p) => {
   const base = p.split("/")[0];

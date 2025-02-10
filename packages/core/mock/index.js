@@ -1,6 +1,4 @@
-import { getMockConfig } from "./genConfig";
-import { generateMockData } from "./genData";
+import { getComponentConfig } from "./genConfig";
+import { generateMockData, generateCustomMockData } from "./genData";
 
-
-
-export { getMockConfig, generateMockData };
+export { getComponentConfig, generateMockData, generateCustomMockData };

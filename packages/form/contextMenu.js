@@ -3,20 +3,27 @@ export default {
     handleContextMenu(event) {
       if (this.formOptions.contextMenu === false) return;
 
+      const isFormElement =
+        ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName) ||
+        event.target.contentEditable === "true";
+      // 如果是表单元素则不拦截右键菜单
+      if (isFormElement) return;
+      event.preventDefault();
       // 创建右键菜单项
       const menuItems = [
         {
           label: "生成测试数据",
           icon: "el-icon-magic-stick",
           onClick: () => {
-            this.$emit("mock");
             this.$emit("mockData");
           },
         },
         {
           label: "重置表单",
           icon: "el-icon-refresh",
-          onClick: () => this.reset(),
+          onClick: () => {
+            this.$emit("handleChild", "resetField");
+          },
         },
         {
           label: "复制数据",
@@ -59,11 +66,8 @@ export default {
 
               // 更新表单数据
               const newFormData = { ...this.value };
-              this.trueRenderColumns.forEach((column) => {
-                if (pasteData[column.prop] !== undefined) {
-                  newFormData[column.prop] = pasteData[column.prop];
-                }
-              });
+              const updates = await this.filterDisabledData(pasteData);
+              Object.assign(newFormData, updates);
 
               this.$emit("input", newFormData);
               this.$emit("paste", newFormData);
@@ -115,6 +119,29 @@ export default {
       return this.trueRenderColumns.some(
         (column) => data[column.prop] !== undefined
       );
+    },
+    async filterDisabledData(data) {
+      const updates = {};
+      if (this.isDisabled) {
+        return updates;
+      }
+
+      const updatePromises = this.trueRenderColumns.map(async (column) => {
+        if (data[column.prop] === undefined) return;
+
+        // 获取字段配置
+        const config = await new Promise((resolve) => {
+          this.$emit("handleChild", "getComponentConfig", column.prop, resolve);
+        });
+
+        // 如果字段未禁用,则更新值
+        if (!config?.disabled && !column.disabled && !column.detail) {
+          updates[column.prop] = data[column.prop];
+        }
+      });
+
+      await Promise.all(updatePromises);
+      return updates;
     },
   },
 };

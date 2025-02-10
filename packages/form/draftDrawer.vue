@@ -145,68 +145,59 @@ export default create({
         inputPattern: /\S+/, // 不允许空白字符
         inputErrorMessage: "草稿名称不能为空",
         inputValue: `草稿_${new Date().toLocaleString()}`, // 默认名称
-      })
-        .then(({ value: draftName }) => {
-          try {
-            // 创建新的草稿对象
-            const draft = {
-              id: `draft_${Date.now()}`, // 使用时间戳生成唯一ID
-              name: draftName.trim(),
-              formData: JSON.parse(JSON.stringify(this.formCtx.value)), // 深拷贝表单数据
-              createTime: new Date().toISOString(),
-              updateTime: new Date().toISOString(),
-            };
+      }).then(({ value: draftName }) => {
+        try {
+          // 创建新的草稿对象
+          const draft = {
+            id: `draft_${Date.now()}`, // 使用时间戳生成唯一ID
+            name: draftName.trim(),
+            formData: JSON.parse(JSON.stringify(this.formCtx.value)), // 深拷贝表单数据
+            createTime: new Date().toISOString(),
+            updateTime: new Date().toISOString(),
+          };
 
-            // 获取现有草稿列表
-            const drafts = [...this.draftList];
+          // 获取现有草稿列表
+          const drafts = [...this.draftList];
 
-            // 检查是否存在同名草稿
-            const existingIndex = drafts.findIndex(
-              (item) => item.name === draft.name
-            );
+          // 检查是否存在同名草稿
+          const existingIndex = drafts.findIndex(
+            (item) => item.name === draft.name
+          );
 
-            if (existingIndex !== -1) {
-              // 如果存在同名草稿，提示用户是否覆盖
-              return this.$confirm("已存在同名草稿，是否覆盖？", "提示", {
-                type: "warning",
-                confirmButtonText: "覆盖",
-                cancelButtonText: "取消",
+          if (existingIndex !== -1) {
+            // 如果存在同名草稿，提示用户是否覆盖
+            return this.$confirm("已存在同名草稿，是否覆盖？", "提示", {
+              type: "warning",
+              confirmButtonText: "覆盖",
+              cancelButtonText: "取消",
+            })
+              .then(() => {
+                // 覆盖已有草稿
+                drafts[existingIndex] = draft;
+                this.saveDraftsToStorage(drafts);
+                this.$message.success("草稿已更新");
               })
-                .then(() => {
-                  // 覆盖已有草稿
-                  drafts[existingIndex] = draft;
-                  this.saveDraftsToStorage(drafts);
-                  this.$message.success("草稿已更新");
-                })
-                .catch(() => {
-                  // 用户取消覆盖，重新调用保存方法
-                  this.handleSaveDraft();
-                });
-            }
-
-            // 添加新草稿到列表开头
-            drafts.unshift(draft);
-
-            // 限制草稿数量，最多保存10个
-            if (drafts.length > 10) {
-              drafts.pop();
-            }
-
-            // 保存到本地存储
-            this.saveDraftsToStorage(drafts);
-
-            // 更新组件数据
-            this.draftList = drafts;
-
-            this.$message.success("草稿保存成功");
-          } catch (error) {
-            console.error("保存草稿失败:", error);
-            this.$message.error("保存草稿失败：" + error.message);
+              .catch(() => {
+                // 用户取消覆盖，重新调用保存方法
+                this.handleSaveDraft();
+              });
           }
-        })
-        .catch(() => {
-          // 用户取消输入，不做处理
-        });
+
+          // 添加新草稿到列表开头
+          drafts.unshift(draft);
+
+          // 保存到本地存储
+          this.saveDraftsToStorage(drafts);
+
+          // 更新组件数据
+          this.draftList = drafts;
+
+          this.$message.success("草稿保存成功");
+        } catch (error) {
+          console.error("保存草稿失败:", error);
+          this.$message.error("保存草稿失败：" + error.message);
+        }
+      });
     },
 
     // 保存草稿列表到本地存储
@@ -245,18 +236,15 @@ export default create({
         cancelButtonText: "取消",
         type: "warning",
       })
-        .then(() => {
+        .then(async () => {
           try {
             // 更新表单数据
             const formData = JSON.parse(JSON.stringify(draft.formData));
 
             // 只更新表单中存在的字段
             const newFormData = { ...this.formCtx.value };
-            this.formCtx.trueRenderColumns.forEach((column) => {
-              if (formData[column.prop] !== undefined) {
-                newFormData[column.prop] = formData[column.prop];
-              }
-            });
+            const updates = await this.formCtx.filterDisabledData(formData);
+            Object.assign(newFormData, updates);
 
             // 更新表单数据
             this.formCtx.$emit("input", newFormData);

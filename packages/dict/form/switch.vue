@@ -3,7 +3,6 @@
     ref="target"
     :value="value"
     @input="onElInput"
-    @change="onChange"
     :active-color="_active[props.color]"
     :active-value="_active[props.value]"
     :active-text="_active[props.label]"
@@ -48,13 +47,13 @@ export default create({
       return this.options || this.scope.dict;
     },
     _active() {
-      if (this._options.length > 0) {
+      if (this._options?.length > 0) {
         return this._options[0];
       }
       return {};
     },
     _inActive() {
-      if (this._options.length > 1) {
+      if (this._options?.length > 1) {
         return this._options[1];
       }
       return {};
@@ -65,11 +64,6 @@ export default create({
   },
   methods: {
     onElInput(value) {
-      // 字典没有加载完成之前，屏蔽switch发来的input事件
-      if (this._active[this.props.value] == null) {
-        return;
-      }
-
       this.onInput(value);
     },
   },

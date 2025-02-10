@@ -38,7 +38,7 @@ export const renderItem = {
   formatter: Function, // 格式化函数
   html: Boolean, // 是否开启HTML渲染
   render: Function, // 渲染函数
-  required: [Boolean, Object], // 是否必填
+  required: [Boolean, Object, Function], // 是否必填
   rules: {
     type: [Array, Function],
     arrayOf: {

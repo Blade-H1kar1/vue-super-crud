@@ -15,7 +15,7 @@ import DictMixin from "../dict/mixin";
 import position from "./position.vue";
 import { isEmptyData } from "utils";
 import {
-  getMockConfig,
+  getComponentConfig,
   generateMockData,
   generateCustomMockData,
 } from "../mock/index";
@@ -52,7 +52,7 @@ export default {
     $h: {
       default: undefined,
     },
-    formCtx: { default: undefined },
+    controlCtx: { default: undefined },
     elForm: {
       default: "",
     },
@@ -66,40 +66,48 @@ export default {
         return this.value;
       },
       set(value) {
-        this._isSettingValue = true;
         this.setFormatValue(value);
       },
     },
   },
   created() {
-    // if (this.item.formatData) {
-    //   setTimeout(() => {
-    //     this.$watch("value", (val) => {
-    //       if (this._isSettingValue) return (this._isSettingValue = false);
-    //       this._isSettingValue = true;
-    //       this.setFormatValue(val);
-    //     });
-    //   }, 0);
-    // }
+    if (this.item.formatData) {
+      setTimeout(() => {
+        this.isSettingValue = false;
+        this.$watch("value", (val) => {
+          // 防止重复触发
+          if (this.isSettingValue) return;
+          this.setFormatValue(this.$value);
+        });
+      }, 0);
+    }
     if (this.compStrategy) {
       this.matcher = this.createMatcher(this.compStrategy);
     }
-    if (this.formCtx) {
-      this.formCtx.$on("mockData", () => {
-        if ((this.elForm || {}).disabled || !isEmptyData(this.$value)) return;
+    if (this.controlCtx) {
+      this.controlCtx.$on("mockData", () => {
+        if (
+          (this.elForm || {}).disabled ||
+          (!isEmptyData(this.$value) && this.$value !== 0)
+        )
+          return;
         if (this.item.mock) {
           const mockValue = generateCustomMockData(this.item.mock, this.scope);
           mockValue && this.setFormatValue(mockValue);
           return;
         }
-        const mockValue = generateMockData(getMockConfig(this.$vnode), {
+
+        const mockValue = generateMockData(this.getComponentConfig(), {
           pattern: this.getPattern(),
         });
-        mockValue && this.setFormatValue(mockValue);
+        !isEmptyData(mockValue) && this.setFormatValue(mockValue);
       });
     }
   },
   methods: {
+    getComponentConfig() {
+      return getComponentConfig(this.$vnode);
+    },
     getPattern() {
       const rules = this.rawRules;
       if (rules) {
@@ -110,6 +118,7 @@ export default {
     setFormatValue(value) {
       const output = this.item.formatData?.output;
       if (output) {
+        this.isSettingValue = true; // 设置标志
         const outputValue = output(value, this.scope, (prop, val) => {
           this.$set(this.scope.row, prop, val);
         });
@@ -120,6 +129,9 @@ export default {
           this.scope.row["$" + this.prop] = value;
         }
         if (outputValue !== undefined) this.$emit("input", outputValue);
+        this.$nextTick(() => {
+          this.isSettingValue = false; // 重置标志
+        });
       } else {
         this.$emit("input", value);
       }

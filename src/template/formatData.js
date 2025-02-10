@@ -49,7 +49,7 @@ export default {
         return hasAnyValue ? props.map((prop) => row[prop] || "") : [];
       },
       output: (value, { row }, setRow) => {
-        if (value && value.length) {
+        if (value && value.length && !isEmptyData(value[0])) {
           props.forEach((prop, index) => {
             setRow(prop, value[index]);
           });

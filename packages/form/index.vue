@@ -5,7 +5,7 @@
       { 'sc-form--border': isDetail && isBorder, 'sc-form--group': isGroup },
     ]"
     :style="{ padding: formOptions.gap }"
-    @contextmenu.prevent="handleContextMenu"
+    @contextmenu="handleContextMenu"
   >
     <div style="min-height: 0; position: relative;">
       <position
@@ -107,7 +107,15 @@ import position from "core/components/position";
 import formProps from "./props";
 export default create({
   name: "form",
-  components: { grid, cell, group, formItem, formAction, position, draftDrawer },
+  components: {
+    grid,
+    cell,
+    group,
+    formItem,
+    formAction,
+    position,
+    draftDrawer,
+  },
   props: {
     value: {
       type: Object,
@@ -124,13 +132,11 @@ export default create({
     loading: {
       type: Boolean,
     },
-    disabled: {
-      type: Boolean,
-    },
   },
   provide() {
     return {
       formCtx: this,
+      controlCtx: this,
       $h: this.$createElement,
     };
   },
@@ -162,7 +168,7 @@ export default create({
       return this.formOptions.border || this.formOptions.border === "";
     },
     isDisabled() {
-      return this.isDetail || this.loadingStatus || this.disabled;
+      return this.isDetail || this.loadingStatus || this.formOptions.disabled;
     },
     isLoading() {
       if (this.isDetail) return this.loadingStatus;
@@ -381,7 +387,12 @@ export default create({
       this.$refs.formRef && this.$refs.formRef.clearValidate();
     },
     refreshForm() {
+      const tempValue = cloneDeep(this.value);
+      this.$emit("input", {});
       this.key = Math.random();
+      setTimeout(() => {
+        this.$emit("input", tempValue);
+      }, 100);
     },
     getFirstRowLastCellIndex(columns = [], columnsNumber = 1) {
       let widthSize = 0;

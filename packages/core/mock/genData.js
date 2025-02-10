@@ -5,34 +5,47 @@ const Random = Mock.Random;
  * 预设的数据生成规则
  */
 const PRESET_RULES = {
-  // 用户信息相关
-  name: () => Random.cname(),
-  nickname: () => Random.cword(2, 4),
-  username: () => Random.word(5, 8),
-  password: () => Random.string("lower", 8, 16),
-  email: () => Random.email(),
-  phone: () => Mock.mock(/^1[3-9]\d{9}$/),
-  idcard: () => Mock.mock(/^\d{18}$/),
-  avatar: () => Random.image("100x100"),
+  // 数字相关
+  integer: (min = 0, max = 100) => Random.integer(min, max), // 整数
+  float: (min = 0, max = 100, precision = 2) =>
+    Random.float(min, max, 0, precision), // 浮点数
 
-  // 地址相关
-  province: () => Random.province(),
-  city: () => Random.city(),
-  address: () => Random.county(true),
-  zip: () => Random.zip(),
+  // 文本相关
+  chinese: (min = 2, max = 4) => Random.cword(min, max), // 中文字符
+  english: (min = 3, max = 8) => Random.word(min, max), // 英文字符
+  paragraph: (min = 1, max = 3) => Random.cparagraph(min, max), // 中文段落
+  sentence: (min = 3, max = 8) => Random.csentence(min, max), // 中文句子
 
-  // 公司相关
-  company: () => Random.company(),
-  department: () => Random.cword(2, 4) + "部",
-  position: () => Random.cword(2, 4),
+  // 特殊格式
+  email: () => Random.email(), // 邮箱
+  phone: () => Mock.mock(/^1[3-9]\d{9}$/), // 手机号
+  id: () => Mock.mock(/^\d{18}$/), // 18位数字
+  date: (format = "yyyy-MM-dd") => Random.date(format), // 日期
+  time: (format = "HH:mm:ss") => Random.time(format), // 时间
+  datetime: (format = "yyyy-MM-dd HH:mm:ss") => Random.datetime(format), // 日期时间
+  timestamp: () => Random.datetime("T"), // 时间戳
 
-  // 其他常用
-  guid: () => Random.guid(),
-  age: () => Random.integer(18, 60),
-  status: () => Random.pick(["active", "inactive", "pending"]),
-  timestamp: () => Random.datetime("T"),
-  color: () => Random.color(),
+  // 列表生成
+  array: (generator, length = 1) => {
+    const count =
+      typeof length === "number"
+        ? length
+        : Random.integer(length[0], length[1]);
+    return Array.from({ length: count }, () =>
+      typeof generator === "function" ? generator() : generator
+    );
+  },
+
+  // 图片相关
+  image: (width = 100, height = 100) => Random.image(`${width}x${height}`),
+  imageUrl: (seed = 1, width = 100, height = 100) =>
+    `https://picsum.photos/seed/${seed}/${width}/${height}`,
   url: () => Random.url(),
+
+  // 其他
+  pick: (arr) => Random.pick(arr), // 从数组中随机选择
+  bool: (probability = 0.5) => Random.boolean(probability), // 布尔值，可设置概率
+  uuid: () => Random.guid(), // 唯一标识
 };
 
 export function generateCustomMockData(m, scope) {
@@ -41,6 +54,7 @@ export function generateCustomMockData(m, scope) {
       {
         Random,
         Mock,
+        Preset: PRESET_RULES,
       },
       scope
     );
@@ -54,12 +68,7 @@ export function generateCustomMockData(m, scope) {
 export function generateMockData(config, options = {}) {
   if (!config) return null;
 
-  const { yearRange = 1, preset, pattern } = options;
-
-  // 1. 检查是否使用预设规则
-  if (preset && PRESET_RULES[preset]) {
-    return PRESET_RULES[preset]();
-  }
+  const { yearRange = 1, pattern } = options;
 
   if (config.disabled) {
     return undefined;
@@ -93,6 +102,8 @@ export function generateMockData(config, options = {}) {
       return generateSliderValue(config);
     case "rate":
       return generateRateValue(config);
+    case "transfer":
+      return generateTransferValue(config);
     default:
       return undefined;
   }
@@ -247,21 +258,47 @@ function generateDateValue(config, options = {}) {
 }
 
 function generateTimeValue(config) {
-  const { min = "00:00", max = "23:59", step = 60 } = config;
-  const [minHour, minMinute] = min.split(":").map(Number);
-  const [maxHour, maxMinute] = max.split(":").map(Number);
+  const {
+    isRange,
+    valueFormat = "HH:mm:ss",
+    format = "HH:mm:ss",
+    min = "00:00:00",
+    max = "23:59:59",
+    step = 1,
+  } = config;
 
-  const totalMinutes = Random.integer(
-    minHour * 60 + minMinute,
-    maxHour * 60 + maxMinute
-  );
+  // 辅助函数：生成随机时间
+  function generateTime() {
+    const [minHour, minMinute, minSecond = "00"] = min.split(":").map(Number);
+    const [maxHour, maxMinute, maxSecond = "59"] = max.split(":").map(Number);
 
-  const hour = Math.floor(totalMinutes / 60);
-  const minute = Math.floor((totalMinutes % 60) / step) * step;
+    const minTotal = minHour * 3600 + minMinute * 60 + minSecond;
+    const maxTotal = maxHour * 3600 + maxMinute * 60 + maxSecond;
 
-  return `${hour.toString().padStart(2, "0")}:${minute
-    .toString()
-    .padStart(2, "0")}`;
+    let totalSeconds = Random.integer(minTotal, maxTotal);
+    totalSeconds = Math.floor(totalSeconds / step) * step;
+
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const timeStr = [hours, minutes, seconds]
+      .map((num) => String(num).padStart(2, "0"))
+      .join(":");
+
+    return valueFormat.includes("ss") ? timeStr : timeStr.slice(0, 5);
+  }
+
+  if (isRange) {
+    const time1 = generateTime();
+    let time2;
+    do {
+      time2 = generateTime();
+    } while (time2 <= time1);
+    return [time1, time2];
+  }
+
+  return generateTime();
 }
 
 function generateRadioValue(config) {
@@ -294,20 +331,46 @@ function generateCheckboxValue(config) {
 }
 
 function generateCascaderValue(config) {
-  const { options = [], props = {}, multiple } = config;
+  const { options = [], props = {} } = config;
 
-  function getRandomPath(items) {
-    if (!items.length) return [];
+  // 获取完整的路径(直到叶子节点)
+  function getFullPath(items, currentPath = []) {
+    if (!items?.length) return currentPath;
+
     const item = Random.pick(items);
-    const children = item[props.children || "children"] || [];
-    return [item[props.value || "value"]].concat(
-      Math.random() < 0.7 ? getRandomPath(children) : []
-    );
+    currentPath.push(item[props.value || "value"]);
+
+    const children = item[props.children || "children"];
+    if (!children?.length) return currentPath;
+
+    // 如果不是任意级别选择，必须选到最后一级
+    if (!props.checkStrictly) {
+      return getFullPath(children, currentPath);
+    }
+
+    // 如果是任意级别选择，随机决定是否继续选择子级
+    return Math.random() < 0.5
+      ? currentPath
+      : getFullPath(children, currentPath);
   }
 
-  if (multiple) {
+  // 获取随机路径
+  function getRandomPath(items) {
+    if (!items?.length) return [];
+    return getFullPath(items);
+  }
+
+  if (props.multiple) {
+    // 生成1-3个路径
     const count = Random.integer(1, 3);
-    return Array.from({ length: count }, () => getRandomPath(options));
+    const paths = new Set(); // 使用Set避免重复路径
+
+    while (paths.size < count) {
+      const path = getRandomPath(options);
+      paths.add(JSON.stringify(path)); // 转成字符串以便Set去重
+    }
+
+    return Array.from(paths).map((path) => JSON.parse(path));
   }
 
   return getRandomPath(options);
@@ -319,7 +382,7 @@ function generateSwitchValue(config) {
 }
 
 function generateSliderValue(config) {
-  const { min = 0, max = 100, step = 1, range = false } = config;
+  const { min = 1, max = 100, step = 1, range = false } = config;
 
   if (range) {
     const value1 = Random.integer(min, max - step);
@@ -332,8 +395,28 @@ function generateSliderValue(config) {
 
 function generateRateValue(config) {
   const { max = 5, allowHalf = false } = config;
+
   if (allowHalf) {
-    return Math.round(Random.float(0, max) * 2) / 2;
+    // 生成0.5的倍数
+    const value = Random.integer(1, max * 2) / 2;
+    return value;
   }
-  return Random.integer(0, max);
+  return Random.integer(1, max);
+}
+
+function generateTransferValue(config) {
+  const { data = [] } = config;
+
+  if (!data.length) return [];
+
+  // 随机选择1-3个可用的值
+  const availableValues = data
+    .filter((item) => !item.disabled)
+    .map((item) => item.key || item.value);
+
+  const count = Random.integer(1, Math.min(3, availableValues.length));
+  const selectedValues = Random.pick(availableValues, count);
+
+  // 如果是数组则返回数组，否则返回单个值
+  return Array.isArray(selectedValues) ? selectedValues : [selectedValues];
 }

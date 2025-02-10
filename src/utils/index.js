@@ -28,6 +28,7 @@ export function isEmptyData(val) {
     return false;
   if (val instanceof Array) {
     if (val.length === 0) return true;
+    return val.every((item) => isEmptyData(item));
   } else if (val instanceof Object) {
     for (var o in val) {
       return false;
