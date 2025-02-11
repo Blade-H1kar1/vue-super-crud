@@ -110,7 +110,7 @@ export function generateMockData(config, options = {}) {
 }
 
 function generateInputValue(config) {
-  const { subtype, maxLength = 10, minLength = 0 } = config;
+  const { subtype, maxLength = 10, minLength = 1 } = config;
 
   switch (subtype) {
     case "email":

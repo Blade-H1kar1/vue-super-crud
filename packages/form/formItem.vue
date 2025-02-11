@@ -27,23 +27,22 @@ export default create({
     return {};
   },
   created() {
-    this.formCtx.$on("handleChild", (method, prop, callBack) => {
+    this.formCtx.$on("handleChild", (method, prop, params) => {
       if (!method) return;
       if (prop) {
         if (prop !== this.item.prop) return;
         if (!this[method])
           return console.error(`不存在方法${method},prop-${this.item.prop}`);
-        this[method](callBack);
+        this[method](params);
       } else {
-        this[method](callBack);
+        this[method](params);
       }
     });
   },
   methods: {
-    resetField() {
+    resetField(isCondition) {
       const config = this.getComponentConfig();
-
-      if (config?.disabled || this.disabled) {
+      if (isCondition && (config?.disabled || this.disabled)) {
         return;
       }
       this.$refs.formItem?.resetField();

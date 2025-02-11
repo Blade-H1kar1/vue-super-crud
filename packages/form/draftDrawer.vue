@@ -221,7 +221,6 @@ export default create({
       } catch (error) {
         console.error("加载草稿列表失败:", error);
         this.draftList = [];
-        this.$message.error("加载草稿列表失败");
       }
     },
 

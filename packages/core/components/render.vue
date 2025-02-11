@@ -104,6 +104,11 @@ export default {
       });
     }
   },
+  mounted() {
+    if (this.item.ref && typeof this.item.ref === "function") {
+      this.item.ref(this.$vnode.componentInstance);
+    }
+  },
   methods: {
     getComponentConfig() {
       return getComponentConfig(this.$vnode);
@@ -122,7 +127,7 @@ export default {
         const outputValue = output(value, this.scope, (prop, val) => {
           this.$set(this.scope.row, prop, val);
         });
-        const getFormatValue = this.item.formatData.getFormatValue;
+        const getFormatValue = this.item.formatValue;
         if (getFormatValue && typeof getFormatValue === "string") {
           this.scope.row[getFormatValue] = value;
         } else if (getFormatValue) {

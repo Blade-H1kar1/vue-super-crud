@@ -22,7 +22,7 @@ export default {
           label: "重置表单",
           icon: "el-icon-refresh",
           onClick: () => {
-            this.$emit("handleChild", "resetField");
+            this.$emit("handleChild", "resetField", null, true);
           },
         },
         {
