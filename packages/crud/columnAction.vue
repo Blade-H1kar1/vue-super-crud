@@ -58,6 +58,7 @@ export default create({
     },
     action() {
       return {
+        type: "action",
         delete: this.ctx.crudOptions.deleteBtn,
         view: this.ctx.crudOptions.viewBtn,
         edit: this.ctx.crudOptions.editBtn,

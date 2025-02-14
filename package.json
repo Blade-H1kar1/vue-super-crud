@@ -13,6 +13,7 @@
     "release": "standard-version"
   },
   "dependencies": {
+    "dayjs": "^1.11.13",
     "el-table-virtual-scroll": "^1.4.6",
     "element-ui": "^2.15.14",
     "lodash-es": "^4.17.21",

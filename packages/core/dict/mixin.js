@@ -3,12 +3,12 @@ import { isPlainObject } from "lodash-es";
 export default {
   props: {
     // 字典配置
-    dict: [Object, String],
+    dict: [Object, String, Function],
     scope: Object,
     prop: String,
   },
   watch: {
-    dict: {
+    dictConfig: {
       immediate: true,
       handler(val, oldVal) {
         if (val) {
@@ -20,14 +20,19 @@ export default {
 
   computed: {
     dictData() {
-      if (this.dict) {
-        if (isPlainObject(this.dict)) {
+      if (this.dictConfig) {
+        if (isPlainObject(this.dictConfig)) {
           return this.$scDict[this.getDictKey()];
         }
-        if (typeof this.dict === "string") {
-          return this.$scDict[this.dict];
+        if (typeof this.dictConfig === "string") {
+          return this.$scDict[this.dictConfig];
         }
       }
+    },
+    dictConfig() {
+      const dictConfig =
+        typeof this.dict === "function" ? this.dict(this.scope) : this.dict;
+      return dictConfig;
     },
   },
 
@@ -39,36 +44,37 @@ export default {
   methods: {
     // 初始化局部字典
     initLocalDict() {
-      if (isPlainObject(this.dict)) {
-        if (this.dict.local) {
+      const dict = this.dictConfig;
+      if (isPlainObject(dict)) {
+        if (dict.local) {
           // 创建字典key
           const dictKey = this.getDictKey();
 
           // 注册字典配置
           this.$scDict.register(dictKey, {
-            ...this.dict,
+            ...dict,
             params:
-              typeof this.dict.params === "function"
-                ? () => this.dict.params(this.scope)
-                : this.dict.params,
+              typeof dict.params === "function"
+                ? () => dict.params(this.scope)
+                : dict.params,
             load:
-              typeof this.dict.load === "function"
-                ? () => this.dict.load(this.scope)
-                : this.dict.load,
+              typeof dict.load === "function"
+                ? () => dict.load(this.scope)
+                : dict.load,
             immediate: false,
             cache: false, // 局部字典默认不缓存
           });
         } else {
           this.$scDict.register(this.getDictKey(), {
-            ...this.dict,
+            ...dict,
             params:
-              typeof this.dict.params === "function"
-                ? () => this.dict.params(this.scope)
-                : this.dict.params,
+              typeof dict.params === "function"
+                ? () => dict.params(this.scope)
+                : dict.params,
             load:
-              typeof this.dict.load === "function"
-                ? () => this.dict.load(this.scope)
-                : this.dict.load,
+              typeof dict.load === "function"
+                ? () => dict.load(this.scope)
+                : dict.load,
           });
         }
       }
@@ -76,10 +82,11 @@ export default {
 
     // 获取字典唯一key
     getDictKey() {
-      if (this.dict?.local) {
-        return `${this._uid}_${this.dict?.key || this.prop}`;
+      const dict = this.dictConfig;
+      if (dict?.local) {
+        return `${this._uid}_${dict?.key || this.prop}`;
       }
-      return this.dict?.key || this.prop;
+      return dict?.key || this.prop;
     },
   },
 };

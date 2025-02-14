@@ -54,7 +54,14 @@
 
           <div class="draft-item__footer">
             <el-button type="text" size="mini" @click="handleLoadDraft(draft)">
-              加载草稿
+              加载当前
+            </el-button>
+            <el-button
+              type="text"
+              size="mini"
+              @click="handleLoadDraft(draft, true)"
+            >
+              完整加载
             </el-button>
             <el-button
               type="text"
@@ -192,10 +199,10 @@ export default create({
           // 更新组件数据
           this.draftList = drafts;
 
-          this.$message.success("草稿保存成功");
+          this.$message.success("保存成功");
         } catch (error) {
           console.error("保存草稿失败:", error);
-          this.$message.error("保存草稿失败：" + error.message);
+          this.$message.error("保存失败：" + error.message);
         }
       });
     },
@@ -224,66 +231,60 @@ export default create({
       }
     },
 
-    handleLoadDraft(draft) {
+    async handleLoadDraft(draft, loadAll = false) {
       if (!draft) {
         draft = this.filteredDraftList[0];
       }
       if (!draft) return;
-      // 确认是否加载草稿
-      this.$confirm("加载草稿将覆盖当前表单数据，是否继续？", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(async () => {
-          try {
-            // 更新表单数据
-            const formData = JSON.parse(JSON.stringify(draft.formData));
+      try {
+        // 更新表单数据
+        const formData = JSON.parse(JSON.stringify(draft.formData));
+        let newFormData;
+        if (loadAll) {
+          // 加载全部字段
+          newFormData = formData;
+        } else {
+          // 只更新表单中存在的字段
+          const currentFormData = { ...this.formCtx.value };
+          const updates = await this.formCtx.filterDisabledData(formData);
+          newFormData = { ...currentFormData, ...updates };
+        }
 
-            // 只更新表单中存在的字段
-            const newFormData = { ...this.formCtx.value };
-            const updates = await this.formCtx.filterDisabledData(formData);
-            Object.assign(newFormData, updates);
+        // 更新表单数据
+        this.formCtx.$emit("input", newFormData);
 
-            // 更新表单数据
-            this.formCtx.$emit("input", newFormData);
+        // 更新草稿的使用时间
+        const updatedDraft = {
+          ...draft,
+          updateTime: new Date().toISOString(),
+        };
 
-            // 更新草稿的使用时间
-            const updatedDraft = {
-              ...draft,
-              updateTime: new Date().toISOString(),
-            };
+        // 更新草稿列表中的数据
+        const draftIndex = this.draftList.findIndex(
+          (item) => item.id === draft.id
+        );
+        if (draftIndex !== -1) {
+          this.draftList.splice(draftIndex, 1);
+          this.draftList.unshift(updatedDraft);
+          // 保存更新后的草稿列表
+          this.saveDraftsToStorage(this.draftList);
+        }
 
-            // 更新草稿列表中的数据
-            const draftIndex = this.draftList.findIndex(
-              (item) => item.id === draft.id
-            );
-            if (draftIndex !== -1) {
-              this.draftList.splice(draftIndex, 1);
-              this.draftList.unshift(updatedDraft);
-              // 保存更新后的草稿列表
-              this.saveDraftsToStorage(this.draftList);
-            }
+        // 关闭草稿箱
+        this.draftVisible = false;
 
-            // 关闭草稿箱
-            this.draftVisible = false;
+        // 清除表单验证状态
+        this.formCtx.clearValidate();
 
-            // 清除表单验证状态
-            this.formCtx.clearValidate();
+        // 提示成功
+        this.$message.success("加载成功");
 
-            // 提示成功
-            this.$message.success("草稿加载成功");
-
-            // 触发加载草稿事件
-            this.formCtx.$emit("draft-loaded", draft);
-          } catch (error) {
-            console.error("加载草稿失败:", error);
-            this.$message.error("加载草稿失败：" + error.message);
-          }
-        })
-        .catch(() => {
-          // 用户取消加载，不做处理
-        });
+        // 触发加载草稿事件
+        this.formCtx.$emit("draft-loaded", draft);
+      } catch (error) {
+        console.error("加载草稿失败:", error);
+        this.$message.error("加载失败：" + error.message);
+      }
     },
 
     // 添加草稿数据验证方法
@@ -314,10 +315,7 @@ export default create({
             const draftIndex = this.draftList.findIndex(
               (item) => item.id === draftId
             );
-            if (draftIndex === -1) {
-              this.$message.error("未找到要删除的草稿");
-              return;
-            }
+            if (draftIndex === -1) return;
 
             // 从列表中移除草稿
             const deletedDraft = this.draftList[draftIndex];
@@ -325,10 +323,6 @@ export default create({
 
             // 保存更新后的草稿列表到本地存储
             this.saveDraftsToStorage(this.draftList);
-
-            // 提示成功
-            this.$message.success("草稿已删除");
-
             // 触发删除事件
             this.formCtx.$emit("draft-deleted", deletedDraft);
 
@@ -338,7 +332,6 @@ export default create({
             }
           } catch (error) {
             console.error("删除草稿失败:", error);
-            this.$message.error("删除草稿失败：" + error.message);
           }
         })
         .catch(() => {
@@ -347,9 +340,14 @@ export default create({
     },
 
     handleClearDraft() {
-      this.draftList = [];
-      this.saveDraftsToStorage([]);
-      this.$message.success("草稿箱已清空");
+      this.$confirm("确认清空草稿箱？", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).then(() => {
+        this.draftList = [];
+        this.saveDraftsToStorage([]);
+      });
     },
     // 格式化时间显示
     formatTime(time) {

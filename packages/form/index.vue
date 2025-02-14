@@ -346,6 +346,7 @@ export default create({
         this.$refs.formRef.validate((valid, obj) => {
           if (!valid) {
             reject(obj);
+            callBack && callBack(false);
             if (this.formOptions.scrollError) {
               const key = Object.keys(obj)[0];
               const itemRef =
@@ -358,8 +359,8 @@ export default create({
               }
             }
           } else {
-            callBack && callBack({ form: this.value });
-            resolve({ form: this.value });
+            callBack && callBack(true);
+            resolve();
           }
         });
       });

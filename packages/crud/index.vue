@@ -109,7 +109,6 @@
 </template>
 
 <script>
-// TODO: 已知bug，a.某列设置排序后且有children渲染会重复,b.高度固定式，统计栏消失
 import { create, init, event } from "core";
 import position from "core/components/position";
 import {
@@ -639,16 +638,18 @@ export default create({
       const col = column.col;
       if (!col) return;
       if (
-        !this.crudOptions.editOpacity &&
+        !col.type &&
+        this.crudOptions.editTheme &&
         this.validateEdit(col, { row, $index: rowIndex })
       ) {
-        cellName += " edit-cell";
+        cellName += (cellName ? " " : "") + "edit-cell";
       }
+
       if (this.validateIsError(row.$index, col.prop)) {
-        cellName += " error-badge";
+        cellName += (cellName ? " " : "") + "error-badge";
       }
       if (!this.isDefaultColumn(col)) {
-        cellName += " custom-cell";
+        cellName += (cellName ? " " : "") + "custom-cell";
       }
       return cellName;
     },

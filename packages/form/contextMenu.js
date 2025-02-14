@@ -53,30 +53,28 @@ export default {
         {
           label: "粘贴数据",
           icon: "el-icon-document-add",
-          onClick: async () => {
-            try {
-              const text = await navigator.clipboard.readText();
-              let pasteData = JSON.parse(text);
-
-              // 验证数据结构
-              if (!this.validatePasteData(pasteData)) {
-                this.$message.error("数据结构不匹配，请检查字段");
-                return;
-              }
-
-              // 更新表单数据
-              const newFormData = { ...this.value };
-              const updates = await this.filterDisabledData(pasteData);
-              Object.assign(newFormData, updates);
-
-              this.$emit("input", newFormData);
-              this.$emit("paste", newFormData);
-              this.$message.success("数据导入成功");
-              this.clearValidate();
-            } catch (error) {
-              this.$message.error("导入失败：" + error.message);
-            }
-          },
+          children: [
+            {
+              label: "粘贴当前",
+              onClick: async () => {
+                try {
+                  await this.handlePasteData();
+                } catch (error) {
+                  this.$message.error("导入失败：" + error.message);
+                }
+              },
+            },
+            {
+              label: "粘贴全部",
+              onClick: async () => {
+                try {
+                  await this.handlePasteData(true);
+                } catch (error) {
+                  this.$message.error("导入失败：" + error.message);
+                }
+              },
+            },
+          ],
         },
         {
           label: `保存为草稿`,
@@ -88,9 +86,20 @@ export default {
         {
           label: `加载最新草稿`,
           icon: "el-icon-bottom",
-          onClick: () => {
-            this.$refs.draftDrawer.handleLoadDraft();
-          },
+          children: [
+            {
+              label: "加载当前",
+              onClick: () => {
+                this.$refs.draftDrawer.handleLoadDraft();
+              },
+            },
+            {
+              label: "完整加载",
+              onClick: () => {
+                this.$refs.draftDrawer.handleLoadDraft(null, true);
+              },
+            },
+          ],
         },
         {
           label: `草稿箱 (${this.$refs.draftDrawer.draftNumber})`,
@@ -142,6 +151,28 @@ export default {
 
       await Promise.all(updatePromises);
       return updates;
+    }, // 处理粘贴数据
+    async handlePasteData(loadAll = false) {
+      const text = await navigator.clipboard.readText();
+      let pasteData = JSON.parse(text);
+
+      // 验证数据结构
+      if (!this.validatePasteData(pasteData)) {
+        this.$message.error("数据结构不匹配，请检查字段");
+        return;
+      }
+
+      // 更新表单数据
+      const newFormData = { ...this.value };
+      const updates = loadAll
+        ? pasteData
+        : await this.filterDisabledData(pasteData);
+      Object.assign(newFormData, updates);
+
+      this.$emit("input", newFormData);
+      this.$emit("paste", newFormData);
+      this.$message.success("数据导入成功");
+      this.clearValidate();
     },
   },
 };

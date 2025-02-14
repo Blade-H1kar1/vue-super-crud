@@ -10,6 +10,7 @@ import _switch from "pak/dict/form/switch.vue";
 import checkbox from "pak/dict/form/checkbox.vue";
 import tabs from "pak/tabs";
 import verifyInput from "pak/verifyInput";
+import button from "pak/button";
 
 import { mergeTemplate } from "./template";
 import directive from "pak/directive";
@@ -29,6 +30,7 @@ const components = [
   checkbox,
   tabs,
   verifyInput,
+  button,
 ];
 
 const install = function (Vue, opts = {}) {

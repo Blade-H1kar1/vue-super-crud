@@ -119,6 +119,12 @@
     border-color: transparent #f56c6c transparent transparent;
     transform: rotate(45deg);
   }
+  .edit-cell.error-badge {
+    background: #fee6e6 !important;
+    .el-input__inner::placeholder {
+      color: #f56c6c !important;
+    }
+  }
   // 单元格编辑样式
   .sc-crud-cell__edit--active {
     display: flex;

@@ -118,11 +118,13 @@ export default {
       type: Boolean,
       default: true,
     },
-    // 是否开启编辑透明主题
-    editOpacity: {
+    // 是否开启编辑主题
+    editTheme: {
       type: Boolean,
-      default: true,
+      default: false,
     },
+    // 校验信息是否提示
+    validateMsg: Boolean,
     // 所有列配置统一设置的属性
     allColumn: Object,
     // 表格高度

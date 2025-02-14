@@ -1,9 +1,9 @@
 import { debounce } from "lodash-es";
 export default {
   data() {
-    this.listError = {};
     return {
       errorContent: "",
+      listError: {},
     };
   },
   created() {
@@ -72,6 +72,15 @@ export default {
                 behavior: "smooth",
                 block: "center",
               });
+              // 校验信息是否提示
+              if (
+                this.crudOptions.validateMsg &&
+                Object.keys(this.listError).length
+              ) {
+                const msg = this.listError[Object.keys(this.listError).shift()]
+                  ?.msg;
+                msg && this.$message.error(msg);
+              }
             }
           } else {
             callBack && callBack(this.list);
