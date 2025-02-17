@@ -6,7 +6,7 @@
     v-bind="action"
     :width="width"
     :fixed="fixed"
-    @hook:mounted="handleMounted"
+    @hook:mounted="bindColumnConfig"
   >
     <template v-slot="scope">
       <div :class="b()" ref="actionRef">
@@ -44,6 +44,11 @@ export default create({
   created() {
     const calcAutoWidth = this.calcAutoWidth;
     this.calcAutoWidth = debounce(calcAutoWidth, 0);
+  },
+  watch: {
+    action() {
+      this.bindColumnConfig();
+    },
   },
   computed: {
     width() {
@@ -144,7 +149,7 @@ export default create({
     },
   },
   methods: {
-    handleMounted() {
+    bindColumnConfig() {
       const columnConfig = this.$refs.column?.columnConfig;
       if (columnConfig) {
         columnConfig.col = this.action;

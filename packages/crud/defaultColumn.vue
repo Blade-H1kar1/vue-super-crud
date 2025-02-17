@@ -5,6 +5,11 @@ export default {
   props: {
     col: Object,
   },
+  watch: {
+    col() {
+      this.bindColumnConfig();
+    },
+  },
   computed: {
     crudOptions() {
       return this.ctx.crudOptions;
@@ -22,6 +27,14 @@ export default {
       if (fixed) return fixed;
     },
   },
+  methods: {
+    bindColumnConfig() {
+      const columnConfig = this.$refs.column?.columnConfig;
+      if (columnConfig) {
+        columnConfig.col = this.col;
+      }
+    },
+  },
   render(h) {
     if (!this.showColumn) return null;
     if (isFunction(this.col.index) || this.col.sameRowSpan) {
@@ -33,12 +46,7 @@ export default {
           fixed={this.defaultFixed}
           props={this.col}
           on={{
-            "hook:mounted": () => {
-              const columnConfig = this.$refs.column?.columnConfig;
-              if (columnConfig) {
-                columnConfig.col = this.col;
-              }
-            },
+            "hook:mounted": this.bindColumnConfig,
           }}
           scopedSlots={{
             default: (scope) => {
@@ -65,16 +73,17 @@ export default {
         fixed={this.defaultFixed}
         props={this.col}
         scopedSlots={{
-          default: (this.col.render || this.ctx.$scopedSlots[this.col.type])
-            ?  (scope) => {
-                if (this.col.render) {
-                  return this.col.render(scope);
+          default:
+            this.col.render || this.ctx.$scopedSlots[this.col.type]
+              ? (scope) => {
+                  if (this.col.render) {
+                    return this.col.render(scope);
+                  }
+                  if (this.ctx.$scopedSlots[this.col.type]) {
+                    return this.ctx.$scopedSlots[this.col.type](scope);
+                  }
                 }
-            if (this.ctx.$scopedSlots[this.col.type]) {
-              return this.ctx.$scopedSlots[this.col.type](scope);
-                }
-              }
-            : null,
+              : null,
         }}
         on={{
           "hook:mounted": () => {

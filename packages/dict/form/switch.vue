@@ -38,6 +38,10 @@ export default create({
         };
       },
     },
+    showText: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {};
@@ -47,13 +51,13 @@ export default create({
       return this.options || this.scope.dict;
     },
     _active() {
-      if (this._options?.length > 0) {
+      if (this.showText && this._options?.length > 0) {
         return this._options[0];
       }
       return {};
     },
     _inActive() {
-      if (this._options?.length > 1) {
+      if (this.showText && this._options?.length > 1) {
         return this._options[1];
       }
       return {};

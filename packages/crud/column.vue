@@ -38,6 +38,11 @@ export default create({
     };
   },
   components: { TableColumn, columnCell, column, searchHeader, position },
+  watch: {
+    col() {
+      this.bindColumnConfig();
+    },
+  },
   computed: {
     isDefaultColumn() {
       return this.ctx.isDefaultColumn(this.col);
@@ -121,6 +126,12 @@ export default create({
         item,
       };
     },
+    bindColumnConfig() {
+      const columnConfig = this.$refs.column?.columnConfig;
+      if (columnConfig) {
+        columnConfig.col = this.col;
+      }
+    },
   },
   render(h) {
     const {
@@ -187,10 +198,7 @@ export default create({
         }}
         on={{
           "hook:mounted": () => {
-            const columnConfig = this.$refs.column?.columnConfig;
-            if (columnConfig) {
-              columnConfig.col = this.col;
-            }
+            this.bindColumnConfig();
           },
         }}
       >
