@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.1.0...v1.2.0) (2025-02-20)
+
+
+### ✨ 新功能
+
+* **crud,core:** 新增生成动态嵌套列功能及深层响应式优化 ([4976c0d](https://github.com/Blade-H1kar1/vue-super-crud/commit/4976c0d3feef8ecb189504df819796536bebcf57))
+* **form:** 新增表单草稿箱功能及数据模拟能力 ([80b82c9](https://github.com/Blade-H1kar1/vue-super-crud/commit/80b82c91f164d77b0cd6609209ff39b0c28d49d9))
+* **form:** 优化表单粘贴和草稿功能 ([970ec74](https://github.com/Blade-H1kar1/vue-super-crud/commit/970ec74ec56e43635b1c5328940cdc59af3b3bdd))
+* **mock:** 重构模拟数据生成逻辑 ([66a7645](https://github.com/Blade-H1kar1/vue-super-crud/commit/66a76454d85d473800bc9f3554252dc4ef3e039c))
+
+
+### 🐛 问题修复
+
+* 修复弹窗缺失路由、表单重置增加禁用条件 ([53126e0](https://github.com/Blade-H1kar1/vue-super-crud/commit/53126e0c4ea0e3f3e89d1f1c5addd848c818a1a0))
+* **crud:** 修复表格列配置更新问题 ([4f93ae4](https://github.com/Blade-H1kar1/vue-super-crud/commit/4f93ae4b0f410a88af78cdd55dfa709127223178))
+* **form:** 修复多表单初始化问题 ([ba9265e](https://github.com/Blade-H1kar1/vue-super-crud/commit/ba9265ebaeb3a85f34b5a8f7a01a82c1cf9ba465))
+
 ## [1.1.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.0.0...v1.1.0) (2025-02-07)
 
 

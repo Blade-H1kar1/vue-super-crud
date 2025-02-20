@@ -1,6 +1,6 @@
 {
   "name": "super-crud",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -10,7 +10,10 @@
     "dev": "cross-env TARGET=dev gulp watch",
     "build": "cross-env TARGET=prod gulp build",
     "deploy": "deploy.bat",
-    "release": "standard-version"
+    "release": "standard-version",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "dayjs": "^1.11.13",
@@ -46,6 +49,7 @@
     "gulp-cssmin": "^0.1.7",
     "gulp-postcss": "^6.1.1",
     "gulp-sass": "^5.1.0",
+    "jest": "^29.7.0",
     "progress-bar-webpack-plugin": "^2.1.0",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
