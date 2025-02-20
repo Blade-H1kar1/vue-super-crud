@@ -52,7 +52,7 @@
               :slotName="item.prop"
               :render="item.render"
               :slots="slots"
-              :scope="getScope"
+              :scope="formScope"
             />
           </group>
           <formAction />
@@ -105,6 +105,29 @@ import { mergeTemp } from "utils/mergeTemp";
 import { isEmptyData, toCamelCase } from "utils";
 import position from "core/components/position";
 import formProps from "./props";
+
+// 表单初始化队列
+const formInitQueue = {
+  promise: Promise.resolve(),
+  isProcessing: false, // 添加标记表示队列是否正在处理
+  add(callback) {
+    this.isProcessing = true;
+    const currentPromise = this.promise.then(async () => {
+      try {
+        await callback();
+      } catch (error) {
+        console.error("Form init error:", error);
+      } finally {
+        // 检查是否还有待处理的 promise
+        if (this.promise === currentPromise) {
+          this.isProcessing = false;
+        }
+      }
+    });
+    this.promise = currentPromise;
+    return currentPromise;
+  },
+};
 export default create({
   name: "form",
   components: {
@@ -146,6 +169,7 @@ export default create({
       key: 1,
       loadingStatus: false,
       formBind: {},
+      isInitializing: false, // 添加初始化状态标记
     };
   },
   created() {
@@ -195,17 +219,22 @@ export default create({
       });
       return map;
     },
-    getScope() {
-      if (this.scope) {
-        return {
-          ...this.scope,
-          row: this.value,
-        };
-      } else {
-        return {
-          row: this.value,
-        };
-      }
+    formScope() {
+      const baseScope = {
+        row: this.value,
+        form: this.$refs.formRef,
+        formOptions: this.formOptions,
+        columns: this.trueRenderColumns,
+        isDetail: this.isDetail,
+        isDisabled: this.isDisabled,
+      };
+
+      if (!this.scope) return baseScope;
+
+      return {
+        ...this.scope,
+        ...baseScope,
+      };
     },
     slots() {
       return this.formOptions.slots || this.$scopedSlots;
@@ -243,7 +272,9 @@ export default create({
   watch: {
     value() {
       // value重新赋值时需要再初始化
-      this.initFormValue();
+      if (!this.isInitializing && !formInitQueue.isProcessing) {
+        this.initFormValue();
+      }
     },
     loading: {
       handler(val) {
@@ -283,25 +314,39 @@ export default create({
       }
     },
     //初始化表单
-    initFormValue() {
-      if (this.isInitValue) return;
-      this.isInitValue = true;
-      let form = { ...this.value };
-      this.trueRenderColumns.forEach((col) => {
-        if (form[col.prop] === undefined) {
-          if (col.initValue) {
-            form[col.prop] = col.initValue;
-          } else {
-            form[col.prop] = "";
-          }
+    async initFormValue() {
+      if (this.isInitializing) return;
+
+      // 将初始化操作添加到队列
+      await formInitQueue.add(async () => {
+        this.isInitializing = true;
+
+        try {
+          // 确保获取最新的 value
+          await this.$nextTick();
+          let form = { ...this.value };
+
+          this.trueRenderColumns.forEach((col) => {
+            if (form[col.prop] === undefined) {
+              if (col.initValue) {
+                form[col.prop] = col.initValue;
+              } else {
+                form[col.prop] = "";
+              }
+            }
+          });
+
+          this.setControl();
+
+          // 发出更新事件
+          this.$emit("input", form);
+
+          // 等待更新完成
+          await this.$nextTick();
+          this.clearValidate();
+        } finally {
+          this.isInitializing = false;
         }
-      });
-      this.setControl();
-      // 将value未定义的属性变为响应式
-      this.$emit("input", form);
-      this.$nextTick(() => {
-        this.clearValidate();
-        this.isInitValue = false;
       });
     },
     setControl() {
@@ -365,10 +410,6 @@ export default create({
         });
       });
     },
-    resetField(prop) {
-      // 通知子组件执行重置
-      this.$emit("handleChild", "resetField", prop);
-    },
     async submit() {
       await this.validate();
       this.loadingStatus = true;
@@ -380,12 +421,19 @@ export default create({
         this.value
       );
     },
+    resetField(prop) {
+      // 通知子组件执行重置
+      this.$emit("handleChild", "resetField", prop);
+    },
     reset() {
       this.$refs.formRef && this.$refs.formRef.resetFields();
       this.$emit("reset");
     },
-    clearValidate() {
-      this.$refs.formRef && this.$refs.formRef.clearValidate();
+    clearValidate(prop) {
+      this.$refs.formRef && this.$refs.formRef.clearValidate(prop);
+    },
+    validateField(prop) {
+      this.$refs.formRef && this.$refs.formRef.validateField(prop);
     },
     refreshForm() {
       const tempValue = cloneDeep(this.value);

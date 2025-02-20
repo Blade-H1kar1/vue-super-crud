@@ -88,7 +88,7 @@ export default create({
       return this.formCtx.formOptions;
     },
     generateRules() {
-      return generateRules(this.item, this.formCtx.getScope);
+      return generateRules(this.item, this.formCtx.formScope);
     },
     rules() {
       return this.generateRules.rules;
@@ -166,7 +166,7 @@ export default create({
             item={this.item}
             slots={this.formCtx.$scopedSlots}
             mode={this.formOptions.mode}
-            scope={this.formCtx.getScope}
+            scope={this.formCtx.formScope}
             config={this.formOptions}
             rawRules={this.rawRules}
             defaultRender={this.formOptions.defaultRender}
@@ -200,7 +200,7 @@ export default create({
             ellipsis={this.labelOverTip ? true : false}
             slotName={`${this.item.prop}-label`}
             render={this.item.labelRender}
-            scope={this.formCtx.getScope}
+            scope={this.formCtx.formScope}
           >
             {this.item.label}
           </position>
@@ -217,7 +217,7 @@ export default create({
             slotName={`${this.item.prop}-tooltip`}
             render={this.item.tooltipRender}
             slots={this.formCtx.slots}
-            scope={this.formCtx.getScope}
+            scope={this.formCtx.formScope}
           >
             {this.item.tooltip}
           </position>
@@ -241,7 +241,7 @@ export default create({
           label={this.item.label}
           label-width={this.item.labelWidth}
           size={this.formOptions.size}
-          prop={this.item.prop}
+          prop={this.item.validateProp || this.item.prop}
           rules={this.rules}
           scopedSlots={{
             label: labelRender,
