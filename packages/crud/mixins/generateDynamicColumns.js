@@ -102,6 +102,7 @@ export default {
           // 去重并收集源数据项
           if (!uniqueMap.has(prop)) {
             uniqueMap.set(prop, {
+              ...config,
               prop,
               label: label || `未命名-${prop}`,
               sourceItems: [item],
@@ -113,10 +114,17 @@ export default {
 
         // 生成列配置
         return Array.from(uniqueMap.values()).map(
-          ({ prop, label, sourceItems }) => {
+          ({
+            prop,
+            label,
+            sourceItems,
+            childrenPath,
+            dataTransformer,
+            ...rest
+          }) => {
             // 构建当前路径
             const currentPath = parentPath ? `${parentPath}.${prop}` : prop;
-            const column = { label, prop: currentPath };
+            const column = { ...rest, label, prop: currentPath };
 
             // 处理子列
             if (currentLevel < levelConfig.length - 1) {
