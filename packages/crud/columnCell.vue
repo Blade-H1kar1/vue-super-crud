@@ -36,7 +36,9 @@ export default create({
           item.prop
         );
       }
-      return "list." + this.scope.$index + "." + item.prop;
+      return (
+        "list." + this.scope.$index + "." + (item.validateProp || item.prop)
+      );
     },
     getItem(editMode) {
       const col = this.col;

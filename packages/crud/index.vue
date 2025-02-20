@@ -128,6 +128,7 @@ import select from "./mixins/select.js";
 import calcHeight from "./mixins/calcHeight.js";
 import spanMethod from "./mixins/spanMethod.js";
 import exposeMethods from "./mixins/exposeMethods";
+import generateDynamicColumns from "./mixins/generateDynamicColumns";
 import search from "./search.vue";
 import menuBar from "./menuBar.vue";
 import columnAction from "./columnAction.vue";
@@ -170,6 +171,7 @@ export default create({
     calcHeight,
     spanMethod,
     exposeMethods,
+    generateDynamicColumns,
   ],
   props: {
     // 防止scope中携带实例时，拷贝合并报错
@@ -302,6 +304,19 @@ export default create({
       return filterColumns(columns.sort((a, b) => a.order - b.order));
     },
     columns() {
+      if (this.crudOptions.dynamicConfig) {
+        const dynamicColumns = (
+          this.generateDynamicColumns(
+            this.data,
+            this.crudOptions.dynamicConfig
+          ) || []
+        ).map(this.handleInitColumn);
+        return this.insertColumns(
+          dynamicColumns,
+          this.resultColumns,
+          this.crudOptions.dynamicInsertPosition
+        );
+      }
       return this.resultColumns;
     },
     flatColumns() {
@@ -345,11 +360,6 @@ export default create({
         const isUpdated = newVal !== oldVal;
         if (isUpdated) {
           this.processList(this.list);
-          // 数据变化时高度更新，防止统计栏不显示
-          this.$nextTick(() => {
-            this.$refs.tableRef.layout.updateElsHeight();
-            this.updateSelection();
-          });
         }
       },
       immediate: true,
@@ -477,6 +487,18 @@ export default create({
           this.lazyLoad(tree, treeNode, resolve);
         });
       }
+      // 动态列打平数据
+      if (this.crudOptions.flattenConfig || this.crudOptions.dynamicConfig) {
+        this.transformToTree(
+          this.data,
+          this.crudOptions.flattenConfig || this.crudOptions.dynamicConfig
+        );
+      }
+      // 数据变化时高度更新，防止统计栏不显示
+      this.$nextTick(() => {
+        this.$refs.tableRef.layout.updateElsHeight();
+        this.updateSelection();
+      });
     },
     handleLocalLazy(list) {
       list.forEach((i) => {
@@ -590,11 +612,12 @@ export default create({
       // current 可能为 undefined || true 转换为 {}
       current = isPlainObject(current) ? current : {};
       current = mergeTemp("render", current.presetType, current);
-      if (typeof current.formatData === "string") {
-        current.formatData = singleMerge(
-          "formatData",
+      const formatData = get(current, "formatData.type") || current.formatData;
+      if (typeof formatData === "string") {
+        current.formatData = Object.assign(
+          {},
           current.formatData,
-          current
+          singleMerge("formatData", formatData, current)
         );
       }
       extendsObj = cloneDeep(extendsObj);
@@ -694,7 +717,6 @@ export default create({
         this.setOptions,
         cacheData[this.$route.path]
       );
-      this.resetInit();
     },
     resetLocalCache() {
       this.setOptions.fixed = {};
@@ -707,7 +729,6 @@ export default create({
       let cacheData = cache.local.getJSON("tableOptions") || {};
       cacheData[this.$route.path] = this.setOptions;
       cache.local.setJSON("tableOptions", cacheData);
-      this.resetInit();
       refresh && this.refreshTable();
     },
     isDefaultColumn(col) {

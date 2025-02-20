@@ -1,11 +1,4 @@
-import {
-  merge,
-  cloneDeep,
-  isFunction,
-  isPlainObject,
-  debounce,
-  isEqual,
-} from "lodash-es";
+import { merge, cloneDeep, isFunction, isEqualWith, get } from "lodash-es";
 import { mergeTemp, singleMerge, filterColumns } from "utils";
 import configManager from "core/configManager";
 
@@ -24,23 +17,20 @@ export default (optionsKey, opts) => {
     },
     data() {
       return {
-        resultColumns: [],
-        resultOptions: {},
+        attrs: this.$attrs,
       };
     },
     watch: {
-      initColumns() {
-        this.debounceInitHandler();
-      },
-      options: {
-        handler() {
-          this.debounceInitHandler();
-        },
-        deep: true,
-      },
-      $attrs(v, oldVal) {
-        if (!isEqual(v, oldVal)) {
-          this.debounceInitHandler();
+      $attrs(v) {
+        // 添加函数类型的特殊处理
+        const customizer = (a, b) => {
+          if (typeof a === "function" && typeof b === "function") {
+            return a.toString() === b.toString();
+          }
+          return undefined;
+        };
+        if (!isEqualWith(v, this.attrs, customizer)) {
+          this.attrs = v;
         }
       },
     },
@@ -49,14 +39,8 @@ export default (optionsKey, opts) => {
         const columns = this.options.renderColumns || this.renderColumns;
         return isFunction(columns) ? columns() : columns;
       },
-    },
-    created() {
-      this.initHandler();
-      this.debounceInitHandler = debounce(this.initHandler, 0);
-    },
-    methods: {
-      initHandler() {
-        this.resultOptions = configManager.getInstance().mergeConfig(
+      resultOptions() {
+        return configManager.getInstance().mergeConfig(
           Object.assign(this.getUserOptions(), {
             renderColumns: this.initColumns,
           }),
@@ -64,27 +48,28 @@ export default (optionsKey, opts) => {
             type: optionsKey,
           }
         );
+      },
+      resultColumns() {
         if (
           this.resultOptions.renderColumns &&
           Array.isArray(this.resultOptions.renderColumns)
         ) {
-          this.resultColumns = filterColumns(
+          return filterColumns(
             cloneDeep(this.resultOptions.renderColumns)
               .map(this.handleInitColumn)
               .sort((a, b) => a.order - b.order)
           );
         }
-        // console.log(this.resultOptions, this.resultColumns, "resultColumns");
+        return [];
       },
-      resetInit() {
-        this.initHandler();
-      },
+    },
+    methods: {
       getUserOptions() {
         let userOptions = opts || this.options;
         userOptions = cloneDeep(userOptions);
         userOptions.size = userOptions.size || (this.$ELEMENT || {}).size;
         return this.convertKeysToCamelCase(
-          Object.assign(userOptions, this.$attrs)
+          Object.assign(userOptions, this.attrs)
         );
       },
       handleInitColumn(col, index) {
@@ -92,8 +77,13 @@ export default (optionsKey, opts) => {
         if (item.presetType) {
           item = mergeTemp("render", item.presetType, item);
         }
-        if (typeof item.formatData === "string") {
-          item.formatData = singleMerge("formatData", item.formatData, item);
+        const formatData = get(item, "formatData.type") || item.formatData;
+        if (typeof formatData === "string") {
+          item.formatData = Object.assign(
+            {},
+            item.formatData,
+            singleMerge("formatData", formatData, item)
+          );
         }
         if (!item.prop) item.prop = "prop_" + index;
         if (this.resultOptions.allColumn)

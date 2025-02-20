@@ -18,12 +18,12 @@ export default {
       },
     });
   },
-  formatter: (h, { row, column, $index, item }) => {
+  formatter: (h, { row, column, $index, item, $value }) => {
     let value = item.formatter
       ? typeof item.formatter === "function"
-        ? item.formatter(row, column, row[item.prop], $index)
+        ? item.formatter(row, column, $value.get, $index)
         : item.formatter
-      : row[item.prop];
+      : $value.get;
     let vm;
     const tooltipEvents = {
       mouseenter: (e) => {

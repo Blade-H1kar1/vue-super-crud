@@ -7,7 +7,7 @@ import {
   isPlainObject,
   merge,
   get,
-  de,
+  set,
 } from "lodash-es";
 import { mergeTemp } from "utils/mergeTemp";
 import { defaultRender as _defaultRender } from "core";
@@ -61,12 +61,22 @@ export default {
   computed: {
     $value: {
       get() {
-        const input = this.item.formatData?.input;
-        if (input) return input(this.value, this.scope);
-        return this.value;
+        try {
+          const input = this.item.formatData?.input;
+          if (input) return input(get(this.scope.row, this.prop), this.scope);
+          return get(this.scope.row, this.prop);
+        } catch (error) {
+          console.error("获取格式化值失败:", error);
+          return get(this.scope.row, this.prop);
+        }
       },
       set(value) {
-        this.setFormatValue(value);
+        try {
+          this.setFormatValue(value);
+        } catch (error) {
+          console.error("设置格式化值失败:", error);
+          this.setRow(this.prop, value);
+        }
       },
     },
   },
@@ -79,6 +89,7 @@ export default {
           if (this.isSettingValue) return;
           this.setFormatValue(this.$value);
         });
+        this.setFormatValue(this.$value);
       }, 0);
     }
     if (this.compStrategy) {
@@ -120,25 +131,55 @@ export default {
         if (pattern) return pattern.regular;
       }
     },
+    // 设置行数据
+    setRow(prop, val) {
+      // 处理数组路径 ['a', 'b'] 或字符串路径 'a.b'
+      const path = Array.isArray(prop) ? prop : prop.split(".");
+      if (path.length > 1) {
+        if (!get(this.scope.row, path)) {
+          // 绑定深层响应式对象
+          path.slice(0, -1).reduce((obj, key, index) => {
+            // 如果当前key值不存在，创建一个新响应式对象
+            if (!obj[key] || typeof obj[key] !== "object") {
+              this.$set(obj, key, {});
+            }
+            return obj[key];
+          }, this.scope.row);
+
+          // 获取最后一层的父对象
+          const parentObj = path
+            .slice(0, -1)
+            .reduce((obj, key) => obj[key], this.scope.row);
+
+          this.$set(parentObj, path[path.length - 1], val);
+        } else {
+          set(this.scope.row, path, val);
+          this.$set(this.scope.row, path[0], this.scope.row[path[0]]);
+        }
+      } else {
+        // 触发响应式更新
+        this.$set(this.scope.row, prop, val);
+      }
+    },
     setFormatValue(value) {
       const output = this.item.formatData?.output;
       if (output) {
         this.isSettingValue = true; // 设置标志
-        const outputValue = output(value, this.scope, (prop, val) => {
-          this.$set(this.scope.row, prop, val);
-        });
-        const getFormatValue = this.item.formatValue;
-        if (getFormatValue && typeof getFormatValue === "string") {
-          this.scope.row[getFormatValue] = value;
-        } else if (getFormatValue) {
-          this.scope.row["$" + this.prop] = value;
+        const outputValue = output(value, this.scope, this.setRow);
+        const formatValueProp = get(this.item, ["formatData", "formatValue"]);
+        if (formatValueProp && typeof formatValueProp === "string") {
+          this.setRow(formatValueProp, value);
+        } else if (formatValueProp) {
+          this.setRow("$" + this.prop, value);
         }
-        if (outputValue !== undefined) this.$emit("input", outputValue);
+        if (outputValue !== undefined) {
+          this.setRow(this.prop, outputValue);
+        }
         this.$nextTick(() => {
           this.isSettingValue = false; // 重置标志
         });
       } else {
-        this.$emit("input", value);
+        this.setRow(this.prop, value);
       }
     },
     interruptibleCompose(...funcs) {
