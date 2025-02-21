@@ -121,7 +121,7 @@ export default {
     // 是否开启编辑主题
     editTheme: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     // 校验信息是否提示
     validateMsg: Boolean,

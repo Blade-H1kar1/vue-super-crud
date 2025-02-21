@@ -1,17 +1,39 @@
 <template>
   <div v-if="isMounted">
-    <el-select v-model="form.country">
-      <el-option
-        v-for="item in $scDict.countries"
-        :key="item.value"
-        :label="item.label"
-        :value="item.value"
-      />
-    </el-select>
+    <sc-form v-model="form" :options="options">
+      <template #defaultDict>
+        <el-select v-model="form.defaultDict">
+          <el-option
+            v-for="item in $scDict.gender"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </template>
+      <template #normalDict>
+        <el-select v-model="form.normalDict">
+          <el-option
+            v-for="item in $scDict.countries"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </template>
+    </sc-form>
 
     <!-- 展示标签文本 -->
-    <p>国家：{{ $scDict.countries.findLabel(form.country) }}</p>
-    <p>完整对象：{{ $scDict.countries.getOption(form.country) }}</p>
+    <p>
+      使用增强方法 findLabel 获取标签：{{
+        $scDict.countries.findLabel(form.normalDict)
+      }}
+    </p>
+    <p>
+      使用增强方法 getOption 获取完整对象：{{
+        $scDict.countries.getOption(form.normalDict)
+      }}
+    </p>
   </div>
 </template>
 
@@ -23,6 +45,18 @@ export default {
       form: {},
       tableData: [],
       isMounted: false,
+      options: {
+        renderColumns: [
+          {
+            label: "默认字典",
+            prop: "defaultDict",
+          },
+          {
+            label: "普通注册字典",
+            prop: "normalDict",
+          },
+        ],
+      },
     };
   },
   mounted() {

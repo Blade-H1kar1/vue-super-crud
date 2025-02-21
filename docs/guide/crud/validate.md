@@ -7,29 +7,35 @@
 `column.required` 是否必填 `Boolean：true | false` </br>
 `column.required` 自定义必填参数 `Object：{ message: 'xxxx必填', trigger: 'blur' }`
 
+<ClientOnly>
 <common-code-format>
   <crud-validate-base slot="source"></crud-validate-base>
   
 <<< @/docs/.vuepress/components/crud/validate/base.vue
 </common-code-format>
+</ClientOnly>
 
 ## 正则校验
 
 `column.rules` 正则校验规则 `Array：['integer', { regular: xx, message: 'xxxx' }]`（接收匹配模板正则的字符串或接收完整正则校验对象）
 
+<ClientOnly>
 <common-code-format>
   <crud-validate-regulars slot="source"></crud-validate-regulars>
   
 <<< @/docs/.vuepress/components/crud/validate/regulars.vue
 </common-code-format>
+</ClientOnly>
 
 
 ## 自定义校验规则
 
 `column.rules` 自定义校验规则 `Array：[{ validator:()=>{},trigger: "change" } ]`
 
+<ClientOnly>
 <common-code-format>
   <crud-validate-custom slot="source"></crud-validate-custom>
   
 <<< @/docs/.vuepress/components/crud/validate/custom.vue
 </common-code-format>
+</ClientOnly>

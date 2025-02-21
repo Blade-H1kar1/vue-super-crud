@@ -5,23 +5,27 @@ import { get } from "lodash-es";
 
 export default {
   // 字符串转数组
-  strToArr: (item) => ({
-    input: (value, { row }) => {
-      if (!value) {
-        return [];
-      }
-      return typeof value === "string" ? value.split(",") : value;
-    },
-    output: (value, { row }) => {
-      if (!value) {
-        return "";
-      }
-      return value.join(",");
-    },
-  }),
+  strToArr: (item) => {
+    const separator =
+      get(item, "formatData.separator") || item.separator || ",";
+    return {
+      input: (value, { row }) => {
+        if (!value) {
+          return [];
+        }
+        return typeof value === "string" ? value.split(separator) : value;
+      },
+      output: (value, { row }) => {
+        if (!value) {
+          return "";
+        }
+        return value.join(separator);
+      },
+    };
+  },
   // 双字段格式化
   doublePropToArr: (item) => {
-    const props = item.doubleProp;
+    const props = get(item, "formatData.doubleProp") || item.doubleProp;
     if (!Array.isArray(props)) {
       console.error("doubleProp必须为数组");
       return;
@@ -45,7 +49,9 @@ export default {
   },
   // 多字段格式化
   multiPropToArr: (item) => {
-    const props = item.multiProp;
+    const props = get(item, "formatData.multiProp") || item.multiProp;
+    // 是否包裹对象
+    const isObject = get(item, "formatData.isObject") || item.isObject;
     if (!Array.isArray(props)) {
       console.error("multiProp必须为数组");
       return;
@@ -53,11 +59,16 @@ export default {
     return {
       input: (value, { row }) => {
         // 检查是否所有字段都为空
-        const isAllEmpty = props.every((prop) => isEmptyData(row[prop]));
+
+        const isAllEmpty = props.every((prop) =>
+          isEmptyData(isObject ? row[item.prop][prop] : row[prop])
+        );
         if (isAllEmpty) return [];
 
         // 获取所有值（包括空值）
-        const values = props.map((prop) => row[prop]);
+        const values = props.map((prop) =>
+          +isObject ? row[item.prop][prop] : row[prop]
+        );
 
         // 找到最后一个非空值的索引
         const lastValidIndex = values.reduce((lastIndex, val, index) => {
@@ -75,13 +86,15 @@ export default {
       output: (value, { row }, setRow) => {
         // 如果value为空数组或undefined，清空所有字段
         if (!value || !Array.isArray(value) || value.length === 0) {
-          props.forEach((prop) => setRow(prop, ""));
+          props.forEach((prop) =>
+            setRow(isObject ? [item.prop, prop] : prop, "")
+          );
           return;
         }
 
         // 设置有值的字段，其余字段清空
         props.forEach((prop, index) => {
-          setRow(prop, value[index] || "");
+          setRow(isObject ? [item.prop, prop] : prop, value[index] || "");
         });
       },
     };
@@ -102,7 +115,7 @@ export default {
         convertDateFormat(get(item, "comp.valueFormat")) || "YYYY-MM-DD", // 优先获取时间组件格式，否则使用默认格式
       outputFormat: null, // 输出格式化
       outputType: "string",
-      ...item,
+      ...(get(item, "formatData") || item),
     };
 
     // 检测日期格式
@@ -180,12 +193,12 @@ export default {
   weekFormat: (item) => {
     // 默认配置
     const config = {
-      valueFormat: "YYYY-MM-DD", // 输出日期格式
+      valueFormat: "YYYY-MM-DD", // 日期格式
       weekStart: 0, // 周起始日（0-6）
       includeTime: false, // 是否包含时间
       separator: " ~ ", // 日期分隔符
       outputType: "array", // 输出类型：array 或 string
-      ...item,
+      ...(get(item, "formatData") || item),
     };
 
     let originalValue = null;
@@ -227,14 +240,14 @@ export default {
   // 数字格式化
   numberFormat: (item) => {
     const config = {
-      precision: undefined, // 精度（小数位数）
+      precision: 2, // 精度（小数位数）
       round: true, // 是否四舍五入
       toFixed: false, // 是否固定小数位数
       thousandth: false, // 是否显示千分位
       prefix: "", // 前缀
       suffix: "", // 后缀
       keepZero: false, // 是否保留末尾0
-      ...item,
+      ...(get(item, "formatData") || item),
     };
 
     // 处理千分位逻辑
@@ -357,11 +370,11 @@ export default {
 
     // 默认配置
     const config = {
-      type: "number", // 格式化类型
-      pattern: "", // 自定义正则（type为custom时使用）
+      inputType: "number", // 格式化类型
+      pattern: "", // 自定义正则
       maxLength: undefined, // 最大长度
       decimal: undefined, // 小数位数（type为decimal时使用）
-      ...item.inputConfig,
+      ...(get(item, "formatData") || item),
     };
 
     // 处理小数格式化
@@ -398,15 +411,14 @@ export default {
           }
 
           // 小数特殊处理
-          if (config.type === "decimal") {
+          if (config.inputType === "decimal") {
             return formatDecimal(formatted);
           }
 
-          // 使用预设规则或自定义正则进行格式化
-          const rule =
-            config.type === "custom"
-              ? new RegExp(config.pattern, "g")
-              : REGEX_RULES[config.type];
+          // 优先使用自定义正则，如果没有则使用预设规则
+          const rule = config.pattern
+            ? new RegExp(config.pattern, "g")
+            : REGEX_RULES[config.inputType];
 
           return formatted.replace(rule, "");
         } catch (error) {
@@ -423,7 +435,7 @@ export default {
       precision: 2, // 小数位数
       multiplier: 100, // 乘数因子
       addSymbol: true, // 是否添加百分号
-      ...item,
+      ...(get(item, "formatData") || item),
     };
 
     return {
@@ -455,7 +467,7 @@ export default {
     const config = {
       units: ["B", "KB", "MB", "GB", "TB"],
       precision: 2,
-      ...item,
+      ...(get(item, "formatData") || item),
     };
 
     return {

@@ -5,11 +5,13 @@
 `api` 接收一个对象，每个属性分别接收 promise 请求方法</br> 
 `props` 自定义数据格式
 
+<ClientOnly>
 <common-code-format>
   <crud-crudEvents-api slot="source"></crud-crudEvents-api>
   
 <<< @/docs/.vuepress/components/crud/crudEvents/api.vue
 </common-code-format>
+</ClientOnly>
 
 ## 操作触发事件
 
@@ -28,11 +30,13 @@
 `unLoading` 是否取消loading，失败时可手动关闭loading
 
 
+<ClientOnly>
 <common-code-format>
   <crud-crudEvents-events slot="source"></crud-crudEvents-events>
   
 <<< @/docs/.vuepress/components/crud/crudEvents/events.vue
 </common-code-format>
+</ClientOnly>
 
 ## 自定义提示
 
@@ -43,8 +47,10 @@
 `successTip` 自定义操作成功提示，传`false` 则不提示 </br>
 
 
+<ClientOnly>
 <common-code-format>
   <crud-crudEvents-deleteTip slot="source"></crud-crudEvents-deleteTip>
   
 <<< @/docs/.vuepress/components/crud/crudEvents/deleteTip.vue
 </common-code-format>
+</ClientOnly>

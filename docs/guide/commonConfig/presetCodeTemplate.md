@@ -6,11 +6,13 @@
 
 通用`presetType` 匹配到的配置对象会与原有的配置合并，形成一个新的配置对象，达到配置复用的效果。
 
+<ClientOnly>
 <common-code-format>
   <commonConfig-presetCodeTemplate-base slot="source"></commonConfig-presetCodeTemplate-base>
   
 <<< @/docs/.vuepress/components/commonConfig/presetCodeTemplate/base.vue
 </common-code-format>
+</ClientOnly>
 
 
 
@@ -18,11 +20,13 @@
 
 预设的配置如果是一个函数，接收的参数为原有的配置对象`item`，可以动态的返回一个配置对象，实现配置的动态化。
 
+<ClientOnly>
 <common-code-format>
   <commonConfig-presetCodeTemplate-customParams slot="source"></commonConfig-presetCodeTemplate-customParams>
   
 <<< @/docs/.vuepress/components/commonConfig/presetCodeTemplate/customParams.vue
 </common-code-format>
+</ClientOnly>
 
 
 

@@ -1,5 +1,50 @@
 # 基本使用
 
+## 使用字典+增强方法
+
+默认字典与全局字典无需注册，直接使用即可 <br>
+
+<ClientOnly>
+<common-code-format>
+  <dict-baseUse slot="source"></dict-baseUse>
+  
+<<< @/docs/.vuepress/components/dict/baseUse.vue
+</common-code-format>
+</ClientOnly>
+
+
+## 字典联动
+
+<ClientOnly>
+<common-code-format>
+  <dict-DictLinkage slot="source"></dict-DictLinkage>
+  
+<<< @/docs/.vuepress/components/dict/DictLinkage.vue
+</common-code-format>
+</ClientOnly>
+
+## 局部字典+联动
+
+字典数据不共用，需要配合现有组件使用，`local` 设置局部字典 <br>
+
+<ClientOnly>
+<common-code-format>
+  <dict-localDict slot="source"></dict-localDict>
+  
+<<< @/docs/.vuepress/components/dict/localDict.vue
+</common-code-format>
+</ClientOnly>
+
+## 字典配合组件使用
+
+<ClientOnly>
+<common-code-format>
+  <dict-component slot="source"></dict-component>
+  
+<<< @/docs/.vuepress/components/dict/component.vue
+</common-code-format>
+</ClientOnly>
+
 ## 全局注册
 
 ```javascript
@@ -127,39 +172,3 @@ this.$scDict.register('countries', {
 // 使用
 this.$scDict.countries.customFindLabel(1)
 ```
-
-## 使用字典
-
-<common-code-format>
-  <dict-baseUse slot="source"></dict-baseUse>
-  
-<<< @/docs/.vuepress/components/dict/baseUse.vue
-</common-code-format>
-
-
-## 字典联动
-
-<common-code-format>
-  <dict-DictLinkage slot="source"></dict-DictLinkage>
-  
-<<< @/docs/.vuepress/components/dict/DictLinkage.vue
-</common-code-format>
-
-
-## 局部字典
-
-字典数据不共用，需要配合现有组件使用，`local` 设置局部字典 <br>
-
-<common-code-format>
-  <dict-localDict slot="source"></dict-localDict>
-  
-<<< @/docs/.vuepress/components/dict/localDict.vue
-</common-code-format>
-
-## 字典组件
-
-<common-code-format>
-  <dict-component slot="source"></dict-component>
-  
-<<< @/docs/.vuepress/components/dict/component.vue
-</common-code-format>

@@ -5,11 +5,13 @@
 `v-model="data"` 绑定的表单值`data`可以不用声明属性`name`,`gender`来绑定响应式，组件内部会自动进行响应式处理</br>
 `action` 配置表单按钮
 
+<ClientOnly>
 <common-code-format>
   <form-baseUse-base slot="source"></form-baseUse-base>
   
 <<< @/docs/.vuepress/components/form/baseUse/base.vue
 </common-code-format>
+</ClientOnly>
 
 
 ## 布局
@@ -20,19 +22,23 @@
 `columns` 表单列数，`columnGap` 列间距， `rowGap` 行间距 </br>
 `renderColumns`项中，`widthSize` 占据列数，`heightSize` 占据行数</br>
 
+<ClientOnly>
 <common-code-format>
   <form-baseUse-gridLayout slot="source"></form-baseUse-gridLayout>
   
 <<< @/docs/.vuepress/components/form/baseUse/gridLayout.vue
 </common-code-format>
+</ClientOnly>
 
 ### 设置 columnWidth 固定每列宽度,不固定数量
 
+<ClientOnly>
 <common-code-format>
   <form-baseUse-inlineLayout slot="source"></form-baseUse-inlineLayout>
   
 <<< @/docs/.vuepress/components/form/baseUse/inlineLayout.vue
 </common-code-format>
+</ClientOnly>
 
 
 ## 提示
@@ -40,11 +46,13 @@
 `renderColumns`项中，`tooltip` 提示文本，`tooltipRender` 提示渲染函数</br>
 `#[prop]-tooltip` 提示插槽 </br>
 
+<ClientOnly>
 <common-code-format>
   <form-baseUse-tooltip slot="source"></form-baseUse-tooltip>
   
 <<< @/docs/.vuepress/components/form/baseUse/tooltip.vue
 </common-code-format>
+</ClientOnly>
 
 
 ## label
@@ -54,11 +62,13 @@
 `hiddenLabel` 隐藏label，在`renderColumns`项中配置单个隐藏 </br>
 `labelOverTip` label超出隐藏，在`renderColumns`项中配置单个超出隐藏 </br>
 
+<ClientOnly>
 <common-code-format>
   <form-baseUse-label slot="source"></form-baseUse-label>
   
 <<< @/docs/.vuepress/components/form/baseUse/label.vue
 </common-code-format>
+</ClientOnly>
 
 
 ## 校验
@@ -66,22 +76,26 @@
 `renderColumns`项中，`required` 必填，`rules` 匹配规则模板和自定义规则</br>
 详情参考[crud-校验](/guide/crud/validate.html#基本使用)
 
+<ClientOnly>
 <common-code-format>
   <form-baseUse-validate slot="source"></form-baseUse-validate>
   
 <<< @/docs/.vuepress/components/form/baseUse/validate.vue
 </common-code-format>
+</ClientOnly>
 
 
 ## 显示/隐藏
 
 `renderColumns`项中，`hidden` 隐藏，`show` 显示</br>
 
+<ClientOnly>
 <common-code-format>
   <form-baseUse-hidden slot="source"></form-baseUse-hidden>
   
 <<< @/docs/.vuepress/components/form/baseUse/hidden.vue
 </common-code-format>
+</ClientOnly>
 
 
 ## 分组
@@ -89,11 +103,13 @@
 `type: group` 设置分组</br>
 `renderColumns`项中，`children` 配置表单项 </br>
 
+<ClientOnly>
 <common-code-format>
   <form-baseUse-group slot="source"></form-baseUse-group>
   
 <<< @/docs/.vuepress/components/form/baseUse/group.vue
 </common-code-format>
+</ClientOnly>
 
 
 ## 数据格式化
@@ -104,19 +120,23 @@
 `formatData` 接收字符串时则匹配预设的全局格式化模板</br>
 `formatData.getFormatValue = true` 可获取格式化后的值，默认绑定在 `scope.row[$ + prop]` 上，如果配置`getFormatValue`为字符串则绑定在 `scope.row[getFormatValue]` 上
 
+<ClientOnly>
 <common-code-format>
   <form-baseUse-dataFormat slot="source"></form-baseUse-dataFormat>
   
 <<< @/docs/.vuepress/components/form/baseUse/dataFormat.vue
 </common-code-format>
+</ClientOnly>
 
 
 ## 深度绑定
 
 `deepProp` 绑定的对象数据是双向的，改变任意一个，另外一个也会改变
 
+<ClientOnly>
 <common-code-format>
   <form-baseUse-deep slot="source"></form-baseUse-deep>
   
 <<< @/docs/.vuepress/components/form/baseUse/deep.vue
 </common-code-format>
+</ClientOnly>

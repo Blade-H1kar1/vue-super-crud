@@ -48,6 +48,11 @@ module.exports = {
           children: ["dict/config", "dict/component", "dict/baseUse"],
         },
         {
+          title: "响应式数据格式化",
+          collapsable: true,
+          children: ["formatData/config", "formatData/baseUse"],
+        },
+        {
           title: "crud组件",
           collapsable: true,
           children: [
