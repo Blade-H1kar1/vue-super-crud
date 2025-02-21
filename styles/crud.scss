@@ -2,7 +2,7 @@
   //header
   .el-table thead th,
   .el-table thead.is-group th {
-    background-color: #fafafa;
+    background-color: var(--background-color-base);
   }
   .el-table th.el-table__cell.is-sortable {
     cursor: auto;
@@ -19,7 +19,7 @@
     overflow: auto;
     width: 100% !important;
     height: 100% !important;
-    background-color: #fff;
+    background-color: var(--color-white);
     z-index: 1001;
   }
   &__handleRow,
@@ -72,7 +72,7 @@
       margin-left: 5px;
     }
     button:not(.el-button--primary) {
-      background-color: #fafafa;
+      background-color: var(--background-color-base);
     }
   }
   .el-table {
@@ -85,7 +85,7 @@
       top: 0;
       left: -8px;
       content: "*";
-      color: #f56c6c;
+      color: var(--color-danger);
       margin-right: 4px;
     }
   }
@@ -116,13 +116,13 @@
     position: absolute;
     border-width: 5px;
     border-style: solid;
-    border-color: transparent #f56c6c transparent transparent;
+    border-color: transparent var(--color-danger) transparent transparent;
     transform: rotate(45deg);
   }
   .edit-cell.error-badge {
     background: #fee6e6 !important;
     .el-input__inner::placeholder {
-      color: #f56c6c !important;
+      color: var(--color-danger) !important;
     }
   }
   // 单元格编辑样式
@@ -172,14 +172,14 @@
   }
   .sc-crud-pagination {
     padding: 11px 0;
-    background-color: #fff;
+    background-color: var(--color-white);
   }
 
   &__add-button {
     margin-top: 15px;
     font-size: 14px;
     height: 32px;
-    background: #ffffff;
+    background: var(--color-white);
     border: 1px dashed var(--color-primary);
     border-radius: 4px;
     display: flex;
@@ -195,7 +195,7 @@
       border-style: solid;
     }
     &:active {
-      background-color: #ecf5ff;
+      background-color: var(--color-primary-light-9);
     }
   }
 
@@ -226,6 +226,100 @@
       text-align: center;
     }
   }
+
+  .sc-crud-select-banner {
+    background-color: var(--color-primary-light-9);
+    border: 1px solid var(--color-primary-light-7);
+    padding: 8px 16px;
+    margin-bottom: 12px;
+    border-radius: 4px;
+    font-size: 13px;
+
+    &__banner-content {
+      display: flex;
+      align-items: center;
+      color: var(--color-text-regular);
+    }
+
+    &__selected-items,
+    &__selected-preview {
+      margin: 0 8px;
+      color: var(--color-primary);
+    }
+
+    &__remove-tag {
+      margin-left: 4px;
+      cursor: pointer;
+
+      &.el-tag {
+        background-color: transparent;
+        border-color: transparent;
+        padding: 0 4px;
+
+        .el-tag__close {
+          color: var(--color-primary);
+
+          &:hover {
+            color: var(--color-white);
+            background-color: var(--color-primary);
+          }
+        }
+      }
+    }
+
+    &__banner-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .el-button--text {
+        padding: 0;
+        height: auto;
+      }
+    }
+  }
+}
+
+.sc-crud-select-banner__popover {
+  min-width: 200px;
+  max-width: 300px;
+
+  &-list {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  &-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    font-size: 13px;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--border-color-lighter);
+    }
+  }
+  &-remove-tag {
+    margin-left: 4px;
+    cursor: pointer;
+
+    &.el-tag {
+      background-color: transparent;
+      border-color: transparent;
+      padding: 0 4px;
+
+      .el-tag__close {
+        color: var(--color-primary);
+
+        &:hover {
+          color: var(--color-white);
+          background-color: var(--color-primary);
+        }
+      }
+    }
+  }
 }
 
 .sc-crud-search-header {
@@ -251,15 +345,15 @@
 }
 .sc-crud__error-tip.el-tooltip__popper {
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  border: 1px solid #f56c6c;
-  color: #fff;
-  background-color: #f56c6c;
+  border: 1px solid var(--color-danger);
+  color: var(--color-white);
+  background-color: var(--color-danger);
 }
 .sc-crud__error-tip.el-tooltip__popper.is-light .popper__arrow {
-  border-top-color: #f56c6c;
+  border-top-color: var(--color-danger);
 }
 .sc-crud__error-tip.el-tooltip__popper.is-light .popper__arrow::after {
-  border-top-color: #f56c6c;
+  border-top-color: var(--color-danger);
 }
 
 .sc-crud-drawer {
@@ -272,7 +366,7 @@
   .header {
     .title {
       float: right;
-      color: #72767b;
+      color: var(--color-text-secondary);
     }
   }
   .reset-btn {

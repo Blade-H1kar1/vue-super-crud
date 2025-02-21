@@ -217,4 +217,33 @@ export const mockApi = {
       }, 100);
     });
   },
+
+  getList({ pageNum, pageSize }) {
+    return new Promise((resolve) => {
+      const total = 23;
+      const start = (pageNum - 1) * pageSize;
+
+      // 模拟数据生成
+      const mockData = [];
+      const cities = ["北京", "上海", "广州", "深圳", "杭州"];
+      for (let i = 0; i < pageSize; i++) {
+        const index = start + i;
+        if (index >= total) break;
+        mockData.push({
+          id: index + 1,
+          name: `用户${index + 1}`,
+          gender: index % 2 === 0 ? "男" : "女",
+          age: Math.floor(Math.random() * 20) + 20,
+          city: cities[index % cities.length],
+        });
+      }
+
+      setTimeout(() => {
+        resolve({
+          data: mockData,
+          total,
+        });
+      }, 300);
+    });
+  },
 };

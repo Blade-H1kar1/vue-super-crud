@@ -234,6 +234,10 @@ export default {
       default: () => ({
         width: 50,
         align: "center",
+        maxDisplay: 3,
+        clear: true,
+        shiftSelect: true,
+        ctrlSelect: true,
       }),
     },
     // 序号列配置

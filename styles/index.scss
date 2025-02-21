@@ -11,6 +11,25 @@
   --border-color-lighter: #ebeef5;
   --background-color-base: #fafafa;
   --color-primary: #409eff;
+  --color-primary-light-9: #ecf5ff;
+  --color-primary-light-7: #d9ecff;
+  --color-white: #ffffff;
+  --color-danger: #f56c6c;
+  --color-success: #67c23a;
+  --color-warning: #e6a23c;
+  --color-info: #909399;
+
+  // 文字颜色
+  --color-text-primary: #303133;
+  --color-text-secondary: #909399;
+  --color-text-placeholder: #c0c4cc;
+
+  // 边框颜色
+  --border-color-base: #dcdfe6;
+  --border-color-light: #e4e7ed;
+
+  // 背景颜色
+  --background-color-light: #f5f7fa;
 }
 .sc-title {
   display: flex;

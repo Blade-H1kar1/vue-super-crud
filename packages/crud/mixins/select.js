@@ -11,7 +11,6 @@ export default {
       CtrlDown: false,
     };
   },
-
   mounted() {
     if (this.selection) {
       window.addEventListener("keydown", this.keyDown, false);
@@ -211,6 +210,20 @@ export default {
         }
       }
       this.$emit("select-all", selection);
+    },
+    removeSelection(row) {
+      const index = this.selectionRow.findIndex(
+        (item) => item[this.valueKey] === row[this.valueKey]
+      );
+      if (index > -1) {
+        this.selectionRow.splice(index, 1);
+        this.$refs.tableRef.toggleRowSelection(row, false);
+      }
+    },
+
+    clearSelection() {
+      this.selectionRow = [];
+      this.$refs.tableRef.clearSelection();
     },
   },
 };

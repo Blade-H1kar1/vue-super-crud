@@ -64,6 +64,7 @@ module.exports = {
             "crud/validate",
             "crud/contextMenu",
             "crud/buttons",
+            "crud/selection",
           ],
         },
         {

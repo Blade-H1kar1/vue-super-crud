@@ -22,6 +22,15 @@
     >
     <search ref="searchRef" />
     <menuBar ref="menuBar" />
+    <!-- 选中数据横幅 -->
+    <selectBanner
+      v-if="selection.banner"
+      :selection-row="selectionRow"
+      :selection="crudOptions.selection"
+      :valueKey="valueKey"
+      @remove-selection="removeSelection"
+      @clear-selection="clearSelection"
+    />
     <el-form
       :model="{
         list,
@@ -136,6 +145,7 @@ import column from "./column.vue";
 import defaultColumn from "./defaultColumn.vue";
 import pagination from "./pagination.vue";
 import group from "../group/index.vue";
+import selectBanner from "./selectBanner.vue";
 import {
   toCamelCase,
   toTreeArray,
@@ -159,6 +169,7 @@ export default create({
     search,
     group,
     position,
+    selectBanner,
   },
   mixins: [
     init("crudOptions"),
