@@ -1,6 +1,5 @@
 <template>
   <div>
-    <el-button @click="handleClick">手动更新选中数据</el-button>
     <sc-crud
       :loading.sync="loading"
       :search.sync="search"
@@ -20,38 +19,19 @@ export default {
   data() {
     return {
       loading: false,
-      selectedRows: [
-        {
-          id: 1,
-        },
-        {
-          id: 2,
-        },
-        {
-          id: 3,
-        },
-        {
-          id: 8,
-        },
-        {
-          id: 7,
-        },
-      ],
+      selectedRows: {
+        id: 2,
+      },
       search: {
         pageNum: 1,
         pageSize: 10,
       },
       options: {
-        selection: {
-          reserveSelection: true, // 是否保留选中状态
-          ctrlSelect: true, // 是否启用 Ctrl 键点击选中
-          shiftSelect: true, // 是否启用 Shift 键批量选中
-          banner: true, // 是否显示横幅
-          maxDisplay: 3, // 直接显示的最大数量
-          labelKey: "name", // 显示的字段名
-          clear: true, // 是否显示清除按钮
+        singleSelection: {
+          banner: true,
+          ctrlSelect: true,
           selectable: (row, index) => {
-            return index !== 0 && index !== 7;
+            return index !== 0;
           },
         },
         init: true,
@@ -78,16 +58,6 @@ export default {
       this.data = data;
       this.total = total;
       this.loading = false;
-    },
-    handleClick() {
-      this.selectedRows = [
-        {
-          id: 1,
-        },
-        {
-          id: 3,
-        },
-      ];
     },
   },
 };

@@ -228,6 +228,15 @@ export default {
         resetBtn: Boolean, // 是否开启重置按钮
       },
     },
+    singleSelection: {
+      type: [Boolean, Object],
+      default: () => ({
+        width: 50,
+        align: "center",
+        clear: true,
+        ctrlSelect: true,
+      }),
+    },
     // 选择列配置
     selection: {
       type: [Boolean, Object],
@@ -441,6 +450,7 @@ export default {
     (source, key, value) => {
       const showKeys = [
         "searchHeader",
+        "singleSelection",
         "selection",
         "index",
         "expand",

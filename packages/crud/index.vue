@@ -23,14 +23,7 @@
     <search ref="searchRef" />
     <menuBar ref="menuBar" />
     <!-- 选中数据横幅 -->
-    <selectBanner
-      v-if="selection.banner"
-      :selection-row="selectionRow"
-      :selection="crudOptions.selection"
-      :valueKey="valueKey"
-      @remove-selection="removeSelection"
-      @clear-selection="clearSelection"
-    />
+    <selectBanner v-if="selection.banner || singleSelection.banner" />
     <el-form
       :model="{
         list,
@@ -306,7 +299,12 @@ export default create({
     },
     defaultColumns() {
       const columns = [];
-      const options = pick(this.crudOptions, ["expand", "index", "selection"]);
+      const options = pick(this.crudOptions, [
+        "expand",
+        "index",
+        "selection",
+        "singleSelection",
+      ]);
       Object.keys(options).forEach((key) => {
         if (checkVisibility(options[key])) {
           columns.push({ type: key, ...options[key] });

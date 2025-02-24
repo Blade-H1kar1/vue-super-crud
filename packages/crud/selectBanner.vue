@@ -1,16 +1,16 @@
 <template>
-  <div v-show="selectionRow.length" :class="b()">
-    <div :class="b('banner-content')">
-      <span>已选择 {{ selectionRow.length }} 项</span>
-      <template v-if="selectionRow.length <= selection.maxDisplay">
+  <div v-show="showBanner" :class="b()">
+    <div :class="b('banner-content')" v-if="ctx.showSelection">
+      <span>已选择 {{ selected.length }} 项</span>
+      <template v-if="selected.length <= selection.maxDisplay">
         <span :class="b('selected-items')">
           <el-tag
-            v-for="row in selectionRow"
-            :key="row[valueKey]"
+            v-for="row in selected"
+            :key="row[labelKey]"
             :class="b('remove-tag')"
             size="small"
             closable
-            @close="removeSelection(row)"
+            @close="ctx.removeSelection(row)"
             >{{ row[labelKey] }}</el-tag
           >
         </span>
@@ -24,21 +24,21 @@
           <template #reference>
             <span :class="b('popover-selected-preview')">
               <el-tag
-                v-for="row in selectionRow.slice(0, selection.maxDisplay)"
-                :key="row[valueKey]"
+                v-for="row in selected.slice(0, selection.maxDisplay)"
+                :key="row[labelKey]"
                 :class="b('remove-tag')"
                 size="small"
                 closable
-                @close="removeSelection(row)"
+                @close="ctx.removeSelection(row)"
                 >{{ row[labelKey] }}</el-tag
               >
-              等 {{ selectionRow.length }} 项
+              等 {{ selected.length }} 项
             </span>
           </template>
           <div :class="b('popover-list')">
             <div
-              v-for="row in selectionRow.slice(selection.maxDisplay)"
-              :key="row[valueKey]"
+              v-for="row in selected.slice(selection.maxDisplay)"
+              :key="row[labelKey]"
               :class="b('popover-item')"
             >
               <span>{{ row[labelKey] }}</span>
@@ -46,14 +46,39 @@
                 :class="b('popover-remove-tag')"
                 size="small"
                 closable
-                @close="removeSelection(row)"
+                @close="ctx.removeSelection(row)"
               />
             </div>
           </div>
         </el-popover>
       </template>
       <div :class="b('banner-actions')">
-        <el-button v-if="showClearAction" type="text" @click="clearSelection">
+        <el-button
+          v-if="showClearAction"
+          type="text"
+          @click="ctx.clearSelection"
+        >
+          清空选择
+        </el-button>
+      </div>
+    </div>
+    <div :class="b('banner-content')" v-else-if="ctx.selected">
+      <span>已选择</span>
+      <span :class="b('selected-items')">
+        <el-tag
+          :class="b('remove-tag')"
+          size="small"
+          closable
+          @close="ctx.removeSingleSelection"
+          >{{ selected[labelKey] }}</el-tag
+        >
+      </span>
+      <div :class="b('banner-actions')">
+        <el-button
+          v-if="showClearAction"
+          type="text"
+          @click="ctx.removeSingleSelection"
+        >
           清空选择
         </el-button>
       </div>
@@ -64,30 +89,37 @@
 import create from "core/create";
 export default create({
   name: "crud-select-banner",
-  props: {
-    selectionRow: {
-      type: Array,
-    },
-    selection: {
-      type: Object,
-    },
-    valueKey: {},
-  },
+  inject: ["ctx"],
   computed: {
+    selected() {
+      return this.ctx.selected;
+    },
+    selection() {
+      return this.ctx.selection;
+    },
     labelKey() {
-      return this.selection.labelKey || this.valueKey;
+      return this.selection.labelKey || this.ctx.valueKey;
     },
     showClearAction() {
-      return this.selection.clear;
+      if (this.ctx.showSelection) {
+        return this.selection.clear;
+      }
+
+      if (this.ctx.showSingleSelection) {
+        return this.ctx.singleSelection.clear;
+      }
+    },
+    showBanner() {
+      if (this.ctx.showSelection) {
+        return this.selected.length > 0;
+      }
+
+      if (this.ctx.showSingleSelection) {
+        return this.selected;
+      }
+      return false;
     },
   },
-  methods: {
-    removeSelection(row) {
-      this.$emit("remove-selection", row);
-    },
-    clearSelection() {
-      this.$emit("clear-selection");
-    },
-  },
+  methods: {},
 });
 </script>
