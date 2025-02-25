@@ -65,6 +65,7 @@ module.exports = {
             "crud/contextMenu",
             "crud/buttons",
             "crud/selection",
+            "crud/genDynamicColumns",
           ],
         },
         {

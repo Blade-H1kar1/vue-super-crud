@@ -53,7 +53,6 @@ export default create({
     cellRender(item, editMode, rawRules) {
       return (
         <Render
-          v-model={this.scope.row[item.prop]}
           props={item}
           item={item}
           slots={this.ctx.extendsScopedSlots}

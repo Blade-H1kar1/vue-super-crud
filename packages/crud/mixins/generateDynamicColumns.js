@@ -56,7 +56,7 @@ export default {
 
       // 按数据路径提取数据
       return rawData.flatMap((item) => {
-        const result = item[currentConfig.childrenPath || "children"];
+        const result = item[currentConfig.path || "children"];
         return Array.isArray(result) ? result : [];
       });
     },
@@ -86,10 +86,7 @@ export default {
         // 遍历当前层级数据
         currentData.forEach((item) => {
           // 获取prop值,支持函数或属性名
-          const prop =
-            typeof config.prop === "function"
-              ? config.prop(item)
-              : item[config.prop];
+          const prop = item[config.prop];
 
           // 获取label值,支持函数或属性名
           const label =
@@ -114,17 +111,15 @@ export default {
 
         // 生成列配置
         return Array.from(uniqueMap.values()).map(
-          ({
-            prop,
-            label,
-            sourceItems,
-            childrenPath,
-            dataTransformer,
-            ...rest
-          }) => {
+          ({ prop, label, sourceItems, path, dataTransformer, ...rest }) => {
             // 构建当前路径
             const currentPath = parentPath ? `${parentPath}.${prop}` : prop;
-            const column = { ...rest, label, prop: currentPath };
+
+            const column = {
+              ...rest,
+              label,
+              prop: currentPath + "." + config.prop,
+            };
 
             // 处理子列
             if (currentLevel < levelConfig.length - 1) {
@@ -139,11 +134,11 @@ export default {
                 currentLevel + 1,
                 currentPath
               );
-            } else if (config.children) {
-              column.children = config.children(
-                currentPath,
-                sourceItems.find((item) => item[config.prop] === prop),
-                sourceItems
+            }
+            if (config.columnConfig) {
+              Object.assign(
+                column,
+                config.columnConfig(currentPath, sourceItems)
               );
             }
             return column;
@@ -173,8 +168,7 @@ export default {
           if (!currentConfig) return;
 
           // 获取当前层级的子节点数据
-          const children =
-            currentItem[currentConfig.childrenPath || "children"];
+          const children = currentItem[currentConfig.path || "children"];
           // 如果子节点不是数组则返回
           if (!Array.isArray(children)) return;
 
@@ -225,7 +219,7 @@ export default {
         const processLevel = (currentItem, currentConfig, level = 0) => {
           if (!currentConfig) return;
 
-          const children = currentItem[currentConfig.childrenPath];
+          const children = currentItem[currentConfig.path];
           if (!Array.isArray(children)) return;
 
           children.forEach((child) => {
@@ -241,7 +235,7 @@ export default {
 
             // 递归处理下一层级
             const nextConfig = config[level + 1];
-            if (nextConfig && child[nextConfig.childrenPath]) {
+            if (nextConfig && child[nextConfig.path]) {
               processLevel(child, nextConfig, level + 1);
             }
           });

@@ -246,4 +246,84 @@ export const mockApi = {
       }, 300);
     });
   },
+  // 生成更多测试数据
+
+  // 模拟API请求函数
+  getDynamicData({ pageNum = 1, pageSize = 10 }) {
+    const generateMockData = (count) => {
+      const result = [];
+      for (let i = 0; i < count; i++) {
+        result.push({
+          materialCode: `M${String(i + 1).padStart(3, "0")}`,
+          materialName: `产品${i + 1}`,
+          materialSpec: `规格${i + 1}`,
+          quantityGradeName: String.fromCharCode(65 + (i % 26)), // A-Z循环
+          firstChildren: [
+            {
+              id: "S001",
+              name: "供应商1",
+              price: 100 + i * 10,
+              secondChildren: [
+                {
+                  sort: 1,
+                  productUnitPrice: 100 + i * 10,
+                  priceFollow: i % 2 === 0 ? "Y" : "N",
+                  priceDifference: i % 2 === 0 ? -10 : 10,
+                  pricePercentageChange: i % 2 === 0 ? 0.1 : -0.1,
+                },
+                {
+                  sort: 2,
+                  productUnitPrice: 90 + i * 10,
+                  priceFollow: i % 2 === 0 ? "N" : "Y",
+                  priceDifference: i % 2 === 0 ? 5 : -5,
+                  pricePercentageChange: 0.05,
+                },
+              ],
+            },
+            {
+              id: "S002",
+              name: "供应商2",
+              price: 90 + i * 10,
+              secondChildren: [
+                {
+                  sort: 1,
+                  productUnitPrice: 95 + i * 10,
+                  priceFollow: "Y",
+                  priceDifference: -5,
+                  pricePercentageChange: 0.05,
+                },
+                {
+                  sort: 2,
+                  productUnitPrice: 92 + i * 10,
+                  priceFollow: "Y",
+                  priceDifference: -3,
+                  pricePercentageChange: 0.03,
+                },
+              ],
+            },
+            {
+              id: "S003",
+              name: "供应商3",
+              price: 80 + i * 10,
+            },
+          ],
+        });
+      }
+      return result;
+    };
+
+    // 扩展数据集
+    const allData = generateMockData(50);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const start = (pageNum - 1) * pageSize;
+        const end = start + pageSize;
+
+        resolve({
+          total: allData.length,
+          data: allData.slice(start, end),
+        });
+      }, 300);
+    });
+  },
 };
