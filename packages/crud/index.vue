@@ -104,7 +104,7 @@
     >
       <i class="el-icon-plus" /> 新增一行
     </div>
-    <position slotName="pagination" :slots="$scopedSlots"
+    <position :inline="false" slotName="pagination" :slots="$scopedSlots"
       ><pagination ref="paginationRef"
     /></position>
   </div>
@@ -680,7 +680,7 @@ export default create({
       if (this.validateIsError(row.$index, col.prop)) {
         cellName += (cellName ? " " : "") + "error-badge";
       }
-      if (!this.isDefaultColumn(col)) {
+      if (!col.type && !this.isDefaultColumn(col)) {
         cellName += (cellName ? " " : "") + "custom-cell";
       }
       return cellName;

@@ -143,7 +143,6 @@ export default create({
     const contentRender = () => {
       return (
         <Render
-          v-model={this.ctx.query[this.item.prop]}
           props={this.item}
           item={this.item}
           slots={this.ctx.extendsScopedSlots}

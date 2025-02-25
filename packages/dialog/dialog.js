@@ -10,25 +10,7 @@ export const vnodes = {};
 export default (options = {}) => {
   return create({
     name: "dialog",
-    mixins: [
-      init("dialogOptions", options),
-      omit(options, [
-        "created",
-        "mounted",
-        "render",
-        "confirm",
-        "cancel",
-        "closed",
-        "destroy",
-        "hide",
-        "show",
-      ]),
-    ],
-    provide() {
-      return {
-        $h: this.$createElement,
-      };
-    },
+    mixins: [init("dialogOptions", options)],
     data() {
       return {
         fullscreen: false,
@@ -197,14 +179,14 @@ export default (options = {}) => {
       const content = (h) => {
         return (
           <Render
-            v-model={this.value}
             v-loading={this.loading}
-            prop="target"
+            prop="value"
             props={this.dialogOptions}
             item={this.dialogOptions}
             config={this.dialogOptions}
             scope={{
               ref: this,
+              row: this,
             }}
             controlDefault={() => {
               return null;

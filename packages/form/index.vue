@@ -160,7 +160,6 @@ export default create({
     return {
       formCtx: this,
       controlCtx: this,
-      $h: this.$createElement,
     };
   },
   mixins: [init("formOptions"), event, contextMenu],

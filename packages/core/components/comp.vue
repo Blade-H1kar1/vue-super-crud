@@ -39,11 +39,6 @@ export default {
     destroyed: Function, // 销毁
     h: {},
   },
-  inject: {
-    $h: {
-      default: undefined,
-    },
-  },
   components: {
     comp,
   },

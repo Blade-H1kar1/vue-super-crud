@@ -49,9 +49,6 @@ export default {
     rawRules: Array, // 未加工的rules
   },
   inject: {
-    $h: {
-      default: undefined,
-    },
     controlCtx: { default: undefined },
     elForm: {
       default: "",
