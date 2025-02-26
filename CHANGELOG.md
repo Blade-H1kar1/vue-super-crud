@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.1.0...v1.3.0) (2025-02-26)
+
+
+### 🚀 构建/工具
+
+* **release:** 1.2.0 ([b0aa546](https://github.com/Blade-H1kar1/vue-super-crud/commit/b0aa546a917539260531bab28903ec55375b60b0))
+
+
+### ✨ 新功能
+
+* **crud,core:** 新增生成动态嵌套列功能及深层响应式优化 ([4976c0d](https://github.com/Blade-H1kar1/vue-super-crud/commit/4976c0d3feef8ecb189504df819796536bebcf57))
+* **crud:** 新增表格单选，优化多选功能 ([bb2460d](https://github.com/Blade-H1kar1/vue-super-crud/commit/bb2460dfba4ddd37e08839826d1b68064b72bd09))
+* **form:** 新增表单草稿箱功能及数据模拟能力 ([80b82c9](https://github.com/Blade-H1kar1/vue-super-crud/commit/80b82c91f164d77b0cd6609209ff39b0c28d49d9))
+* **form:** 优化表单粘贴和草稿功能 ([970ec74](https://github.com/Blade-H1kar1/vue-super-crud/commit/970ec74ec56e43635b1c5328940cdc59af3b3bdd))
+* **mock:** 重构模拟数据生成逻辑 ([66a7645](https://github.com/Blade-H1kar1/vue-super-crud/commit/66a76454d85d473800bc9f3554252dc4ef3e039c))
+
+
+### 🐛 问题修复
+
+* 修复弹窗缺失路由、表单重置增加禁用条件 ([53126e0](https://github.com/Blade-H1kar1/vue-super-crud/commit/53126e0c4ea0e3f3e89d1f1c5addd848c818a1a0))
+* 修复弹窗value错误绑定 ([b81ac89](https://github.com/Blade-H1kar1/vue-super-crud/commit/b81ac890cd3491508111d2a881167b5bafeb2642))
+* **crud:** 修复表格列配置更新问题 ([4f93ae4](https://github.com/Blade-H1kar1/vue-super-crud/commit/4f93ae4b0f410a88af78cdd55dfa709127223178))
+* **form:** 修复多表单初始化问题 ([ba9265e](https://github.com/Blade-H1kar1/vue-super-crud/commit/ba9265ebaeb3a85f34b5a8f7a01a82c1cf9ba465))
+
+
+### 📝 文档更新
+
+* 新增数据格式化文档, 优化文档结构 ([74d7ee5](https://github.com/Blade-H1kar1/vue-super-crud/commit/74d7ee5b62bc9e40b69b030fc202896d644bf1ca))
+* **crud:** 新增表格选择功能文档 ([7e2ae85](https://github.com/Blade-H1kar1/vue-super-crud/commit/7e2ae857f6b88723eff7f61dbedebb0fa965f6f0))
+* **crud:** 新增动态列生成功能的文档和示例 ([0385d06](https://github.com/Blade-H1kar1/vue-super-crud/commit/0385d063ed5a4bc5fc5a8428b8ba3dc5fbae8fa8))
+
+
+### ♻️ 代码重构
+
+* **curd:** 优化动态嵌套列空值显示 ([48d29d0](https://github.com/Blade-H1kar1/vue-super-crud/commit/48d29d0db9b4c1a399a4c32fdbb919dc36b57f37))
+* **form:** 优化表单显示隐藏功能，支持函数 ([84e5273](https://github.com/Blade-H1kar1/vue-super-crud/commit/84e52737bef4b1a58784a6256e92603f1cbaa06e))
+
 ## [1.2.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.1.0...v1.2.0) (2025-02-20)
 
 
