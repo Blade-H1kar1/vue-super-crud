@@ -137,9 +137,9 @@ export default {
           deepProp: String, // 深度绑定属性
           formatData: {
             // 数据格式化
-            strict: true,
             type: [String, Object],
             properties: {
+              type: String,
               formatValue: Boolean, // 是否获取格式化值
               input: Function, // 输入格式化
               output: Function, // 输出格式化

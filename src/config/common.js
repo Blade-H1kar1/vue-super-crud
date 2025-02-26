@@ -1,6 +1,6 @@
 export const renderItem = {
-  show: Boolean,
-  hidden: Boolean, // 是否隐藏
+  show: [Boolean, Function],
+  hidden: [Boolean, Function], // 是否隐藏
   prop: String, // 绑定字段
   label: String, // 列标题
   presetType: {

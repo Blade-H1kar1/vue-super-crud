@@ -54,11 +54,9 @@ export default (optionsKey, opts) => {
           this.resultOptions.renderColumns &&
           Array.isArray(this.resultOptions.renderColumns)
         ) {
-          return filterColumns(
-            cloneDeep(this.resultOptions.renderColumns)
-              .map(this.handleInitColumn)
-              .sort((a, b) => a.order - b.order)
-          );
+          return cloneDeep(this.resultOptions.renderColumns)
+            .map(this.handleInitColumn)
+            .sort((a, b) => a.order - b.order);
         }
         return [];
       },

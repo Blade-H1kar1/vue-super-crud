@@ -102,7 +102,7 @@ import {
   pick,
 } from "lodash-es";
 import { mergeTemp } from "utils/mergeTemp";
-import { isEmptyData, toCamelCase } from "utils";
+import { isEmptyData, toCamelCase, filterColumns } from "utils";
 import position from "core/components/position";
 import formProps from "./props";
 
@@ -198,7 +198,7 @@ export default create({
       return false;
     },
     columns() {
-      return this.groupBy(this.resultColumns);
+      return this.groupBy(filterColumns(this.resultColumns, this.formScope));
     },
     trueRenderColumns() {
       let columns = [];
@@ -222,10 +222,6 @@ export default create({
       const baseScope = {
         row: this.value,
         form: this.$refs.formRef,
-        formOptions: this.formOptions,
-        columns: this.trueRenderColumns,
-        isDetail: this.isDetail,
-        isDisabled: this.isDisabled,
       };
 
       if (!this.scope) return baseScope;

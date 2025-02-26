@@ -146,10 +146,10 @@ import {
   filterColumns,
   mergeTemp,
   singleMerge,
+  checkVisibility,
 } from "utils";
 import tableProps from "./mixins/props";
 import cache from "utils/cache.js";
-import { checkVisibility } from "utils";
 
 export default create({
   name: "crud",
@@ -320,13 +320,15 @@ export default create({
             this.crudOptions.dynamicConfig
           ) || []
         ).map(this.handleInitColumn);
-        return this.insertColumns(
-          dynamicColumns,
-          this.resultColumns,
-          this.crudOptions.dynamicInsertPosition
+        return filterColumns(
+          this.insertColumns(
+            dynamicColumns,
+            this.resultColumns,
+            this.crudOptions.dynamicInsertPosition
+          )
         );
       }
-      return this.resultColumns;
+      return filterColumns(this.resultColumns);
     },
     flatColumns() {
       return toTreeArray(this.columns);
