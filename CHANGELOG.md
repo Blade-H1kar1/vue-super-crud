@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.1](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.3.0...v1.3.1) (2025-02-27)
+
+
+### 📝 文档更新
+
+* **crud:** 新增方位插槽功能文档和示例 ([0bde660](https://github.com/Blade-H1kar1/vue-super-crud/commit/0bde660222047468540178524f9e6954f44b802e))
+
 ## [1.3.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.1.0...v1.3.0) (2025-02-26)
 
 
