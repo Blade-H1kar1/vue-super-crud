@@ -8,7 +8,6 @@ export default create({
       default: true,
     },
     slotName: String,
-    className: String,
     render: Function,
     slots: {
       type: Object,
@@ -21,19 +20,16 @@ export default create({
   },
   computed: {
     leftSlot() {
-      return this.slots[`${this.slotName}-left`];
+      return this.slots[`${this.slotName}-left`] || this.$scopedSlots.left;
     },
     rightSlot() {
-      return this.slots[`${this.slotName}-right`];
+      return this.slots[`${this.slotName}-right`] || this.$scopedSlots.right;
     },
     topSlot() {
-      return this.slots[`${this.slotName}-top`];
+      return this.slots[`${this.slotName}-top`] || this.$scopedSlots.top;
     },
     bottomSlot() {
-      return this.slots[`${this.slotName}-bottom`];
-    },
-    contentSlot() {
-      return this.slots[`${this.slotName}`];
+      return this.slots[`${this.slotName}-bottom`] || this.$scopedSlots.bottom;
     },
     hasPosition() {
       return this.topSlot || this.bottomSlot || this.leftSlot || this.rightSlot;
@@ -71,19 +67,21 @@ export default create({
         display: this.inline ? "inline-grid" : "grid",
         "grid-template-areas": areas.join("\n"),
         "grid-template-columns": columns,
+        "align-items": "center",
       };
     },
   },
   render(h) {
-    const defaultSlot = this.$slots.default;
     const renderContent = () => {
-      if (this.contentSlot) {
-        return this.contentSlot(this.scope);
+      if (this.slots[`${this.slotName}`]) {
+        return this.slots[`${this.slotName}`](this.scope);
+      }
+      if (this.$scopedSlots.default) {
+        return this.$scopedSlots.default(this.scope);
       }
       if (this.render) {
         return this.render(h, this.scope);
       }
-      return defaultSlot;
     };
     const content = renderContent();
     if (
@@ -96,7 +94,7 @@ export default create({
       return null;
     return (
       <div
-        class={[this.b([this.className || this.slotName])]}
+        class={[this.b([this.slotName || "position"])]}
         style={this.gridStyle}
       >
         {this.topSlot && <div class="top">{this.topSlot(this.scope)}</div>}

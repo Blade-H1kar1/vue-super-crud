@@ -748,7 +748,8 @@ export default create({
         col.render ||
         col.html ||
         col.isEdit ||
-        this.extendsScopedSlots[col.prop]
+        this.extendsScopedSlots[col.prop] ||
+        col.position
       ) {
         return false;
       }

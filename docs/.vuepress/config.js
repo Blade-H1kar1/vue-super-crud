@@ -48,6 +48,11 @@ module.exports = {
           children: ["dict/config", "dict/component", "dict/baseUse"],
         },
         {
+          title: "方位插槽",
+          collapsable: true,
+          children: ["positionSlot/base"],
+        },
+        {
           title: "响应式数据格式化",
           collapsable: true,
           children: ["formatData/config", "formatData/baseUse"],

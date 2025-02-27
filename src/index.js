@@ -11,6 +11,7 @@ import checkbox from "pak/dict/form/checkbox.vue";
 import tabs from "pak/tabs";
 import verifyInput from "pak/verifyInput";
 import button from "pak/button";
+import position from "pak/core/components/position";
 
 import { mergeTemplate } from "./template";
 import directive from "pak/directive";
@@ -31,6 +32,7 @@ const components = [
   tabs,
   verifyInput,
   button,
+  position,
 ];
 
 const install = function (Vue, opts = {}) {
