@@ -197,6 +197,7 @@ export default (options = {}) => {
       const footer = (h) => {
         if (this.dialogOptions.footer.h) h = this.dialogOptions.footer.h;
         if (this.showFooter === false) return;
+        const footer = this.dialogOptions.footer.render;
         const buttonRender = () => {
           return this.footerButtons.map((item) => (
             <scButton
@@ -213,7 +214,9 @@ export default (options = {}) => {
           <div
             class={this.b("footer", this.dialogOptions.footer.align || "right")}
           >
-            {resolveRender(this.dialogOptions.footer.render, h, buttonRender)}
+            {footer
+              ? resolveRender(this.dialogOptions.footer.render, h, buttonRender)
+              : buttonRender()}
           </div>
         );
       };
