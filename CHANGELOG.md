@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.2](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.3.1...v1.3.2) (2025-02-28)
+
+
+### 📝 文档更新
+
+* **core:** 渲染配置文档优化 ([39f0d6b](https://github.com/Blade-H1kar1/vue-super-crud/commit/39f0d6bd8e7854ab22aae7d3bdd67bb799954be0))
+* **mock:** 新增数据模拟文档 ([0c0890e](https://github.com/Blade-H1kar1/vue-super-crud/commit/0c0890e1f09f00c8d5b5cbc25ad9cbc40cbedf2f))
+
 ### [1.3.1](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.3.0...v1.3.1) (2025-02-27)
 
 
