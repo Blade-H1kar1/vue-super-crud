@@ -56,7 +56,7 @@ export default {
         },
         tags: "前端,Vue,React",
         price: 1234.56,
-        custom: "1,2,3",
+        custom: "123",
       },
       options: {
         labelWidth: "160px",
@@ -112,10 +112,10 @@ export default {
             prop: "custom",
             formatData: {
               input: (value) => {
-                return value.split(",");
+                return value + "--custom";
               },
               output: (value) => {
-                return value.join(",");
+                return value.replace("--custom", "");
               },
               formatValue: true,
             },

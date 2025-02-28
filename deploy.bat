@@ -10,3 +10,5 @@ git commit -m "deploy"
 git push -f git@github.com:Blade-H1kar1/vue-super-crud.git master:gh-pages
 
 popd
+
+rmdir /s /q docs\.vuepress\dist

@@ -34,7 +34,7 @@ module.exports = {
           children: [{ title: "快速使用", path: "start/base" }],
         },
         {
-          title: "通用配置",
+          title: "渲染配置",
           collapsable: true,
           children: [
             "commonConfig/renderType",

@@ -1,5 +1,6 @@
 <script>
 import create from "core/create";
+import { resolveRender } from "utils";
 export default create({
   name: "position",
   props: {
@@ -80,7 +81,7 @@ export default create({
         return this.$scopedSlots.default(this.scope);
       }
       if (this.render) {
-        return this.render(h, this.scope);
+        return resolveRender(this.render, h, this.scope);
       }
     };
     const content = renderContent();

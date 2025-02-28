@@ -19,7 +19,7 @@ export default {
           {
             prop: "name",
             label: "昵称",
-            render: (h, scope) => {
+            render: (scope) => {
               // 安装了jsx相关转换插件可以使用vue-jsx语法
               return <div>{scope.row.name + "render"}</div>;
             },
@@ -35,7 +35,7 @@ export default {
           {
             prop: "gender",
             label: "性别",
-            render: (h, scope) => {
+            render: (scope) => {
               return (
                 <el-select
                   v-model={scope.row.gender} // 与v-model相同

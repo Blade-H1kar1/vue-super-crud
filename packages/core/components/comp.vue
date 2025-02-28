@@ -59,6 +59,24 @@ export default {
           };
         }
       }
+
+      // 处理以 on 开头的事件配置
+      for (const key in this.omitProps) {
+        if (
+          key.startsWith("on") &&
+          key.length > 3 &&
+          /^on[A-Z]/.test(key) &&
+          isFunction(this.omitProps[key])
+        ) {
+          const eventName = key[2].toLowerCase() + key.slice(3); // 转换事件名 onChange -> change
+          events[eventName] = (...args) => {
+            if (this.omitProps[key]) {
+              this.omitProps[key](...args, scope);
+            }
+          };
+        }
+      }
+
       return {
         ...events,
         input: (event) => {

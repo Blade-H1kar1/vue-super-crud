@@ -13,7 +13,7 @@ import { mergeTemp } from "utils/mergeTemp";
 import { defaultRender as _defaultRender } from "core";
 import DictMixin from "../dict/mixin";
 import position from "./position.vue";
-import { isEmptyData } from "utils";
+import { isEmptyData, resolveRender } from "utils";
 import {
   getComponentConfig,
   generateMockData,
@@ -206,13 +206,7 @@ export default {
       }
     },
     getRender(h, scope) {
-      const render = this.render;
-      if (render) {
-        const VNode = isFunction(render) ? this.render(h, scope) : render;
-        if (VNode) {
-          return isVNode(VNode) ? VNode : <span>{VNode}</span>;
-        }
-      }
+      return resolveRender(this.render, h, scope);
     },
     // 合并一个函数和一个对象（或两个函数）
     mergeFunctionAndObject(t, s, scope) {
@@ -328,7 +322,14 @@ export default {
 
     if (this.position) {
       return (
-        <position slotName={this.prop} slots={this.slots} scope={this.scope}>
+        <position
+          slotName={this.prop}
+          slots={this.slots}
+          scope={this.scope}
+          style={{
+            width: "100%",
+          }}
+        >
           {VNode}
         </position>
       );

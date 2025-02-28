@@ -81,3 +81,18 @@ Vue.use(superCrud, {
   },
 });
 ```
+
+## 在render或插槽渲染中使用
+
+在render或插槽渲染中使用时，需要使用 `$value` 对象来获取和设置值。
+
+```javascript
+{
+  label: "自定义",
+  prop: "custom",
+  formatData: "strToArr",
+  render: (h, { $value }) => {
+    return <el-input value={$value.get} onInput={(v)=>$value.set(v)} />;
+  }
+}
+```

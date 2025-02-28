@@ -1,108 +1,160 @@
 <template>
-  <sc-crud :options="options" :data="data"> </sc-crud>
+  <sc-form v-model="form" :options="options"> </sc-form>
 </template>
 
 <script>
 export default {
   data() {
-    this.scopeComp = {
+    // 非全局组件示例
+    this.CustomComponent = {
       render: (h) => {
-        return h("div", "非全局组件");
+        return h("div", "自定义组件");
       },
     };
+
     return {
       options: {
         renderColumns: [
+          // 1. Select选择器示例
           {
-            prop: "username",
-            label: "名称",
+            prop: "type",
+            label: "下拉选择",
             comp: {
-              // 组件内部通常要有一个value值，用来接收表格的默认值
-              name: "el-select", // 组件名称，全局组件才能使用
-              clearable: true, // 组件的属性
+              name: "el-select",
               multiple: true,
+              // 动态属性配置
               bind: (scope) => ({
-                placeholder: "动态属性" + scope.row.username,
+                disabled: scope.row.status === "disabled",
               }),
+              // 子组件配置
               children: [
-                // 组件的子级，接收comp数组、comp单个对象、渲染函数、默认插槽内容
-                {
-                  name: "el-option",
-                  value: "111",
-                  label: "111",
-                },
-                {
-                  name: "el-option",
-                  value: "222",
-                  label: "222",
-                },
+                { name: "el-option", label: "类型1", value: "1" },
+                { name: "el-option", label: "类型2", value: "2" },
               ],
+              // 事件处理
               on: {
-                // 组件的事件
                 change: (val, scope) => {
-                  this.$message.success(val);
-                  // scope 包含 el表格原有参数与当前组件实例
-                  console.log(scope, "表格参数");
+                  console.log("选择值:", val);
+                  console.log("当前行:", scope.row);
                 },
               },
             },
           },
+
+          // 2. Input输入框示例
           {
             prop: "name",
-            label: "昵称",
+            label: "输入框",
             comp: {
               name: "el-input",
+              // 直接属性配置
+              clearable: true,
+              maxlength: 20,
+              "show-word-limit": true,
+              // 插槽配置
               slots: {
-                // 使用插槽
-                prefix: (h) => {
-                  return "prefix";
-                },
+                prefix: () => <i class="el-icon-search" />,
+                suffix: () => <i class="el-icon-date" />,
               },
-            },
-          },
-          {
-            prop: "gender",
-            label: "性别",
-            comp: {
-              name: "el-button",
+              // 事件监听
               on: {
-                // 组件的事件
-                click: () => {
-                  this.$message.success("点击了按钮");
+                input: (val, scope) => {
+                  console.log("输入值:", val);
+                },
+                focus: (event, scope) => {
+                  console.log("获得焦点");
                 },
               },
-              children: "默认插槽内容",
             },
           },
+
+          // 3. Radio单选组示例
           {
             prop: "gender",
-            label: "性别",
+            label: "单选组",
             comp: {
-              name: this.scopeComp, // 非全局组件使用：将引入的组件直接传给name
+              name: "el-radio-group",
+              // 动态生成选项
+              children: (scope) => {
+                const options = [
+                  { label: "男", value: "male" },
+                  { label: "女", value: "female" },
+                ];
+                return options.map((item) => ({
+                  name: "el-radio",
+                  label: item.value,
+                  children: item.label,
+                }));
+              },
+              // 组件挂载后的回调
+              mounted: (scope, ref) => {
+                console.log("单选组已挂载:", ref);
+              },
+            },
+          },
+
+          // 4. 自定义组件示例
+          {
+            prop: "custom",
+            label: "自定义组件",
+            comp: {
+              name: this.CustomComponent,
+              // 自定义属性
+              customProp: "自定义值",
+              // 原生事件
+              nativeOn: {
+                click: () => {
+                  console.log("点击自定义组件");
+                },
+              },
+            },
+          },
+
+          // 5. 级联选择器示例
+          {
+            prop: "region",
+            label: "地区选择",
+            comp: {
+              name: "el-cascader",
+              // 属性配置
+              options: [
+                {
+                  value: "zhejiang",
+                  label: "浙江",
+                  children: [
+                    {
+                      value: "hangzhou",
+                      label: "杭州",
+                    },
+                  ],
+                },
+              ],
+              // 条件属性
+              bind: (scope) => ({
+                disabled: !scope.row.type,
+                placeholder: `请选择${scope.item.label}`,
+              }),
+              // 值变化事件
+              on: {
+                change: (value, scope) => {
+                  console.log("选择的地区:", value);
+                },
+              },
             },
           },
         ],
       },
-      data: [
-        {
-          createTime: "2018-06-02 12:28:47",
-          createUser: 94,
-          id: 56,
-          idNumber: "8",
-          name: "识间华中张认",
-          password: "sed laboris",
-          phone: "18157668675",
-          gender: "男",
-          age: 20,
-          status: 35,
-          updateTime: "2018-09-08 16:33:19",
-          updateUser: 58,
-          username: "石洋",
-        },
-      ],
+      // 表格数据
+      form: {
+        id: 1,
+        type: "1",
+        name: "测试数据",
+        gender: "male",
+        custom: "",
+        region: ["zhejiang", "hangzhou"],
+        status: "normal",
+      },
     };
   },
 };
 </script>
-
-<style lang="scss" scoped></style>

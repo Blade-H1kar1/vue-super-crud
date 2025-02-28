@@ -4,7 +4,7 @@ import { omit, pick, mergeWith, isFunction } from "lodash-es";
 import { batchMerge } from "utils/mergeTemp";
 import Render from "core/components/render";
 import scButton from "pak/button";
-import { checkVisibility, setPx } from "utils";
+import { checkVisibility, setPx, resolveRender } from "utils";
 
 export const vnodes = {};
 export default (options = {}) => {
@@ -213,9 +213,7 @@ export default (options = {}) => {
           <div
             class={this.b("footer", this.dialogOptions.footer.align || "right")}
           >
-            {isFunction(this.dialogOptions.footer.render)
-              ? this.dialogOptions.footer.render(h, buttonRender)
-              : buttonRender()}
+            {resolveRender(this.dialogOptions.footer.render, h, buttonRender)}
           </div>
         );
       };

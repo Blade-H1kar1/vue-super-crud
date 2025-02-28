@@ -157,3 +157,15 @@ export function checkVisibility(item, scope, defaultShow) {
   if (item.show !== undefined) result.push(checkVisibility("show"));
   return result.length > 0 ? result.every((item) => item) : defaultShow;
 }
+
+export function resolveRender(render, h, scope) {
+  if (!render) return null;
+  const VNode = isFunction(render)
+    ? render.length === 2
+      ? render(h, scope)
+      : render(scope)
+    : render;
+  if (VNode) {
+    return isVNode(VNode) ? VNode : <span>{VNode}</span>;
+  }
+}
