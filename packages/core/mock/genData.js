@@ -6,8 +6,8 @@ const Random = Mock.Random;
  */
 const PRESET_RULES = {
   // 数字相关
-  integer: (min = 0, max = 100) => Random.integer(min, max), // 整数
-  float: (min = 0, max = 100, precision = 2) =>
+  integer: (min = 1, max = 100) => Random.integer(min, max), // 整数
+  float: (min = 1, max = 100, precision = 2) =>
     Random.float(min, max, 0, precision), // 浮点数
 
   // 文本相关
@@ -44,7 +44,6 @@ const PRESET_RULES = {
 
   // 其他
   pick: (arr) => Random.pick(arr), // 从数组中随机选择
-  bool: (probability = 0.5) => Random.boolean(probability), // 布尔值，可设置概率
   uuid: () => Random.guid(), // 唯一标识
 };
 
@@ -62,6 +61,21 @@ export function generateCustomMockData(m, scope) {
   return m;
 }
 
+const typeGenerators = {
+  input: generateInputValue,
+  number: generateNumberValue,
+  select: generateSelectValue,
+  date: generateDateValue,
+  time: generateTimeValue,
+  radio: generateRadioValue,
+  checkbox: generateCheckboxValue,
+  cascader: generateCascaderValue,
+  switch: generateSwitchValue,
+  slider: generateSliderValue,
+  rate: generateRateValue,
+  transfer: generateTransferValue,
+};
+
 /**
  * 根据配置生成 mock 数据
  */
@@ -78,35 +92,12 @@ export function generateMockData(config, options = {}) {
     return Mock.mock(pattern);
   }
 
-  // 5. 根据组件类型生成数据
-  switch (config.type) {
-    case "input":
-      return generateInputValue(config);
-    case "number":
-      return generateNumberValue(config);
-    case "select":
-      return generateSelectValue(config);
-    case "date":
-      return generateDateValue(config, { yearRange });
-    case "time":
-      return generateTimeValue(config);
-    case "radio":
-      return generateRadioValue(config);
-    case "checkbox":
-      return generateCheckboxValue(config);
-    case "cascader":
-      return generateCascaderValue(config);
-    case "switch":
-      return generateSwitchValue(config);
-    case "slider":
-      return generateSliderValue(config);
-    case "rate":
-      return generateRateValue(config);
-    case "transfer":
-      return generateTransferValue(config);
-    default:
-      return undefined;
+  const generator = typeGenerators[config.type];
+  if (generator) {
+    return generator(config, { yearRange });
   }
+
+  return undefined;
 }
 
 function generateInputValue(config) {
@@ -130,7 +121,7 @@ function generateInputValue(config) {
 }
 
 function generateNumberValue(config) {
-  const { min = 0, max = 100, precision = 0 } = config;
+  const { min = 1, max = 100, precision = 0 } = config;
   const factor = Math.pow(10, precision);
   return Math.round(Random.float(min, max) * factor) / factor;
 }
@@ -262,7 +253,7 @@ function generateTimeValue(config) {
     isRange,
     valueFormat = "HH:mm:ss",
     format = "HH:mm:ss",
-    min = "00:00:00",
+    min = "01:00:00",
     max = "23:59:59",
     step = 1,
   } = config;
@@ -317,7 +308,7 @@ function generateCheckboxValue(config) {
     return Random.boolean() ? config.trueLabel : config.falseLabel;
   }
 
-  const { options = [], min = 0, max = options.length } = config;
+  const { options = [], min = 1, max = options.length } = config;
   if (!options.length) return [];
 
   const availableOptions = options.filter((opt) => !opt.disabled);
@@ -384,13 +375,22 @@ function generateSwitchValue(config) {
 function generateSliderValue(config) {
   const { min = 1, max = 100, step = 1, range = false } = config;
 
+  // 根据step调整值
+  const adjustValueByStep = (value) => {
+    if (!step || step === 1) return value;
+    // 计算最接近的合法值
+    return Math.round(value / step) * step;
+  };
+
   if (range) {
-    const value1 = Random.integer(min, max - step);
-    const value2 = Random.integer(value1 + step, max);
+    // 生成范围值
+    const value1 = adjustValueByStep(Random.integer(min, max - step));
+    const value2 = adjustValueByStep(Random.integer(value1 + step, max));
     return [value1, value2];
   }
 
-  return Random.integer(min, max);
+  // 生成单个值
+  return adjustValueByStep(Random.integer(min, max));
 }
 
 function generateRateValue(config) {

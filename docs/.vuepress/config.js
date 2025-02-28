@@ -58,6 +58,11 @@ module.exports = {
           children: ["formatData/config", "formatData/baseUse"],
         },
         {
+          title: "数据模拟",
+          collapsable: true,
+          children: ["mockData/base"],
+        },
+        {
           title: "crud组件",
           collapsable: true,
           children: [

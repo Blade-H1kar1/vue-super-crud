@@ -99,13 +99,15 @@ export default {
           (!isEmptyData(this.$value) && this.$value !== 0)
         )
           return;
+        const config = this.getComponentConfig();
+        if (config && config.disabled) return;
         if (this.item.mock) {
           const mockValue = generateCustomMockData(this.item.mock, this.scope);
           mockValue && this.setFormatValue(mockValue);
           return;
         }
 
-        const mockValue = generateMockData(this.getComponentConfig(), {
+        const mockValue = generateMockData(config, {
           pattern: this.getPattern(),
         });
         !isEmptyData(mockValue) && this.setFormatValue(mockValue);

@@ -10,11 +10,11 @@ const regulars = {
   },
   phone: {
     msg: "请输入正确的手机号码",
-    regular: /^(?:(?:\+|00)86)?1[3-9]\d{9}$/,
+    regular: /^1[3-9]\d{9}$/,
   },
   email: {
     msg: "请输入正确的邮箱地址",
-    regular: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+    regular: /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.(com|cn|net|org|edu|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum)$/,
   },
   number: {
     msg: "请输入数字",

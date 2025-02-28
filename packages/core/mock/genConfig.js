@@ -65,6 +65,7 @@ export function getComponentConfig(vnode) {
     ElSlider: "slider",
     ElRate: "rate",
     ElTransfer: "transfer",
+    ElSwitch: "switch",
   };
 
   if (specialConfig[name]) {
@@ -88,55 +89,42 @@ export function getComponentConfig(vnode) {
  * 获取选择器的选项
  */
 function getSelectOptions(instance) {
-  // 递归查找所有子组件
-  function findOptions(component) {
-    let options = [];
-    if (component.$options.name === "ElOption") {
-      options.push({
-        label: component.label,
-        value: component.value ?? component.label,
-        disabled: !!component.disabled,
-      });
-    }
-
-    // 递归查找子组件
-    if (component.$children && component.$children.length) {
-      component.$children.forEach((child) => {
-        options = options.concat(findOptions(child));
-      });
-    }
-
-    return options;
-  }
-  return findOptions(instance);
+  return findChildComponents(instance, {
+    name: "ElOption",
+    multiple: true,
+  }).map((option) => ({
+    label: option.label,
+    value: option.value ?? option.label,
+    disabled: !!option.disabled,
+  }));
 }
 
 /**
  * 获取单选框组的选项
  */
 function getRadioOptions(instance) {
-  return instance.$children
-    .filter((child) =>
-      ["ElRadio", "ElRadioButton"].includes(child.$options.name)
-    )
-    .map((radio) => ({
-      label: radio.label,
-      value: radio.value ?? radio.label,
-      disabled: !!radio.disabled,
-    }));
+  return findChildComponents(instance, {
+    name: ["ElRadio", "ElRadioButton"],
+    multiple: true,
+  }).map((radio) => ({
+    label: radio.label,
+    value: radio.value ?? radio.label,
+    disabled: !!radio.disabled,
+  }));
 }
 
 /**
  * 获取复选框组的选项
  */
 function getCheckboxOptions(instance) {
-  return instance.$children
-    .filter((child) => child.$options.name === "ElCheckbox")
-    .map((checkbox) => ({
-      label: checkbox.label,
-      value: checkbox.value ?? checkbox.label,
-      disabled: !!checkbox.disabled,
-    }));
+  return findChildComponents(instance, {
+    name: "ElCheckbox",
+    multiple: true,
+  }).map((checkbox) => ({
+    label: checkbox.label,
+    value: checkbox.value ?? checkbox.label,
+    disabled: !!checkbox.disabled,
+  }));
 }
 
 /**
@@ -178,4 +166,63 @@ function getRealComponent(vnode) {
   }
 
   return instance;
+}
+
+/**
+ * 查找特定子组件
+ * @param {Object} instance - 组件实例
+ * @param {Object} options - 查找选项
+ * @param {String} options.name - 组件名称
+ * @param {Function} options.filter - 自定义过滤函数
+ * @param {Boolean} options.deep - 是否深度查找，默认true
+ * @param {Boolean} options.multiple - 是否查找多个，默认false
+ * @returns {Array|Object|null} - 返回找到的组件实例
+ */
+export function findChildComponents(instance, options = {}) {
+  const { name, filter, deep = true, multiple = false } = options;
+
+  if (!instance?.$children) {
+    return multiple ? [] : null;
+  }
+
+  // 处理名称匹配逻辑
+  const matchName = (componentName) => {
+    if (!name) return true;
+    if (Array.isArray(name)) {
+      return name.includes(componentName);
+    }
+    return componentName === name;
+  };
+
+  const result = [];
+
+  // 查找逻辑
+  function find(children) {
+    for (const child of children) {
+      // 检查组件是否匹配
+      const nameMatch = matchName(child.$options.name);
+      const isMatch = nameMatch && (filter ? filter(child) : true);
+
+      if (isMatch) {
+        result.push(child);
+        // 如果不需要多个结果且已找到，则提前返回
+        if (!multiple) {
+          return true;
+        }
+      }
+
+      // 深度查找
+      if (deep && child.$children?.length) {
+        const found = find(child.$children);
+        if (found && !multiple) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  find(instance.$children);
+
+  return multiple ? result : result[0] || null;
 }
