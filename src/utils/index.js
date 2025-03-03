@@ -169,3 +169,48 @@ export function resolveRender(render, h, scope) {
     return isVNode(VNode) ? VNode : <span>{VNode}</span>;
   }
 }
+
+export function filterButtons(
+  buttons,
+  options = {},
+  scope = null,
+  position = ""
+) {
+  if (!Array.isArray(buttons)) return [];
+
+  return buttons
+    .map((button) => {
+      // 检查显示/隐藏条件
+      if (!checkVisibility(button, scope, true)) return null;
+
+      // 检查权限
+      const permission =
+        button.per ||
+        button.hasPermi ||
+        (button.key && options.permission?.[button.key]);
+
+      if (
+        permission &&
+        options.checkPermission &&
+        !options.checkPermission(permission)
+      ) {
+        return null;
+      }
+
+      // 处理子按钮
+      if (button.children?.length) {
+        const children = filterButtons(
+          button.children,
+          options,
+          scope,
+          position
+        );
+        if (children.length === 0) return null;
+        button = { ...button, children };
+      }
+
+      // 应用自定义控制
+      return options.controlButton?.(position, button, scope) || button;
+    })
+    .filter(Boolean);
+}

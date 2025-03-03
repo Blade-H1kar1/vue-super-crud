@@ -32,7 +32,17 @@ class ConfigManager {
   }
 
   getGlobalConfig(key) {
-    return cloneDeep(this.globalConfigs[key]) || {};
+    return (
+      cloneDeep({
+        size: this.globalConfigs.size,
+        checkPermission:
+          this.globalConfigs.checkPermission ||
+          (() => {
+            return true;
+          }),
+        ...this.globalConfigs[key],
+      }) || {}
+    );
   }
 
   /**

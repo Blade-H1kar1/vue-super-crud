@@ -375,9 +375,10 @@ export default {
       properties: {
         show: Boolean,
         hidden: Boolean,
-        quickEdit: Boolean,
         actionBtn: Boolean,
         copy: presetButtonType,
+        mock: presetButtonType,
+        reset: presetButtonType,
         handles: {
           type: Array,
           default: () => [],
@@ -386,7 +387,8 @@ export default {
       },
       default: () => ({
         copy: true,
-        quickEdit: true,
+        mock: true,
+        reset: true,
         actionBtn: true,
         handles: [],
       }),

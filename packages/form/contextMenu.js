@@ -1,31 +1,24 @@
+import { batchMerge } from "utils/mergeTemp";
+import { checkVisibility, filterButtons } from "utils";
 export default {
   methods: {
-    handleContextMenu(event) {
-      if (this.formOptions.contextMenu === false) return;
-
-      const isFormElement =
-        ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName) ||
-        event.target.contentEditable === "true";
-      // 如果是表单元素则不拦截右键菜单
-      if (isFormElement) return;
-      event.preventDefault();
-      // 创建右键菜单项
-      const menuItems = [
-        {
+    contextMenuTemps() {
+      return {
+        mock: {
           label: "生成测试数据",
           icon: "el-icon-magic-stick",
           onClick: () => {
             this.$emit("mockData");
           },
         },
-        {
+        reset: {
           label: "重置表单",
           icon: "el-icon-refresh",
           onClick: () => {
             this.$emit("handleChild", "resetField", null, true);
           },
         },
-        {
+        copy: {
           label: "复制数据",
           icon: "el-icon-document-copy",
           onClick: async () => {
@@ -50,7 +43,7 @@ export default {
             }
           },
         },
-        {
+        paste: {
           label: "粘贴数据",
           icon: "el-icon-document-add",
           children: [
@@ -76,14 +69,14 @@ export default {
             },
           ],
         },
-        {
+        saveDraft: {
           label: `保存为草稿`,
           icon: "el-icon-plus",
           onClick: () => {
             this.$refs.draftDrawer.handleSaveDraft();
           },
         },
-        {
+        loadDraft: {
           label: `加载最新草稿`,
           icon: "el-icon-bottom",
           children: [
@@ -101,18 +94,39 @@ export default {
             },
           ],
         },
-        {
+        draft: {
           label: `草稿箱 (${this.$refs.draftDrawer.draftNumber})`,
           icon: "el-icon-notebook-2",
           onClick: () => {
             this.$refs.draftDrawer.handleDraft();
           },
         },
-      ];
+      };
+    },
+    handleContextMenu(event) {
+      if (checkVisibility(this.formOptions.contextMenu) === false) return;
 
+      const isFormElement =
+        ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName) ||
+        event.target.contentEditable === "true";
+      // 如果是表单元素则不拦截右键菜单
+      if (isFormElement) return;
+      event.preventDefault();
+      // 创建右键菜单项
+      const menuItems = batchMerge(
+        "btn.form.contextMenu",
+        this.formOptions.contextMenu,
+        this.formScope,
+        this.contextMenuTemps()
+      );
       // 显示右键菜单
       this.$contextmenu({
-        items: menuItems,
+        items: filterButtons(
+          menuItems,
+          this.formOptions,
+          this.formScope,
+          "contextMenu"
+        ),
         event,
         customClass: "sc-form-contextmenu",
         zIndex: 3000,

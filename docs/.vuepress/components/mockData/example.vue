@@ -1,5 +1,10 @@
 <template>
-  <sc-form v-model="form" :options="options"> </sc-form>
+  <div>
+    <h3>表单</h3>
+    <sc-form v-model="form" :options="options"> </sc-form>
+    <h3 style="margin-top: 20px;">表格</h3>
+    <sc-crud :data="data" :options="crudOptions"> </sc-crud>
+  </div>
 </template>
 
 <script>
@@ -13,6 +18,28 @@ export default {
         cascader: [],
         transfer: [],
       },
+      data: [
+        {
+          id: 1,
+          input: "",
+          select: "",
+        },
+        {
+          id: 2,
+          input: "",
+          select: "",
+        },
+        {
+          id: 3,
+          input: "",
+          select: "",
+        },
+        {
+          id: 4,
+          input: "",
+          select: "",
+        },
+      ],
     };
   },
   computed: {
@@ -213,6 +240,46 @@ export default {
                 { key: 3, label: "选项3" },
               ],
               titles: ["待选列表", "已选列表"],
+            },
+          },
+        ],
+      };
+    },
+    crudOptions() {
+      return {
+        toolbar: false,
+        renderColumns: [
+          {
+            prop: "id",
+            label: "ID",
+            isEdit: false,
+          },
+          {
+            prop: "input",
+            label: "普通输入框",
+            isEdit: true,
+            form: {
+              comp: {
+                name: "el-input",
+                maxlength: 20,
+                "show-word-limit": true,
+              },
+            },
+          },
+          {
+            prop: "select",
+            label: "下拉选择",
+            isEdit: true,
+            form: {
+              comp: {
+                name: "el-select",
+                options: [
+                  { label: "选项1", value: "1" },
+                  { label: "选项2", value: "2" },
+                  { label: "选项3", value: "3" },
+                  { label: "选项4", value: "4" },
+                ],
+              },
             },
           },
         ],

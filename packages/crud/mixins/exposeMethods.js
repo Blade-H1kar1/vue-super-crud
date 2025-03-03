@@ -8,5 +8,13 @@ export default {
       this.$refs.searchRef.handleSearch();
       this.$emit("closeSearchPopover");
     },
+    resetField(prop) {
+      // 通知子组件执行重置
+      this.$emit("handleChild", "resetField", prop);
+    },
+    reset() {
+      this.$refs.tableFormRef && this.$refs.tableFormRef.resetFields();
+      this.$emit("reset");
+    },
   },
 };

@@ -99,7 +99,34 @@ export default {
     labelOverTip: Boolean,
     // 右键菜单配置
     contextMenu: {
-      type: Boolean,
+      type: [Boolean, Object],
+      strict: true,
+      properties: {
+        show: Boolean,
+        hidden: Boolean,
+        mock: presetButtonType,
+        copy: presetButtonType,
+        reset: presetButtonType,
+        paste: presetButtonType,
+        saveDraft: presetButtonType,
+        loadDraft: presetButtonType,
+        draft: presetButtonType,
+        handles: {
+          type: Array,
+          default: () => [],
+          arrayOf: buttonItem,
+        },
+      },
+      default: () => ({
+        copy: true,
+        mock: true,
+        reset: true,
+        paste: true,
+        saveDraft: true,
+        loadDraft: true,
+        draft: true,
+        handles: [],
+      }),
     },
     // 操作按钮配置
     action: {
@@ -158,7 +185,7 @@ export default {
   },
   transforms: [
     (source, key, value) => {
-      const showKeys = ["action"];
+      const showKeys = ["action", "contextMenu"];
       if (showKeys.includes(key)) {
         if (typeof value === "boolean") {
           source[key] = {
@@ -177,7 +204,7 @@ export default {
       }
     },
     (source, key, value) => {
-      const buttonKeys = ["action"];
+      const buttonKeys = ["action", "contextMenu"];
       if (Array.isArray(value) && buttonKeys.includes(key)) {
         source[key] = {
           handles: value,

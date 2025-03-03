@@ -126,7 +126,7 @@ export default create({
     const formProp = this.getFormProp(item);
     const { rules, rawRules } = generateRules(item, this.scope);
     const isValidate = editMode && rules.length;
-    const compName = isValidate ? "el-form-item" : "div";
+    const compName = editMode ? "el-form-item" : "div";
     this.cellVnode = (
       <compName
         key={this.scope.$index + item.prop}

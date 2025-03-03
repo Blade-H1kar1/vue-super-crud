@@ -147,6 +147,7 @@ import {
   mergeTemp,
   singleMerge,
   checkVisibility,
+  filterButtons,
 } from "utils";
 import tableProps from "./mixins/props";
 import cache from "utils/cache.js";
@@ -206,6 +207,7 @@ export default create({
   provide() {
     return {
       ctx: this,
+      controlCtx: this,
     };
   },
   data() {
@@ -689,22 +691,7 @@ export default create({
     },
     // 校验按钮隐藏
     checkHiddenButtons(key, buttons, scope) {
-      buttons = filterColumns(buttons, scope);
-      buttons = buttons.reduce((acc, cur) => {
-        const permission =
-          cur.per ||
-          cur.hasPermi ||
-          (cur.key && this.crudOptions.permission[cur.key]);
-        if (permission && !this.$scOpt?.checkPermission(permission)) return acc;
-        if (cur.children) {
-          cur.children = this.checkHiddenButtons(key, cur.children, scope);
-        }
-        acc.push(cur);
-        return acc;
-      }, []);
-      if (isFunction(this.crudOptions.controlButton)) {
-        buttons = this.crudOptions.controlButton(key, buttons, scope);
-      }
+      buttons = filterButtons(buttons, this.crudOptions, scope, key);
       return buttons;
     },
     changeLoading(bool = false) {
