@@ -1,48 +1,139 @@
 .sc-tabs {
+  // 旋转动画
   @keyframes rotate {
-    0% {
+    from {
       transform: rotate(0deg);
     }
-    100% {
+    to {
       transform: rotate(360deg);
     }
   }
+
+  // 刷新图标旋转
   .rotating {
     animation: rotate 0.45s linear infinite;
   }
-  .fade-transform--move,
-  .fade-transform-leave-active,
-  .fade-transform-enter-active {
-    transition: all 0.3s;
+
+  // tabs内容区域基础样式
+  .sc-tabs__content {
+    position: relative;
+    min-height: 100px;
+    transition: height 0.3s ease-in-out; // 保留过渡动画
+    height: auto; // 默认自适应高度
+  }
+
+  // 标签页面板
+  .tab-pane {
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 20px;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+    will-change: transform, opacity;
+
+    &.is-active {
+      position: relative; // 激活状态下改为相对定位，使父容器可以正确计算高度
+    }
+  }
+
+  // 动画相关样式
+  .fade-transform-enter-active,
+  .fade-transform-leave-active {
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    position: absolute;
+    left: 0;
+    top: 0;
   }
 
   .fade-transform-enter {
     opacity: 0;
-    transform: translateX(-30px);
+    transform: translateX(20px);
   }
 
   .fade-transform-leave-to {
     opacity: 0;
-    transform: translateX(30px);
+    transform: translateX(-20px);
   }
+
+  // tabs导航栏底部线条
   .el-tabs__nav-wrap::after {
     height: 1px;
+    background-color: var(--border-color-lighter);
+  }
+
+  // 自定义滚动条样式
+  .el-tabs__content {
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--border-color-light);
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: var(--background-color-light);
+      border-radius: 3px;
+    }
   }
 }
+
+// 带边框的tabs样式
 .sc-tabs__border {
+  // 移除头部边距
   .el-tabs__header {
     margin-bottom: 0;
   }
+
+  // 移除卡片式tabs的底部边框
   .el-tabs--card > .el-tabs__header {
     border-bottom: none;
   }
+
+  // 内容区域样式
   .sc-tabs__content {
-    overflow: hidden;
-    border: 1px solid #dfe4ed;
+    position: relative;
+    overflow: visible;
+    border: 1px solid var(--border-color-lighter);
     border-radius: 0 4px 4px 4px;
-    padding: 20px;
+    background-color: var(--color-white);
+    // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    // 刷新状态移除边框
+    &.sc-tabs__is-refresh {
+      border: none;
+      box-shadow: none;
+    }
   }
-  .sc-tabs__is-refresh {
-    border: none;
+
+  // 选项卡样式优化
+  .el-tabs__item {
+    height: 40px;
+    line-height: 40px;
+    color: var(--color-text-regular);
+
+    &.is-active {
+      font-weight: 500;
+      color: var(--color-primary);
+    }
+
+    // 刷新图标
+    .el-icon-refresh {
+      margin-left: 5px;
+      font-size: 14px;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      transition: color 0.3s;
+
+      &:hover {
+        color: var(--color-primary);
+      }
+    }
   }
 }

@@ -27,7 +27,7 @@
 </common-code-format>
 </ClientOnly>
 
-## v-insertSlot插入插槽渲染弹窗
+<!-- ## v-insertSlot插入插槽渲染弹窗
 
 `v-insertSlot` 获取模板，插入弹窗实例</br>
 
@@ -37,7 +37,7 @@
   
 <<< @/docs/.vuepress/components/dialog/baseUse/insertSlot.vue
 </common-code-format>
-</ClientOnly>
+</ClientOnly> -->
 
 
 ## 确认，取消关闭前方法

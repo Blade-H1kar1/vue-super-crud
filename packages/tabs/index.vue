@@ -1,21 +1,17 @@
 <template>
-  <div
-    :class="[
-      b(),
-      {
-        [b('border')]: border,
-      },
-    ]"
-  >
+  <div :class="[b(), { [b('border')]: border || $attrs.type === 'card' }]">
+    <!-- 标签页头部 -->
     <el-tabs
       v-model="activeName"
-      v-if="tabList && tabList.length"
+      v-if="tabList.length"
       v-bind="$attrs"
       v-on="omitListeners"
       @tab-click="handleTabClick"
     >
-      <el-tab-pane v-if="all" :label="allConfig.label" name="all">
-      </el-tab-pane>
+      <!-- 全部标签页 -->
+      <el-tab-pane v-if="all" :label="allConfig.label" name="all" />
+
+      <!-- 动态标签页 -->
       <el-tab-pane
         v-for="(item, index) in tabList"
         :key="getItemKey(item, index)"
@@ -23,63 +19,71 @@
         :name="getItemName(item, index)"
         v-bind="getItem(item)"
       >
-        <span slot="label">
+        <template #label>
+          <i v-if="item.icon" :class="item.icon"></i>
           <slot
             v-if="$scopedSlots[getItemName(item, index) + '-label']"
             :name="getItemName(item, index) + '-label'"
             v-bind="item"
-          >
-          </slot>
+          />
           <template v-else>{{ getItemLabel(item) }}</template>
           <i
-            v-if="cache && activeName === getItemName(item, index)"
-            title="刷新"
+            v-if="refresh && cache && activeName === getItemName(item, index)"
             class="el-icon-refresh"
-            style="padding: 5px;"
             :class="{ rotating: isRefreshing }"
-            @click="refreshTab(item, index)"
-          ></i>
-        </span>
+            title="刷新"
+            @click.stop="refreshTab(item, index)"
+          />
+        </template>
       </el-tab-pane>
     </el-tabs>
-    <slot></slot>
-    <div
-      :class="{
-        [b('content')]: true,
-        [b('is-refresh')]: isRefreshing,
-      }"
-    >
-      <transition name="fade-transform" mode="out-in">
-        <div v-show="isContentVisible">
-          <template v-for="(item, index) in tabList">
-            <div
-              v-show="currentTab === getItemName(item, index)"
-              :key="getItemKey(item, index)"
-            >
-              <slot
-                v-if="shouldShowTab(item, index)"
-                :name="getItemName(item, index)"
-              ></slot>
-            </div>
-          </template>
-        </div>
-      </transition>
+
+    <!-- 插槽内容 -->
+    <slot />
+
+    <!-- 标签页内容区 -->
+    <div :class="[b('content'), { [b('is-refresh')]: isRefreshing }]">
+      <transition-group name="fade-transform" mode="out-in">
+        <template v-for="(item, index) in tabList">
+          <div
+            v-if="shouldRenderTab(item, index)"
+            :key="getItemKey(item, index)"
+            v-show="currentTab === getItemName(item, index)"
+            class="tab-pane"
+            :class="{ 'is-active': currentTab === getItemName(item, index) }"
+          >
+            <slot
+              v-if="$scopedSlots[getItemName(item, index)]"
+              :name="getItemName(item, index)"
+            />
+            <Render
+              v-else
+              v-bind="item"
+              :item="item"
+              :scope="{
+                row: item.value,
+              }"
+            />
+          </div>
+        </template>
+      </transition-group>
     </div>
   </div>
 </template>
 
 <script>
 import { create } from "core";
-import { isPlainObject, omit, debounce } from "lodash-es";
+import { isPlainObject, omit } from "lodash-es";
+import Render from "core/components/render";
+
 export default create({
   name: "tabs",
+
   props: {
     value: {},
     tabList: {
       type: Array,
-      default() {
-        return [];
-      },
+      default: () => [],
     },
     cache: {
       type: Boolean,
@@ -91,16 +95,41 @@ export default create({
       type: Boolean,
       default: true,
     },
+    refresh: {
+      type: Boolean,
+      default: false,
+    },
   },
+  components: {
+    Render,
+  },
+
   data() {
     return {
       activeName: "",
-      cacheIndex: new Set(),
-      isContentVisible: true,
+      renderedTabs: new Set(),
       currentTab: "",
       isRefreshing: false,
+      scope: { row: {} },
     };
   },
+
+  computed: {
+    omitListeners() {
+      return omit(this.$listeners, ["tab-click", "input"]);
+    },
+
+    allConfig() {
+      const defaultConfig = {
+        label: "全部",
+        name: null,
+      };
+      return isPlainObject(this.all)
+        ? { ...defaultConfig, ...this.all }
+        : defaultConfig;
+    },
+  },
+
   watch: {
     value: {
       handler(val) {
@@ -108,112 +137,129 @@ export default create({
       },
       immediate: true,
     },
+
     activeName: {
       handler(val) {
-        this.handleActiveNameChange(val);
-        this.$emit(
-          "input",
-          this.all && this.activeName == "all"
-            ? this.allConfig.name
-            : this.activeName
-        );
+        if (!val) return;
+
+        this.handleTabTransition(val);
+        this.renderedTabs.add(val);
+
+        const emitValue = this.all && val === "all" ? this.allConfig.name : val;
+        this.$emit("input", emitValue);
       },
       immediate: true,
     },
-    tabList() {
-      this.initActiveName(this.value);
+
+    tabList: {
+      handler() {
+        this.initActiveName(this.value);
+      },
     },
   },
-  computed: {
-    omitListeners() {
-      return omit(this.$listeners, ["tab-click", "input"]);
-    },
-    allConfig() {
-      const defaultConfig = {
-        label: "全部",
-        name: null,
-      };
-      if (isPlainObject(this.all)) {
-        return Object.assign(defaultConfig, this.all);
-      }
-      return defaultConfig;
-    },
-  },
+
   mounted() {
+    // 从路由中恢复激活的标签
     if (this.cacheActive && this.$route?.query.tabActive) {
-      this.activeName = this.$route?.query.tabActive;
+      this.activeName = this.$route.query.tabActive;
     }
+    this.$nextTick(this.updateContentHeight);
   },
+  updated() {
+    this.$nextTick(this.updateContentHeight);
+  },
+
   methods: {
-    handleTabClick(...args) {
+    handleTabClick(tab) {
       this.$nextTick(() => {
-        this.cacheActive && this.updateRouteQuery(this.activeName);
-        this.$emit("tab-click", ...args);
+        if (this.cacheActive) {
+          this.updateRouteQuery(this.activeName);
+        }
+        this.$emit(
+          "tab-click",
+          tab,
+          this.tabList.find(
+            (item) => this.getItemName(item) === this.activeName
+          )
+        );
       });
     },
+
     initActiveName(val) {
-      if (this.tabList.length) {
-        this.activeName =
-          val || (this.all && "all") || this.getItemName(this.tabList[0], 0);
-      }
+      if (!this.tabList.length) return;
+
+      this.activeName =
+        val || (this.all && "all") || this.getItemName(this.tabList[0], 0);
     },
+
     getItem(item) {
       return isPlainObject(item) ? item : {};
     },
+
     getItemKey(item, index) {
-      return (item?.label || index) + "";
+      return `${item?.label || index}`;
     },
+
     getItemLabel(item) {
       return item?.label || item;
     },
-    getItemName(item, index) {
-      return (item?.name || item?.value || index) + "";
-    },
-    shouldShowTab(item, index) {
-      const tabName = this.getItemName(item, index);
-      const cache = item.cache === undefined ? this.cache : item.cache;
-      return cache ? this.cacheIndex.has(tabName) : this.currentTab === tabName;
-    },
-    handleActiveNameChange(val) {
-      this.handleTabTransition(val);
-      this.cacheIndex.add(val);
-    },
-    updateRouteQuery(val) {
-      if (this.$route) {
-        this.$router.replace({
-          path: this.$route.path,
-          query: {
-            ...this.$route.query,
-            tabActive: val,
-          },
-        });
-      }
-    },
-    handleTabTransition(val) {
-      this.isContentVisible = false;
-      if (this.timer) {
-        clearTimeout(this.timer);
-      }
 
-      this.timer = setTimeout(() => {
-        this.isContentVisible = true;
-        this.currentTab = val;
-      }, 300);
+    getItemName(item, index) {
+      return `${item?.name || item?.value || index}`;
     },
+
+    shouldRenderTab(item, index) {
+      const tabName = this.getItemName(item, index);
+      const shouldCache = item.cache === undefined ? this.cache : item.cache;
+      return shouldCache
+        ? this.renderedTabs.has(tabName)
+        : this.currentTab === tabName;
+    },
+
+    updateRouteQuery(val) {
+      if (!this.$route) return;
+
+      this.$router.replace({
+        path: this.$route.path,
+        query: {
+          ...this.$route.query,
+          tabActive: val,
+        },
+      });
+    },
+
+    async handleTabTransition(val) {
+      this.currentTab = val;
+    },
+
     async refreshTab(item, index) {
       if (this.isRefreshing) return;
+
+      this.$emit("refresh", item, index);
       const tabName = this.getItemName(item, index);
       this.isRefreshing = true;
-      this.isContentVisible = false;
 
-      await new Promise((resolve) => setTimeout(resolve, 150));
-      this.$forceUpdate();
-      this.cacheIndex.delete(tabName);
+      // 移除缓存
+      this.renderedTabs.delete(tabName);
+      await this.$nextTick();
 
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      this.cacheIndex.add(tabName);
-      this.isRefreshing = false;
-      this.isContentVisible = true;
+      // 重新渲染
+      setTimeout(() => {
+        this.renderedTabs.add(tabName);
+        this.isRefreshing = false;
+      }, 300);
+    },
+    updateContentHeight() {
+      // 获取当前激活的面板
+      const activePane = this.$el.querySelector(".tab-pane.is-active");
+      if (activePane) {
+        // 获取面板实际高度并设置给容器
+        const height = activePane.offsetHeight;
+        const content = this.$el.querySelector(".sc-tabs__content");
+        if (content) {
+          content.style.height = `${height}px`;
+        }
+      }
     },
   },
 });

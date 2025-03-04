@@ -88,6 +88,16 @@ module.exports = {
           collapsable: true,
           children: ["dialog/baseUse"],
         },
+        {
+          title: "button组件",
+          collapsable: true,
+          children: ["button/base"],
+        },
+        {
+          title: "tabs组件",
+          collapsable: true,
+          children: ["tabs/base"],
+        },
       ],
     },
   },

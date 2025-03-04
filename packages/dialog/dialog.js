@@ -32,8 +32,6 @@ export default (options = {}) => {
         if (isFunction(options.mounted)) {
           options.mounted(this);
         }
-        // 将子组件扩展方法绑定在当前this上
-        this.$refs.target && this.extendMethod(this.$refs.target);
       });
     },
     computed: {
@@ -45,11 +43,6 @@ export default (options = {}) => {
         }
         opt = batchMerge("render", [opt], this);
         opt = opt[0];
-        if (this.vnode) {
-          // 删除 自定义指令防止重复执行
-          delete this.vnode.data;
-          opt.render = () => this.vnode;
-        }
         return opt;
       },
       dialogType() {
@@ -225,8 +218,8 @@ export default (options = {}) => {
           v-scDialogDrag={this.dialogOptions.drag}
           v-scDialogDragHeight={this.dialogOptions.dragSize}
           class={[this.b(), this.dialogOptions.class]}
-          size={setPx(this.dialogOptions.width)}
-          width={setPx(this.dialogOptions.width)}
+          size={setPx(this.dialogOptions.width || "600px")}
+          width={setPx(this.dialogOptions.width || "600px")}
           fullscreen={this.fullscreen}
           visible={this.visible}
           beforeClose={this.cancel}

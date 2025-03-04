@@ -37,20 +37,21 @@ export default {
       },
     };
   },
+  // 返回指定页
   successBack: (item) => {
     return {
       title: "提交成功",
       footer: {
         hidden: true,
       },
-      render: (h) => (
+      render: (h, scope) => (
         <el-result icon="success" title="提交成功" subTitle="是否立即返回？">
           <template slot="extra">
             <el-button
               type="primary"
               style="width: 100px;"
               size="small"
-              onClick={item.backClick}
+              onClick={item.onClick}
             >
               返回
             </el-button>
@@ -59,24 +60,25 @@ export default {
       ),
     };
   },
+  // 确认提示
   confirmTip: (item) => {
     return {
-      title: "提示",
+      title: item.title || "提示",
       width: "400px",
-      render: (h) => {
+      render: (h, scope) => {
         return (
           <div style="display:flex">
             <div
-              class="el-icon-question"
+              class="el-icon-warning"
               style="color:#E6A23C;font-size:24px;margin-right:15px"
             ></div>
             <div style="flex:1;padding-right:20px">
-              <div style="margin-top:5px;">
-                {item.label || "此操作将永久删除该文件, 是否继续?"}
+              <div style="margin-top:2px;">
+                {item.label || "确定要执行此操作吗？"}
               </div>
               {item.content ? (
                 typeof item.content !== "function" ? (
-                  <div style="margin-top:10px;">{item.content}</div>
+                  <div style="margin-top:10px;">{item.content || ""}</div>
                 ) : (
                   <div style="margin-top:10px;">{item.content(h)}</div>
                 )
@@ -84,6 +86,38 @@ export default {
             </div>
           </div>
         );
+      },
+    };
+  },
+  // 文本提交
+  textSubmit: (item) => {
+    let formRef = null;
+    return {
+      title: item.title || "提示",
+      width: item.width || "400px",
+      comp: {
+        name: "sc-form",
+        labelPosition: "top",
+        mounted: (scope, instance) => {
+          formRef = instance;
+        },
+        renderColumns: [
+          {
+            prop: "input",
+            label: item.label || item.title || "原因",
+            required: item.required || true,
+            comp: {
+              type: item.type || "textarea",
+              rows: item.rows || 4,
+              maxlength: item.maxlength || 200,
+              showWordLimit: item.showWordLimit || true,
+            },
+          },
+        ],
+      },
+      confirm: async (cb, d) => {
+        await formRef.validate();
+        item.submit(cb, d.value.input);
       },
     };
   },

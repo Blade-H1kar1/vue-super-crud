@@ -5,7 +5,7 @@ export default {
     // 宽度
     width: {
       type: [Number, String],
-      default: "600px",
+      default: "",
     },
     // 尺寸
     size: {
