@@ -61,13 +61,13 @@ export default {
         // 检查是否所有字段都为空
 
         const isAllEmpty = props.every((prop) =>
-          isEmptyData(isObject ? row[item.prop][prop] : row[prop])
+          isEmptyData(isObject ? get(row, [item.prop, prop]) : get(row, prop))
         );
         if (isAllEmpty) return [];
 
         // 获取所有值（包括空值）
         const values = props.map((prop) =>
-          +isObject ? row[item.prop][prop] : row[prop]
+          isObject ? get(row, [item.prop, prop]) : row[prop]
         );
 
         // 找到最后一个非空值的索引

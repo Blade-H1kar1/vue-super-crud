@@ -25,7 +25,7 @@ export default {
     value: {},
     prop: {
       type: String,
-      default: "value",
+      default: "",
     },
     comp: [Object, Function],
     render: Function,
@@ -60,11 +60,11 @@ export default {
       get() {
         try {
           const input = this.item.formatData?.input;
-          if (input) return input(get(this.scope.row, this.prop), this.scope);
-          return get(this.scope.row, this.prop);
+          if (input) return input(this.getRow(), this.scope);
+          return this.getRow();
         } catch (error) {
           console.error("获取格式化值失败:", error);
-          return get(this.scope.row, this.prop);
+          return this.getRow();
         }
       },
       set(value) {
@@ -130,8 +130,16 @@ export default {
         if (pattern) return pattern.regular;
       }
     },
+    getRow() {
+      if (!this.prop) return this.scope.row;
+      return get(this.scope.row, this.prop);
+    },
     // 设置行数据
     setRow(prop, val) {
+      if (!prop) {
+        this.$set(this.scope, "row", val);
+        return;
+      }
       // 处理数组路径 ['a', 'b'] 或字符串路径 'a.b'
       const path = Array.isArray(prop) ? prop : prop.split(".");
       if (path.length > 1) {

@@ -2,7 +2,7 @@
 import { isEmptyData } from "utils";
 import { create } from "core";
 import Render from "core/components/render";
-import { isFunction, merge, isPlainObject } from "lodash-es";
+import { isFunction, merge, isPlainObject, get } from "lodash-es";
 export default create({
   name: "crud-search-header",
   props: {
@@ -20,29 +20,26 @@ export default create({
       active: false,
     };
   },
-  watch: {
-    isSearch() {
-      this.$emit("update:isSearch", this.isSearch);
-    },
-  },
   created() {
-    this.$emit("update:isSearch", this.isSearch);
+    this.$emit("update:isSearch", this.isSearch());
     this.ctx.$on("closeSearchPopover", (prop) => {
       if (prop === this.item.prop) return;
       this.closePopover();
     });
+    this.$watch(
+      () =>
+        this.item.validateProp
+          ? get(this.ctx.query, this.item.validateProp)
+          : this.ctx.query[this.item.prop],
+      (val) => {
+        this.$emit("update:isSearch", this.isSearch());
+      },
+      {
+        deep: true,
+      }
+    );
   },
   computed: {
-    isSearch() {
-      const value = this.ctx.query[this.item.prop];
-      if (Array.isArray(value) && value.length) {
-        return value.every((item) => !isEmptyData(item));
-      }
-      if (isPlainObject(value) && Object.keys(value).length) {
-        return Object.values(value).every((item) => !isEmptyData(item));
-      }
-      return !isEmptyData(value);
-    },
     searchHeader() {
       return this.ctx.crudOptions.searchHeader;
     },
@@ -137,6 +134,18 @@ export default create({
     },
     popClick(e) {
       e.stopPropagation();
+    },
+    isSearch() {
+      const value = this.item.validateProp
+        ? get(this.ctx.query, this.item.validateProp)
+        : this.ctx.query[this.item.prop];
+      if (Array.isArray(value) && value.length) {
+        return value.every((item) => !isEmptyData(item));
+      }
+      if (isPlainObject(value) && Object.keys(value).length) {
+        return Object.values(value).every((item) => !isEmptyData(item));
+      }
+      return !isEmptyData(value);
     },
   },
   render(h) {

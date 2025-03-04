@@ -224,6 +224,7 @@ export default {
     },
     select(selection, row) {
       this.$emit("select", selection, row);
+      if (!this.selected) return;
       if (selection.indexOf(row) > -1) {
         selection.forEach((row) => {
           const exists = this.selected.some(
@@ -238,6 +239,8 @@ export default {
       }
     },
     selectAll(selection) {
+      this.$emit("select-all", selection);
+      if (!this.selected) return;
       const currentPageKeys = new Set(
         this.list.map((item) => item[this.valueKey])
       );
@@ -266,12 +269,12 @@ export default {
           }
         }
       }
-      this.$emit("select-all", selection);
     },
     removeSelection(row) {
       if (!this.selectionSelectable(row, row.$index)) {
         return;
       }
+      if (!this.selected) return;
       const index = this.selected.findIndex(
         (item) => item[this.valueKey] === row[this.valueKey]
       );

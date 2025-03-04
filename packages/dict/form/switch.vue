@@ -5,10 +5,10 @@
     @input="onElInput"
     :active-color="_active[props.color]"
     :active-value="_active[props.value]"
-    :active-text="_active[props.label]"
+    :active-text="showText ? _active[props.label] : ''"
     :inactive-color="_inActive[props.color]"
     :inactive-value="_inActive[props.value]"
-    :inactive-text="_inActive[props.label]"
+    :inactive-text="showText ? _inActive[props.label] : ''"
     v-bind="$attrs"
     v-on="listeners"
   >
@@ -51,13 +51,13 @@ export default create({
       return this.options || this.scope.dict;
     },
     _active() {
-      if (this.showText && this._options?.length > 0) {
+      if (this._options?.length > 0) {
         return this._options[0];
       }
       return {};
     },
     _inActive() {
-      if (this.showText && this._options?.length > 1) {
+      if (this._options?.length > 1) {
         return this._options[1];
       }
       return {};
