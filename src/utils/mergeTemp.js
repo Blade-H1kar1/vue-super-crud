@@ -9,7 +9,15 @@ import {
   cloneDeep,
 } from "lodash-es";
 
-export function mergeTemp(prefix, key, item, scope, templates = {}) {
+// swapMerge 是否交换合并顺序
+export function mergeTemp(
+  prefix,
+  key,
+  item,
+  scope,
+  templates = {},
+  swapMerge = false
+) {
   if (key) {
     let mergeItem;
     delete item.presetType;
@@ -24,14 +32,14 @@ export function mergeTemp(prefix, key, item, scope, templates = {}) {
         }
         const raw = cloneDeep(mergeItem);
         mergeItem.key = typeof key === "string" ? key : "";
-        item = merge(mergeItem, item);
+        item = swapMerge ? merge(item, mergeItem) : merge(mergeItem, item);
         if (item.raw) {
           item.raw = merge(item.raw, raw);
         } else {
           item.raw = raw;
         }
         if (item.presetType) {
-          item = mergeTemp(prefix, item.presetType, item, scope, templates);
+          item = mergeTemp(prefix, item.presetType, item, scope, templates, swapMerge);
         }
       }
     } else {
@@ -39,12 +47,12 @@ export function mergeTemp(prefix, key, item, scope, templates = {}) {
     }
   }
   if (Array.isArray(item.children) && item.children.length) {
-    item.children = batchMerge(prefix, item.children, scope, templates);
+    item.children = batchMerge(prefix, item.children, scope, templates, swapMerge);
   }
   return item;
 }
 
-export function batchMerge(prefix, item, scope, templates) {
+export function batchMerge(prefix, item, scope, templates, swapMerge) {
   const items = [];
   if (isPlainObject(item)) {
     Object.keys(item).forEach((key) => {
@@ -52,7 +60,7 @@ export function batchMerge(prefix, item, scope, templates) {
         items.push(...batchMerge(prefix, item[key], scope, templates));
       } else if (isPlainObject(item[key]) || item[key] === true) {
         if (item[key] === true) item[key] = {};
-        const mergeItem = mergeTemp(prefix, key, item[key], scope, templates);
+        const mergeItem = mergeTemp(prefix, key, item[key], scope, templates, swapMerge);
         if (!isEmpty(mergeItem)) items.push(mergeItem);
       }
     });
@@ -60,10 +68,10 @@ export function batchMerge(prefix, item, scope, templates) {
   if (isArray(item)) {
     item.forEach((i) => {
       if (isPlainObject(i)) {
-        const mergeItem = mergeTemp(prefix, i.presetType, i, scope, templates);
+        const mergeItem = mergeTemp(prefix, i.presetType, i, scope, templates, swapMerge);
         if (!isEmpty(mergeItem)) items.push(mergeItem);
       } else if (typeof i === "string") {
-        const mergeItem = mergeTemp(prefix, i, {}, scope, templates);
+        const mergeItem = mergeTemp(prefix, i, {}, scope, templates, swapMerge);
         if (!isEmpty(mergeItem)) items.push(mergeItem);
         else items.push(i);
       } else {

@@ -17,7 +17,6 @@ export default (options = {}) => {
         visible: false,
         loading: false,
         value: {},
-        vnode: null,
       };
     },
     created() {
@@ -41,8 +40,7 @@ export default (options = {}) => {
         if (options.presetType) {
           opt.presetType = options.presetType;
         }
-        opt = batchMerge("render", [opt], this);
-        opt = opt[0];
+        opt = batchMerge("render", [opt], this, {}, true)[0];
         return opt;
       },
       dialogType() {
@@ -61,19 +59,18 @@ export default (options = {}) => {
             label: "取消",
             onClick: this.cancel,
           },
+          close: {
+            label: "关闭",
+            type: "primary",
+            onClick: this.hide,
+          },
         };
       },
       footerButtons() {
         const footer = { ...this.dialogOptions.footer };
-        let buttons = [];
-        const merges = batchMerge(
-          "btn.dialog",
-          footer,
-          { ctx: this },
-          this.footerTemps
-        );
-        buttons.push(...merges);
-        return buttons;
+        return footer
+          ? batchMerge("btn.dialog", footer, { ctx: this }, this.footerTemps)
+          : [];
       },
       showFooter() {
         return checkVisibility(
@@ -88,9 +85,6 @@ export default (options = {}) => {
     },
     methods: {
       async confirm(params) {
-        if (this.validate) {
-          await this.validate();
-        }
         const cb = (p) => {
           this.visible = false;
           this.confirmCb(this, p);
@@ -188,9 +182,8 @@ export default (options = {}) => {
         );
       };
       const footer = (h) => {
-        if (this.dialogOptions.footer.h) h = this.dialogOptions.footer.h;
         if (this.showFooter === false) return;
-        const footer = this.dialogOptions.footer.render;
+        const render = this.dialogOptions.footer.render;
         const buttonRender = () => {
           return this.footerButtons.map((item) => (
             <scButton
@@ -207,8 +200,8 @@ export default (options = {}) => {
           <div
             class={this.b("footer", this.dialogOptions.footer.align || "right")}
           >
-            {footer
-              ? resolveRender(this.dialogOptions.footer.render, h, buttonRender)
+            {render
+              ? resolveRender(render, h, this, buttonRender)
               : buttonRender()}
           </div>
         );

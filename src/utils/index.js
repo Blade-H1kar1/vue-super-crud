@@ -158,11 +158,11 @@ export function checkVisibility(item, scope, defaultShow) {
   return result.length > 0 ? result.every((item) => item) : defaultShow;
 }
 
-export function resolveRender(render, h, scope) {
+export function resolveRender(render, h, scope, ...args) {
   if (!render) return null;
   const VNode = isFunction(render)
-    ? render.length === 2
-      ? render(h, scope)
+    ? render.length >= 2
+      ? render(h, scope, ...args)
       : render(scope)
     : render;
   if (VNode) {
