@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.3.3...v1.4.0) (2025-03-05)
+
+
+### ✨ 新功能
+
+* **crud:** 新增编辑状态下的数据模拟功能 ([acef33b](https://github.com/Blade-H1kar1/vue-super-crud/commit/acef33b034d1c8f37822677737752873b16dd2b7))
+* **tabs、button:** 优化tabs、button组件功能并完善文档 ([4aaff44](https://github.com/Blade-H1kar1/vue-super-crud/commit/4aaff44602ef1e354d1dcd59ea695b62d0e4afbf))
+
+
+### 🐛 问题修复
+
+* **crud:**  搜索头复杂数据错误判断修复、其他bug修复 ([d7a987e](https://github.com/Blade-H1kar1/vue-super-crud/commit/d7a987e44b1ad7d89c3bff84999fbe987ea92033))
+* **dialog:** 修复模板配置覆盖不了默认配置 ([7c892ec](https://github.com/Blade-H1kar1/vue-super-crud/commit/7c892ec7bbff2547cd5931e55c048076db486006))
+
 ### [1.3.3](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.3.2...v1.3.3) (2025-02-28)
 
 
