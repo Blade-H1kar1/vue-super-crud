@@ -67,7 +67,13 @@ export class DictManager {
   }
 
   // 注册字典配置
-  register(key, config) {
+  register(key, config, override = false) {
+    console.log(this.state.dictsData, "dictsData");
+
+    if (this.dictMeta.get(key) && !override) {
+      return this;
+    }
+
     const dictConfig = {
       ...this.defaultMeta,
       ...(typeof config === "function" ? { request: config } : config),
@@ -105,8 +111,11 @@ export class DictManager {
       );
     }
 
-    // 如果配置了立即加载且参数不是函数
-    if (dictConfig.immediate && typeof dictConfig.params !== "function") {
+    // 如果配置了立即加载且参数不是函数，并且如果之前已经通过 get 获取过数据，立即使用新配置重新加载
+    if (
+      (dictConfig.immediate && typeof dictConfig.params !== "function") ||
+      this.state.dictsData[key] !== undefined
+    ) {
       this.get(key, dictConfig.params);
     }
     return this;

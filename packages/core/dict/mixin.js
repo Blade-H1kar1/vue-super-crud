@@ -37,8 +37,10 @@ export default {
   },
 
   beforeDestroy() {
-    // 清理监听
-    this.$scDict.clear(this.getDictKey());
+    // 只有局部字典需要清理
+    if (this.dictConfig?.local) {
+      this.$scDict.clear(this.getDictKey());
+    }
   },
 
   methods: {
