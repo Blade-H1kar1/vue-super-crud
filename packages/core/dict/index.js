@@ -68,8 +68,6 @@ export class DictManager {
 
   // 注册字典配置
   register(key, config, override = false) {
-    console.log(this.state.dictsData, "dictsData");
-
     if (this.dictMeta.get(key) && !override) {
       return this;
     }

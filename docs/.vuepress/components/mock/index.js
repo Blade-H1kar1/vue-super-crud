@@ -225,16 +225,18 @@ export const mockApi = {
 
       // 模拟数据生成
       const mockData = [];
-      const cities = ["北京", "上海", "广州", "深圳", "杭州"];
+      const cities = ["北京", "上海", "广州"];
       for (let i = 0; i < pageSize; i++) {
         const index = start + i;
         if (index >= total) break;
+        const age = Math.floor(Math.random() * 20) + 20;
         mockData.push({
           id: index + 1,
           name: `用户${index + 1}`,
-          gender: index % 2 === 0 ? "男" : "女",
-          age: Math.floor(Math.random() * 20) + 20,
-          city: cities[index % cities.length],
+          gender: Math.random() > 0.5 ? "男" : "女",
+          age: age,
+          is30: age > 30 ? "是" : "否",
+          city: cities[Math.floor(Math.random() * cities.length)],
         });
       }
 

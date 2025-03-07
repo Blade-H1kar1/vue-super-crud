@@ -131,6 +131,7 @@ import calcHeight from "./mixins/calcHeight.js";
 import spanMethod from "./mixins/spanMethod.js";
 import exposeMethods from "./mixins/exposeMethods";
 import generateDynamicColumns from "./mixins/generateDynamicColumns";
+import summary from "./mixins/summary";
 import search from "./search.vue";
 import menuBar from "./menuBar.vue";
 import columnAction from "./columnAction.vue";
@@ -177,6 +178,7 @@ export default create({
     spanMethod,
     exposeMethods,
     generateDynamicColumns,
+    summary,
   ],
   props: {
     // 防止scope中携带实例时，拷贝合并报错
@@ -507,6 +509,7 @@ export default create({
           this.crudOptions.flattenConfig || this.crudOptions.dynamicConfig
         );
       }
+      this.sortedData();
       // 数据变化时高度更新，防止统计栏不显示
       this.$nextTick(() => {
         this.$refs.tableRef.layout.updateElsHeight();
@@ -567,9 +570,10 @@ export default create({
       item.order = order === 0 || order ? order : index;
 
       // 行合并
-      if (item.sameRowSpan) {
-        if (typeof item.sameRowSpan === "string") {
-          this.sameRowSpans.push(item.sameRowSpan);
+      const span = item.spanProp || item.sameRowSpan;
+      if (span) {
+        if (typeof span === "string") {
+          this.sameRowSpans.push(span);
         } else {
           this.sameRowSpans.push(item.prop);
         }

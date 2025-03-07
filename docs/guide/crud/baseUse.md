@@ -117,18 +117,6 @@
 </common-code-format>
 </ClientOnly>
 
-<!-- ## 列宽度
-
-`calcColumnWidth` 配置列宽度自动计算规则 </br>
-`column.width`、`column.minWidth` 设置为`auto`，会自适应列宽度 </br>
-`column.widthType...` 独立配置列宽度自动计算规则
-
-<common-code-format>
-  <crud-baseUse-columnWidth slot="source"></crud-baseUse-columnWidth>
-  
-<<< @/docs/.vuepress/components/crud/baseUse/columnWidth.vue
-</common-code-format> -->
-
 
 ## 组件加载
 
@@ -143,36 +131,5 @@
   <crud-baseUse-loading slot="source"></crud-baseUse-loading>
   
 <<< @/docs/.vuepress/components/crud/baseUse/loading.vue
-</common-code-format>
-</ClientOnly>
-
-## 快捷合并行列
-
-`spanMethod` 自定义合并 </br>
-
-`renderColumns`项中：</br>
-`spanMethod` 自定义每列合并</br>
-`sameRowSpan` 自动合并行，默认条件为当前列属性值`row[prop]`相同的行数据，或者指定为其他要合并的prop </br>
-
-<ClientOnly>
-<common-code-format>
-  <crud-baseUse-spanMethod slot="source"></crud-baseUse-spanMethod>
-  
-<<< @/docs/.vuepress/components/crud/baseUse/spanMethod.vue
-</common-code-format>
-</ClientOnly>
-
-## 快捷统计
-
-`summaryMethod` 自定义统计 </br>
-
-`renderColumns`项中：`summary` 指定统计类型，合计`sum`、平均`avg`、最大值`max`、最小值`min`</br>
-
-
-<ClientOnly>
-<common-code-format>
-  <crud-baseUse-summaryMethod slot="source"></crud-baseUse-summaryMethod>
-  
-<<< @/docs/.vuepress/components/crud/baseUse/summaryMethod.vue
 </common-code-format>
 </ClientOnly>

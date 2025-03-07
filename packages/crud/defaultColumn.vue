@@ -10,6 +10,10 @@ export default {
       this.bindColumnConfig();
     },
   },
+  created() {
+    const span = this.col.spanProp || this.col.sameRowSpan;
+    span && this.ctx.sameRowSpans.push(span);
+  },
   computed: {
     crudOptions() {
       return this.ctx.crudOptions;
@@ -77,15 +81,25 @@ export default {
         },
       });
     }
-    if (isFunction(this.col.index) || this.col.sameRowSpan) {
+    const span = this.col.spanProp || this.col.sameRowSpan;
+    if (this.col.type === "index" && (isFunction(this.col.index) || span)) {
       return defaultColumn(
         {
           default: (scope) => {
-            const sameRowSpan = this.col.sameRowSpan;
-            if (sameRowSpan) {
-              const sameRowMap = this.ctx.sameRowMap[sameRowSpan] || {};
-              const rowValue = scope.row[sameRowSpan] || "";
-              const spanIndex = sameRowMap[rowValue]?.spanIndex || scope.$index;
+            if (span) {
+              const sameRowMap = this.ctx.sameRowMap[span] || {};
+
+              const rowValue = scope.row[span] || "";
+
+              const map = sameRowMap?.[rowValue]?.find(
+                (g) =>
+                  scope.$index >= g.firstIndex &&
+                  scope.$index < g.firstIndex + g.span
+              );
+              const spanIndex = map?.spanIndex || scope.$index;
+              if (this.col.render) {
+                return this.col.render(spanIndex + 1);
+              }
               return spanIndex + 1;
             }
             return this.col.index(scope.$index, scope);

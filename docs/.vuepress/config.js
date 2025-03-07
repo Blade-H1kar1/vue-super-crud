@@ -76,6 +76,9 @@ module.exports = {
             "crud/buttons",
             "crud/selection",
             "crud/genDynamicColumns",
+            "crud/span",
+            "crud/dataSort",
+            "crud/summary",
           ],
         },
         {

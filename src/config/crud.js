@@ -139,6 +139,10 @@ export default {
       type: [Number, String],
       default: 20,
     },
+    // 排序字段
+    sortProps: Array,
+    // 自定义排序方法
+    sortMethod: Function,
     // 加载中文字
     loadingText: String,
     // 加载中图标

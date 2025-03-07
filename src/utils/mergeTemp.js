@@ -39,7 +39,14 @@ export function mergeTemp(
           item.raw = raw;
         }
         if (item.presetType) {
-          item = mergeTemp(prefix, item.presetType, item, scope, templates, swapMerge);
+          item = mergeTemp(
+            prefix,
+            item.presetType,
+            item,
+            scope,
+            templates,
+            swapMerge
+          );
         }
       }
     } else {
@@ -47,7 +54,13 @@ export function mergeTemp(
     }
   }
   if (Array.isArray(item.children) && item.children.length) {
-    item.children = batchMerge(prefix, item.children, scope, templates, swapMerge);
+    item.children = batchMerge(
+      prefix,
+      item.children,
+      scope,
+      templates,
+      swapMerge
+    );
   }
   return item;
 }
@@ -60,7 +73,14 @@ export function batchMerge(prefix, item, scope, templates, swapMerge) {
         items.push(...batchMerge(prefix, item[key], scope, templates));
       } else if (isPlainObject(item[key]) || item[key] === true) {
         if (item[key] === true) item[key] = {};
-        const mergeItem = mergeTemp(prefix, key, item[key], scope, templates, swapMerge);
+        const mergeItem = mergeTemp(
+          prefix,
+          key,
+          item[key],
+          scope,
+          templates,
+          swapMerge
+        );
         if (!isEmpty(mergeItem)) items.push(mergeItem);
       }
     });
@@ -68,7 +88,14 @@ export function batchMerge(prefix, item, scope, templates, swapMerge) {
   if (isArray(item)) {
     item.forEach((i) => {
       if (isPlainObject(i)) {
-        const mergeItem = mergeTemp(prefix, i.presetType, i, scope, templates, swapMerge);
+        const mergeItem = mergeTemp(
+          prefix,
+          i.presetType,
+          i,
+          scope,
+          templates,
+          swapMerge
+        );
         if (!isEmpty(mergeItem)) items.push(mergeItem);
       } else if (typeof i === "string") {
         const mergeItem = mergeTemp(prefix, i, {}, scope, templates, swapMerge);

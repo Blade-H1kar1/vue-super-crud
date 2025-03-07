@@ -1,0 +1,39 @@
+# 多层级数据排序
+
+表格支持按照多个字段进行层级排序，即在上一层级排序的基础上，对相同值的数据进行下一层级的排序。常用于具有明确层级关系的数据展示,如省市区地址、组织架构等。
+
+## 基础用法
+
+通过配置 `sortProps` 数组来指定排序字段及其优先级。数组中的字段顺序决定了排序的优先级。
+
+<ClientOnly>
+<common-code-format>
+  <crud-dataSort-base slot="source"></crud-dataSort-base>
+  
+<<< @/docs/.vuepress/components/crud/dataSort/base.vue
+</common-code-format>
+</ClientOnly>
+
+## 自定义排序规则
+
+通过配置 `sortMethod` 来自定义排序逻辑。
+
+```js
+options: {
+  sortMethod: (a, b, field) => {
+    if (field === "age") {
+      return a[field] - b[field];
+    }
+  },
+},
+```
+
+## API
+
+### Options 配置
+
+| 参数       | 说明                       | 类型                  | 默认值 |
+| ---------- | -------------------------- | --------------------- | ------ |
+| sortProps  | 排序字段数组(按优先级排序) | string[]              | []     |
+| sortMethod | 列级别自定义排序方法       | Function(field, a, b) | -      |
+
