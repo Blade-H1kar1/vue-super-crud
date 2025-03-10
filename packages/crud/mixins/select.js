@@ -33,10 +33,10 @@ export default {
         const isUpdated = newVal !== oldVal;
         if (isUpdated && this.showSelection) {
           this.$nextTick(() => {
-            this.updateSelection();
+            this.updateSelection(true);
           });
         } else if (newVal && this.showSingleSelection) {
-          this.singleSelect = newVal[this.valueKey];
+          this.singleSelect = newVal[this.operateKey];
         }
       },
       immediate: true,
@@ -66,6 +66,9 @@ export default {
       return this.selectionRow.reduce((start, end) => {
         return start.$index < end.$index ? start : end;
       });
+    },
+    operateKey() {
+      return this.selection.spanProp || this.valueKey;
     },
   },
   methods: {
@@ -139,7 +142,7 @@ export default {
             return;
           }
         }
-        this.singleSelect = row[this.valueKey];
+        this.singleSelect = row[this.operateKey];
         this.$emit("update:selected", row);
         return;
       }
@@ -198,19 +201,21 @@ export default {
       }
     },
     // 更新选中状态
-    updateSelection() {
+    updateSelection(syncData) {
       if (!this.$refs.tableRef) return;
 
       this.$refs.tableRef.clearSelection();
       if (!this.selected?.length) return;
       this.list.forEach((row, index) => {
         const selectedIndex = this.selected.findIndex(
-          (selected) => selected[this.valueKey] === row[this.valueKey]
+          (selected) => selected[this.operateKey] === row[this.operateKey]
         );
         if (selectedIndex > -1) {
           // 同步表格数据
-          Object.assign(row, this.selected[selectedIndex]);
-          this.$set(this.data, index, row);
+          if (syncData) {
+            Object.assign(row, this.selected[selectedIndex]);
+            this.$set(this.data, index, row);
+          }
           // 同步选中状态
           this.$refs.tableRef.toggleRowSelection(row, true);
           // 同步选中数据
@@ -225,31 +230,55 @@ export default {
     select(selection, row) {
       this.$emit("select", selection, row);
       if (!this.selected) return;
+      if (row[this.operateKey] === undefined) {
+        console.error(
+          `[CRUD Error] row.${this.operateKey}不存在，没有唯一值无法进行选中数据绑定，请设置正确的valueKey`
+        );
+        return;
+      }
       if (selection.indexOf(row) > -1) {
-        selection.forEach((row) => {
-          const exists = this.selected.some(
-            (item) => item[this.valueKey] === row[this.valueKey]
-          );
-          if (!exists) {
-            this.selected.push(row);
-          }
-        });
+        if (this.selection.spanProp) {
+          this.list.forEach((item) => {
+            if (item[this.operateKey] === row[this.operateKey]) {
+              this.selected.push(item);
+            }
+          });
+        } else {
+          selection.forEach((row) => {
+            const exists = this.selected.some(
+              (item) => item[this.operateKey] === row[this.operateKey]
+            );
+            if (!exists) {
+              this.selected.push(row);
+            }
+          });
+        }
       } else {
-        this.selected.splice(this.selected.indexOf(row), 1);
+        if (this.selection.spanProp) {
+          for (let i = this.selected.length - 1; i >= 0; i--) {
+            if (this.selected[i][this.operateKey] === row[this.operateKey]) {
+              this.selected.splice(i, 1);
+            }
+          }
+          this.updateSelection();
+        } else {
+          this.selected.splice(this.selected.indexOf(row), 1);
+        }
       }
     },
     selectAll(selection) {
       this.$emit("select-all", selection);
       if (!this.selected) return;
+      const isAllSelected = this.$refs.tableRef.store.states.isAllSelected;
       const currentPageKeys = new Set(
-        this.list.map((item) => item[this.valueKey])
+        this.list.map((item) => item[this.operateKey])
       );
-
-      // 全选当前页
-      if (selection.length > this.selected.length) {
+      if (isAllSelected) {
         const newSelections = selection.filter(
           (item) =>
-            !this.selected.some((s) => s[this.valueKey] === item[this.valueKey])
+            !this.selected.some(
+              (s) => s[this.operateKey] === item[this.operateKey]
+            )
         );
         this.selected.push(...newSelections);
       }
@@ -257,7 +286,7 @@ export default {
       else {
         // 只移除当前页的数据
         for (let i = this.selected.length - 1; i >= 0; i--) {
-          if (currentPageKeys.has(this.selected[i][this.valueKey])) {
+          if (currentPageKeys.has(this.selected[i][this.operateKey])) {
             if (
               this.selectionSelectable(
                 this.selected[i],
@@ -275,12 +304,21 @@ export default {
         return;
       }
       if (!this.selected) return;
-      const index = this.selected.findIndex(
-        (item) => item[this.valueKey] === row[this.valueKey]
-      );
-      if (index > -1) {
-        this.selected.splice(index, 1);
-        this.$refs.tableRef.toggleRowSelection(row, false);
+      if (this.selection.spanProp) {
+        for (let i = this.selected.length - 1; i >= 0; i--) {
+          if (this.selected[i][this.operateKey] === row[this.operateKey]) {
+            this.selected.splice(i, 1);
+          }
+        }
+        this.updateSelection();
+      } else {
+        const index = this.selected.findIndex(
+          (item) => item[this.operateKey] === row[this.operateKey]
+        );
+        if (index > -1) {
+          this.selected.splice(index, 1);
+          this.$refs.tableRef.toggleRowSelection(row, false);
+        }
       }
     },
     removeSingleSelection() {

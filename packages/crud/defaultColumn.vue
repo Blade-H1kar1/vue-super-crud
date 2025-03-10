@@ -69,7 +69,7 @@ export default {
           return (
             <el-radio
               v-model={this.ctx.singleSelect}
-              label={scope.row[this.ctx.valueKey]}
+              label={scope.row[this.ctx.operateKey]}
               disabled={selectable}
               onChange={() => {
                 this.ctx.$emit("update:selected", scope.row);

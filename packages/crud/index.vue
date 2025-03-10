@@ -458,6 +458,32 @@ export default create({
     processList(list) {
       // 生成唯一id
       const isGenUniqueId = this.crudOptions.uniqueId;
+
+      // 检查唯一值是否重复或缺失
+      if (!this._hasCheckedUnique) {
+        const valueMap = new Map();
+        list.some((row) => {
+          const key = row[this.valueKey];
+          if (!key) {
+            console.error(
+              `[CRUD Error] 数据中存在缺失的 ${this.valueKey} 值`,
+              row
+            );
+            this._hasCheckedUnique = true;
+            return true;
+          }
+          if (valueMap.has(key)) {
+            console.error(
+              `[CRUD Error] 数据中存在重复的 ${this.valueKey} 值`,
+              row
+            );
+            this._hasCheckedUnique = true;
+            return true;
+          }
+          valueMap.set(key, true);
+          return false;
+        });
+      }
       list.forEach((item) => {
         if ((this.rowEdit || this.cellEdit) && item.$edit === undefined) {
           this.$set(item, "$edit", null);

@@ -62,7 +62,7 @@
         </el-button>
       </div>
     </div>
-    <div :class="b('banner-content')" v-else-if="ctx.selected">
+    <div :class="b('banner-content')" v-else-if="selected">
       <span>已选择</span>
       <span :class="b('selected-items')">
         <el-tag
@@ -87,18 +87,27 @@
 </template>
 <script>
 import create from "core/create";
+import { uniqBy } from "lodash-es";
 export default create({
   name: "crud-select-banner",
   inject: ["ctx"],
   computed: {
     selected() {
-      return this.ctx.selected;
+      if (this.ctx.showSelection) {
+        return uniqBy(this.ctx.selected, this.ctx.operateKey);
+      }
+
+      if (this.ctx.showSingleSelection) {
+        return this.ctx.selected;
+      }
     },
     selection() {
       return this.ctx.selection;
     },
     labelKey() {
-      return this.selection.labelKey || this.ctx.valueKey;
+      return (
+        this.selection.labelKey || this.ctx.operateKey || this.ctx.valueKey
+      );
     },
     showClearAction() {
       if (this.ctx.showSelection) {

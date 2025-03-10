@@ -15,6 +15,19 @@
 </common-code-format>
 </ClientOnly>
 
+## 特殊列处理
+
+索引列配置`spanProp`，可以获取合并后的索引。</br>
+选中列配置`spanProp`，可以操作合并后的选中数据，实际选中还是合并前的数据。</br>
+
+<ClientOnly>
+<common-code-format>
+  <crud-span-special slot="source"></crud-span-special>
+
+  <<< @/docs/.vuepress/components/crud/span/special.vue
+</common-code-format>
+</ClientOnly>
+
 ## 列级别自定义
 
 通过 `spanMethod` 属性可以自定义某一列的合并规则。

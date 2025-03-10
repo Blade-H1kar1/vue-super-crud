@@ -47,35 +47,21 @@ export default {
       const events = {};
       let scope = {
         ...this.scope,
-        ref: this.$refs[this.ref],
+        ref: this.$refs.target,
       };
       if (this.on) {
-        const propsEvents = { ...this.on };
-        for (const key in propsEvents) {
-          events[key] = (...args) => {
-            if (propsEvents[key]) {
-              propsEvents[key](...args, scope);
-            }
-          };
-        }
+        Object.entries(this.on).forEach(([key, handler]) => {
+          events[key] = (...args) => handler?.(...args, scope);
+        });
       }
 
       // 处理以 on 开头的事件配置
-      for (const key in this.omitProps) {
-        if (
-          key.startsWith("on") &&
-          key.length > 3 &&
-          /^on[A-Z]/.test(key) &&
-          isFunction(this.omitProps[key])
-        ) {
-          const eventName = key[2].toLowerCase() + key.slice(3); // 转换事件名 onChange -> change
-          events[eventName] = (...args) => {
-            if (this.omitProps[key]) {
-              this.omitProps[key](...args, scope);
-            }
-          };
-        }
-      }
+      Object.entries(this.omitProps)
+        .filter(([key, value]) => /^on[A-Z]/.test(key) && isFunction(value))
+        .forEach(([key, handler]) => {
+          const eventName = key.slice(2).toLowerCase(); // 优化事件名转换
+          events[eventName] = (...args) => handler?.(...args, scope);
+        });
 
       return {
         ...events,
@@ -88,6 +74,14 @@ export default {
           events.change && events.change(event);
         },
       };
+    },
+    _attrs() {
+      // 优化属性过滤逻辑
+      const componentProps =
+        this.$options.components[this.compName]?.options?.props || {};
+      return Object.fromEntries(
+        Object.entries(this.omitProps).filter(([key]) => !componentProps[key])
+      );
     },
     omitProps() {
       const omitKeys = Object.keys(this._props); // 忽略当前组件的props
@@ -129,24 +123,21 @@ export default {
     compSize() {
       return this.omitProps.size || this.size || (this.$ELEMENT || {}).size;
     },
-    ref() {
-      return this.comp.ref || this.prop || "target";
-    },
   },
   created() {
     this.created && this.created(this.scope);
   },
   mounted() {
-    this.mounted && this.mounted(this.scope, this.$refs[this.ref]);
+    this.mounted && this.mounted(this.scope, this.$refs.target);
   },
   updated() {
-    this.updated && this.updated(this.scope, this.$refs[this.ref]);
+    this.updated && this.updated(this.scope, this.$refs.target);
   },
   beforeDestroy() {
-    this.beforeDestroy && this.beforeDestroy(this.scope, this.$refs[this.ref]);
+    this.beforeDestroy && this.beforeDestroy(this.scope, this.$refs.target);
   },
   destroyed() {
-    this.destroyed && this.destroyed(this.scope, this.$refs[this.ref]);
+    this.destroyed && this.destroyed(this.scope, this.$refs.target);
   },
   render(h) {
     const scopedSlots = {};
@@ -201,7 +192,7 @@ export default {
         placeholder={this.placeholder}
         size={this.compSize}
         disabled={this.omitProps.disabled ? true : false}
-        attrs={this.omitProps}
+        attrs={this._attrs}
         props={this.omitProps}
         value={this.value}
         scope={this.scope}
@@ -209,7 +200,7 @@ export default {
         nativeOn={this.nativeOn}
         scopedSlots={scopedSlots}
         clearable={this.clearable}
-        ref={this.ref}
+        ref="target"
         directives={this.directives}
       >
         {renderChildren(this.children)}
