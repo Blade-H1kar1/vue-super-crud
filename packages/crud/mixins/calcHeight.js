@@ -79,9 +79,10 @@ export default {
           const tableRef = this.$refs.tableRef?.$el;
           this.observeVisibility(tableRef, (isVisible) => {
             if (isVisible) {
-              const tableTop = tableRef.getBoundingClientRect().top;
+              const tableTop = tableRef?.getBoundingClientRect().top;
               if (this.tableTop !== tableTop) this.tableTop = tableTop;
-              const wrapperTop = this.$refs.wrapper.getBoundingClientRect().top;
+              const wrapperTop = this.$refs.wrapper?.getBoundingClientRect()
+                .top;
               if (this.wrapperHeight !== wrapperTop)
                 this.wrapperTop = wrapperTop;
             }

@@ -164,9 +164,24 @@ export default create({
       this.activeName = this.$route.query.tabActive;
     }
     this.$nextTick(this.updateContentHeight);
+
+    // 创建 ResizeObserver 实例
+    this.resizeObserver = new ResizeObserver(() => {
+      this.updateContentHeight();
+    });
+
+    // 观察活动面板
+    this.observeActivePane();
   },
   updated() {
     this.$nextTick(this.updateContentHeight);
+  },
+
+  beforeDestroy() {
+    // 清理 ResizeObserver
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
   },
 
   methods: {
@@ -228,10 +243,6 @@ export default create({
       });
     },
 
-    async handleTabTransition(val) {
-      this.currentTab = val;
-    },
-
     async refreshTab(item, index) {
       if (this.isRefreshing) return;
 
@@ -260,6 +271,19 @@ export default create({
           content.style.height = `${height}px`;
         }
       }
+    },
+    observeActivePane() {
+      const activePane = this.$el.querySelector(".tab-pane.is-active");
+      if (activePane && this.resizeObserver) {
+        this.resizeObserver.disconnect(); // 先断开之前的观察
+        this.resizeObserver.observe(activePane); // 观察新的活动面板
+      }
+    },
+
+    async handleTabTransition(val) {
+      this.currentTab = val;
+      await this.$nextTick();
+      this.observeActivePane(); // 切换标签页时重新观察
     },
   },
 });
