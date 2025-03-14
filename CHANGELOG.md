@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.5.1...v1.6.0) (2025-03-14)
+
+
+### ✨ 新功能
+
+* **crud:** 新增本地搜索功能并优化代码结构 ([0fd6c2c](https://github.com/Blade-H1kar1/vue-super-crud/commit/0fd6c2ca0c62d5c26a2b9bf7f976cc39561e4ce7))
+
 ### [1.5.1](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.5.0...v1.5.1) (2025-03-10)
 
 
