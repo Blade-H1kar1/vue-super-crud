@@ -68,7 +68,6 @@ module.exports = {
           children: [
             "crud/config",
             "crud/baseUse",
-            "crud/renderType",
             "crud/search",
             "crud/tableEdit",
             "crud/validate",

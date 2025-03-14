@@ -153,8 +153,12 @@ export default {
     disableLoading: Boolean,
     // 是否开启本地分页
     localPagination: Boolean,
+    // 是否开启本地搜索
+    localSearch: Boolean,
     // 搜索弹窗是否打开
     showPopper: Boolean,
+    // 搜索表单初始化是否展开
+    expandSearch: Boolean,
     // 新增表单配置
     addForm: {
       type: Object,
@@ -223,6 +227,7 @@ export default {
     searchHeader: {
       type: [Boolean, Object],
       default: () => ({
+        show: true,
         width: 290,
         resetBtn: true,
       }),

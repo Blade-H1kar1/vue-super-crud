@@ -238,11 +238,19 @@ export default {
       }
       if (selection.indexOf(row) > -1) {
         if (this.selection.spanProp) {
-          this.list.forEach((item) => {
-            if (item[this.operateKey] === row[this.operateKey]) {
-              this.selected.push(item);
-            }
-          });
+          const exists = this.selected.some(
+            (item) => item[this.operateKey] === row[this.operateKey]
+          );
+          if (!exists) {
+            this.list.forEach((item) => {
+              const exists = this.selected.some(
+                (item) => item[this.operateKey] === row[this.operateKey]
+              );
+              if (!exists && item[this.operateKey] === row[this.operateKey]) {
+                this.selected.push(item);
+              }
+            });
+          }
         } else {
           selection.forEach((row) => {
             const exists = this.selected.some(
@@ -326,6 +334,8 @@ export default {
       this.singleSelect = null;
     },
     clearSelection() {
+      this.$refs.tableRef.clearSelection();
+      if (!this.selected) return;
       // 获取禁用的选中数据
       const disabledSelection = this.selected.filter((item) => {
         if (!this.selectionSelectable(item, item.$index)) {
@@ -333,7 +343,6 @@ export default {
         }
       });
       this.selected.splice(0, this.selected.length, ...disabledSelection);
-      this.$refs.tableRef.clearSelection();
 
       // 恢复禁用的选中数据
       if (disabledSelection.length) {

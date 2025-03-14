@@ -164,7 +164,7 @@ export default create({
             }}
             props={this.item}
             item={this.item}
-            slots={this.formCtx.$scopedSlots}
+            slots={this.formCtx.slots}
             mode={this.formOptions.mode}
             scope={this.formCtx.formScope}
             config={this.formOptions}
@@ -198,8 +198,10 @@ export default create({
           <position
             class="form-label"
             ellipsis={this.labelOverTip ? true : false}
-            slotName={`${this.item.prop}-label`}
+            slotName={this.item.prop}
+            slotSuffixes={this.mode ? [this.mode, "label"] : ["label"]}
             render={this.item.labelRender}
+            slots={this.formCtx.slots}
             scope={this.formCtx.formScope}
           >
             {this.item.label}
@@ -214,7 +216,8 @@ export default create({
         <el-tooltip effect="dark" placement="top">
           <position
             slot="content"
-            slotName={`${this.item.prop}-tooltip`}
+            slotName={this.item.prop}
+            slotSuffixes={this.mode ? [this.mode, "tooltip"] : ["tooltip"]}
             render={this.item.tooltipRender}
             slots={this.formCtx.slots}
             scope={this.formCtx.formScope}

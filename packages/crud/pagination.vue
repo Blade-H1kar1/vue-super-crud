@@ -52,7 +52,15 @@ export default create({
       },
     },
     total() {
-      return this.ctx.total;
+      if (this.ctx.total) {
+        return this.ctx.total;
+      }
+      if (this.ctx.crudOptions.localSearch) {
+        return this.ctx.localFilteredData?.length || 0;
+      }
+      if (this.ctx.crudOptions.localPagination) {
+        return this.ctx.data.length;
+      }
     },
   },
   watch: {

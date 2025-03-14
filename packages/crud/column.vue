@@ -111,21 +111,6 @@ export default create({
     },
   },
   methods: {
-    genProxy(scope) {
-      const editMode = this.ctx.validateEdit(this.col, scope);
-      const scopeProps = this.ctx.controlScopeProps(
-        this.col.prop,
-        editMode,
-        scope
-      );
-      const props = scopeProps ? merge({}, this.col, scopeProps) : this.col;
-      let item = (editMode && props[editMode]) || props;
-      return {
-        ...item,
-        editMode,
-        item,
-      };
-    },
     bindColumnConfig() {
       const columnConfig = this.$refs.column?.columnConfig;
       if (columnConfig) {

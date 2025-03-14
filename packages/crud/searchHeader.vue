@@ -121,7 +121,7 @@ export default create({
     search(val) {
       if (this.justSearched) return;
       this.justSearched = true;
-      this.ctx.$refs.searchRef.handleSearch();
+      this.ctx.handleSearch();
       this.closePopover();
       setTimeout(() => {
         this.justSearched = false;
@@ -129,7 +129,7 @@ export default create({
     },
     reset() {
       if (isFunction(this.item.reset)) this.item.reset();
-      this.ctx.$refs.searchRef.handleReset(this.item.prop);
+      this.ctx.handleReset(this.item.prop);
       this.closePopover();
     },
     popClick(e) {

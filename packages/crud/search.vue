@@ -24,7 +24,7 @@ export default create({
       const opt = this.ctx.crudOptions.searchForm;
       return {
         ...opt,
-        renderColumns: filterColumns(this.ctx.getColumns("search")),
+        renderColumns: filterColumns(this.ctx.getRenderColumns("search")),
       };
     },
     options() {
@@ -39,15 +39,15 @@ export default create({
               label: "查询",
               icon: "el-icon-search",
               type: "primary",
-              onClick: this.handleSearch,
+              onClick: this.ctx.handleSearch,
             },
             reset: {
               icon: "el-icon-refresh",
               label: "重置",
-              onClick: () => this.handleReset(),
+              onClick: () => this.ctx.handleReset(),
             },
           },
-          slots: this.ctx.$scopedSlots,
+          slots: this.ctx.extendsScopedSlots,
           mode: "search",
           defaultRender: (h, scope) => {
             if (isFunction(this.searchForm.defaultRender)) {
@@ -84,13 +84,12 @@ export default create({
   },
   created() {
     // this.saveInitSearch();
-    if (this.searchForm && this.searchForm.initShow) {
+    if (
+      (this.searchForm && this.searchForm.initShow) ||
+      this.ctx.crudOptions?.expandSearch
+    ) {
       this.ctx.showSearch = true;
     }
-  },
-  mounted() {
-    this.ctx.$refs.searchForm = this.$refs.searchForm;
-    // this.setInitSearch();
   },
   methods: {
     saveInitSearch() {
@@ -109,34 +108,12 @@ export default create({
         }, 0);
       }
     },
-    handleSearch() {
-      this.ctx.changeLoading(true);
-      this.ctx.runBefore("search", (res) => {
-        this.ctx.changeLoading();
-        this.$nextTick(this.ctx.getList);
-      });
+    resetField(prop) {
+      this.$refs.searchForm.resetField(prop);
     },
-    handleReset(prop) {
-      this.ctx.changeLoading(true);
-      this.ctx.runBefore(
-        "reset",
-        (res) => {
-          this.ctx.changeLoading();
-          if (prop) {
-            this.$refs.searchForm.resetField(prop);
-          } else {
-            this.$refs.searchForm.resetFields();
-            this.searchForm.renderColumns.forEach((item) => {
-              if (isFunction(item.reset)) item.reset();
-            });
-          }
-          this.$nextTick(this.ctx.getList);
-        },
-        prop
-      );
+    resetFields() {
+      this.$refs.searchForm.resetFields();
     },
   },
 });
 </script>
-
-<style lang="scss" scoped></style>

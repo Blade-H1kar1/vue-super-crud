@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 // provinceData.js - 省份数据
 export const provinceData = [
   { value: "11", label: "北京市" },
@@ -237,6 +239,10 @@ export const mockApi = {
           age: age,
           is30: age > 30 ? "是" : "否",
           city: cities[Math.floor(Math.random() * cities.length)],
+          date: dayjs()
+            .subtract(Math.floor(Math.random() * 30), "day")
+            .format("YYYY-MM-DD"),
+          status: Math.random() > 0.5 ? 1 : 0,
         });
       }
 

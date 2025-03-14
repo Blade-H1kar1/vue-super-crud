@@ -199,7 +199,7 @@ export default create({
           title: "重置",
           circle: true,
           onClick: () => {
-            this.ctx.$refs.searchRef.handleReset();
+            this.ctx.handleReset();
           },
         },
         search: {

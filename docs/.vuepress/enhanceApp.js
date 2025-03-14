@@ -32,12 +32,13 @@ export default async ({ Vue }) => {
     // ]);
 
     Vue.use(VueHighlightJS);
-    Vue.use(ElementUI);
+    Vue.use(ElementUI, {
+      size: "small",
+    });
     Vue.use(Package, {
       crudOptions: {
         gap: 0,
       },
-      size: "small",
       dict: {
         request: (key) => {
           const data = {

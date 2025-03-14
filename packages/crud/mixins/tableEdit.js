@@ -90,26 +90,7 @@ export default {
         return false;
       }
     },
-    isNotEditable(editX, editY) {
-      return false;
-      if (editX && editY) {
-        if (editX === this.editX && editY === this.editY) return false;
-      }
-      if (this.editX === 0 || this.editX) {
-        if (this.crudMode === "add") {
-          this.$message("请先保存或取消新增数据");
-          return true;
-        }
-        // { ...this.list[this.editX] }清除$index
-        if (!isEqual({ ...this.list[this.editX] }, this.oldRowData)) {
-          this.$message("请先保存或取消上一个编辑");
-          return true;
-        }
-      }
-      return false;
-    },
     handleRowAdd(params, type) {
-      if (this.rowEdit && this.isNotEditable()) return;
       let newRow = {};
       this.trueRenderColumns.forEach((col) => {
         if (newRow[col.prop] === undefined) {
@@ -141,8 +122,6 @@ export default {
       );
     },
     handleRowEdit(scope) {
-      if (this.isNotEditable()) return;
-
       this.runBefore(
         ["edit"],
         (data) => {
@@ -248,9 +227,11 @@ export default {
         this.changeLoading(true);
         const callBack = () => {
           const deleteIndex = this.selectionRow.map((item) => item.$index);
-          this.list = this.list.filter(
-            (item) => !deleteIndex.includes(item.$index)
-          );
+          deleteIndex
+            .sort((a, b) => b - a)
+            .forEach((index) => {
+              this.list.splice(index, 1);
+            });
           this.refreshAfterOperation && this.getList();
           this.changeLoading();
         };
@@ -302,8 +283,6 @@ export default {
     handleCellEdit(scope, column) {
       let row = scope.row;
       if (this.cellEdit) {
-        if (this.isNotEditable(row.$index, column.prop)) return;
-
         if (this.editY) return;
         this.runBefore(
           ["edit"],

@@ -1,41 +1,41 @@
 <template>
-  <span :class="b()" v-if="isShow">
+  <el-button
+    v-if="isShow && !bindAttrs.children"
+    :disabled="isDebounce || bindAttrs.disabled"
+    v-bind="bindAttrs"
+    :size="size"
+    :class="b()"
+    @click="handleClick()"
+  >
+    <span v-if="bindAttrs.label">{{ bindAttrs.label }}</span>
+    <slot v-if="$slots.default"></slot>
+  </el-button>
+  <el-dropdown
+    v-else-if="isShow"
+    v-bind="bindAttrs"
+    trigger="click"
+    :size="size"
+    :disabled="isDebounce || bindAttrs.disabled"
+  >
     <el-button
-      v-if="!bindAttrs.children"
-      :disabled="isDebounce || bindAttrs.disabled"
-      v-bind="bindAttrs"
-      :size="size"
-      @click="handleClick()"
-    >
-      <span v-if="bindAttrs.label">{{ bindAttrs.label }}</span>
-      <slot v-if="$slots.default"></slot>
-    </el-button>
-    <el-dropdown
-      v-else
-      v-bind="bindAttrs"
-      trigger="click"
+      :class="b()"
       :size="size"
       :disabled="isDebounce || bindAttrs.disabled"
-    >
-      <el-button
-        :size="size"
-        :disabled="isDebounce || bindAttrs.disabled"
-        v-bind="bindAttrs"
-        ><span v-if="bindAttrs.label">{{ bindAttrs.label }}</span
-        ><slot v-if="$slots.default"></slot
-        ><i class="el-icon-arrow-down el-icon--right"></i
-      ></el-button>
-      <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item
-          v-for="(child, idx) in bindAttrs.children"
-          @click.native="handleClick(child)"
-          :key="idx"
-          v-bind="child"
-          >{{ child.label }}</el-dropdown-item
-        >
-      </el-dropdown-menu>
-    </el-dropdown>
-  </span>
+      v-bind="bindAttrs"
+      ><span v-if="bindAttrs.label">{{ bindAttrs.label }}</span
+      ><slot v-if="$slots.default"></slot
+      ><i class="el-icon-arrow-down el-icon--right"></i
+    ></el-button>
+    <el-dropdown-menu slot="dropdown">
+      <el-dropdown-item
+        v-for="(child, idx) in bindAttrs.children"
+        @click.native="handleClick(child)"
+        :key="idx"
+        v-bind="child"
+        >{{ child.label }}</el-dropdown-item
+      >
+    </el-dropdown-menu>
+  </el-dropdown>
 </template>
 <script>
 import { create } from "core";
@@ -48,10 +48,7 @@ export default create({
       type: Number,
       default: 300,
     },
-    size: {
-      type: String,
-      default: "mini",
-    },
+    size: String,
     scope: {},
     onClick: {},
     confirm: {},

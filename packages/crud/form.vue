@@ -37,7 +37,7 @@ export default create({
       );
       return {
         ...opt,
-        renderColumns: filterColumns(this.ctx.getColumns(this.mode)),
+        renderColumns: filterColumns(this.ctx.getRenderColumns(this.mode)),
       };
     },
     options() {

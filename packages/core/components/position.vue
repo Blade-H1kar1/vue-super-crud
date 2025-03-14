@@ -9,6 +9,10 @@ export default create({
       default: true,
     },
     slotName: String,
+    slotSuffixes: {
+      type: Array,
+      default: () => [],
+    },
     render: Function,
     slots: {
       type: Object,
@@ -20,17 +24,30 @@ export default create({
     ellipsis: Boolean,
   },
   computed: {
+    slotNames() {
+      if (!this.slotName) return;
+      // 如果没有后缀，直接返回原始slotName
+      if (!this.slotSuffixes.length) return this.slotName;
+
+      // 将所有后缀用'-'连接
+      const suffix = this.slotSuffixes
+        .filter(Boolean) // 过滤掉空值
+        .join("-");
+
+      // 如果有后缀，返回 slotName-suffix 格式
+      return suffix ? `${this.slotName}-${suffix}` : this.slotName;
+    },
     leftSlot() {
-      return this.slots[`${this.slotName}-left`] || this.$scopedSlots.left;
+      return this.slots[`${this.slotNames}-left`] || this.$scopedSlots.left;
     },
     rightSlot() {
-      return this.slots[`${this.slotName}-right`] || this.$scopedSlots.right;
+      return this.slots[`${this.slotNames}-right`] || this.$scopedSlots.right;
     },
     topSlot() {
-      return this.slots[`${this.slotName}-top`] || this.$scopedSlots.top;
+      return this.slots[`${this.slotNames}-top`] || this.$scopedSlots.top;
     },
     bottomSlot() {
-      return this.slots[`${this.slotName}-bottom`] || this.$scopedSlots.bottom;
+      return this.slots[`${this.slotNames}-bottom`] || this.$scopedSlots.bottom;
     },
     hasPosition() {
       return this.topSlot || this.bottomSlot || this.leftSlot || this.rightSlot;
@@ -74,14 +91,14 @@ export default create({
   },
   render(h) {
     const renderContent = () => {
-      if (this.slots[`${this.slotName}`]) {
-        return this.slots[`${this.slotName}`](this.scope);
-      }
-      if (this.$scopedSlots.default) {
-        return this.$scopedSlots.default(this.scope);
+      if (this.slots[`${this.slotNames}`]) {
+        return this.slots[`${this.slotNames}`](this.scope);
       }
       if (this.render) {
         return resolveRender(this.render, h, this.scope);
+      }
+      if (this.$scopedSlots.default) {
+        return this.$scopedSlots.default(this.scope);
       }
     };
     const content = renderContent();
@@ -95,7 +112,7 @@ export default create({
       return null;
     return (
       <div
-        class={[this.b([this.slotName || "position"])]}
+        class={[this.b([this.slotNames || "position"])]}
         style={this.gridStyle}
       >
         {this.topSlot && <div class="top">{this.topSlot(this.scope)}</div>}

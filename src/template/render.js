@@ -64,7 +64,7 @@ export default {
   confirmTip: (item) => {
     return {
       title: item.title || "提示",
-      width: "400px",
+      width: item.width || "400px",
       render: (h, scope) => {
         return (
           <div style="display:flex">

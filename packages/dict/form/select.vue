@@ -5,6 +5,7 @@
     filterable
     v-bind="$attrs"
     :value-key="props.value"
+    :multiple="multiple"
     @input="onInput"
     @change="onChange"
     v-on="listeners"
