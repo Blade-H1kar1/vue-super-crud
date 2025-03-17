@@ -14,17 +14,31 @@
 </common-code-format>
 </ClientOnly>
 
+## 高级排序配置
+
+对象数组：为每个字段指定详细的排序规则
+
+```js
+options: {
+  sortProps: [
+    "province",
+    { prop: "city", order: "desc", nullsPosition: "first" },
+    "amount",
+  ],
+},
+```
+
 ## 自定义排序规则
 
 通过配置 `sortMethod` 来自定义排序逻辑。
 
 ```js
 options: {
-  sortMethod: (a, b, field) => {
-    if (field === "age") {
-      return a[field] - b[field];
-    }
-  },
+  sortProps: [
+    "province",
+    "city",
+    { prop: "amount", sortMethod: (a, b) => b.amount - a.amount },
+  ],
 },
 ```
 
@@ -32,8 +46,15 @@ options: {
 
 ### Options 配置
 
-| 参数       | 说明                       | 类型                  | 默认值 |
-| ---------- | -------------------------- | --------------------- | ------ |
-| sortProps  | 排序字段数组(按优先级排序) | string[]              | []     |
-| sortMethod | 列级别自定义排序方法       | Function(field, a, b) | -      |
+| 参数      | 说明                       | 类型     | 默认值 |
+| --------- | -------------------------- | -------- | ------ |
+| sortProps | 排序字段数组(按优先级排序) | string[] | []     |
 
+### 排序参数
+
+| 参数          | 说明           | 类型             | 默认值 |
+| ------------- | -------------- | ---------------- | ------ |
+| prop          | 排序字段名称   | string           | -      |
+| order         | 排序方向       | 'asc' / 'desc'   | 'asc'  |
+| nullsPosition | 空值位置       | 'first' / 'last' | 'last' |
+| sortMethod    | 自定义排序方法 | Function(a, b)   | -      |

@@ -48,24 +48,30 @@ export default {
     },
     // 多级排序实现
     sortedData() {
-      const sortFields = [...(this.crudOptions.sortProps || this.sameRowSpans)];
-      if (!sortFields.length) return;
+      const sortProps = [...(this.crudOptions.sortProps || this.sameRowSpans)];
+      if (!sortProps.length) return;
 
       // 逐级排序
-      sortFields.forEach((currentField, index) => {
+      sortProps.forEach((currentProp, index) => {
         // 获取当前级别之前的所有字段
-        const previousFields = sortFields.slice(0, index);
+        const previousFields = sortProps
+          .slice(0, index)
+          .map((prop) => (typeof prop === "string" ? prop : prop.prop));
+
+        // 获取当前字段
+        const currentField =
+          typeof currentProp === "string" ? currentProp : currentProp.prop;
 
         // 对数据进行分组排序
-        this.sortByFieldWithinGroups(currentField, previousFields);
+        this.sortByFieldWithinGroups(currentField, previousFields, currentProp);
       });
     },
 
     // 在已有分组内进行排序
-    sortByFieldWithinGroups(currentField, previousFields) {
+    sortByFieldWithinGroups(currentField, previousFields, currentProp) {
       if (!previousFields.length) {
         // 第一个字段直接排序
-        this.sortByField(currentField);
+        this.sortByField(currentField, currentProp);
         return;
       }
 
@@ -78,7 +84,14 @@ export default {
       // 对每个分组内部进行排序并更新原数组
       Object.values(groups).forEach((group) => {
         // 对当前组按字段排序
-        group.sort((a, b) => this.compareValue(a, b, currentField));
+        group.sort((a, b) =>
+          this.compareValue(
+            a,
+            b,
+            currentField,
+            this.getSortOptions(currentField, currentProp)
+          )
+        );
 
         // 将排序后的组数据写回原数组
         group.forEach((item, i) => {
@@ -103,28 +116,54 @@ export default {
     },
 
     // 单字段排序 - 直接修改原数组
-    sortByField(field) {
-      this.list.sort((a, b) => this.compareValue(a, b, field));
-    }, // 通用比较函数
-    compareValue(a, b, field) {
+    sortByField(field, propConfig) {
+      const sortOptions = this.getSortOptions(field, propConfig);
+      this.list.sort((a, b) => this.compareValue(a, b, field, sortOptions));
+    },
+
+    // 获取字段的排序选项
+    getSortOptions(field, propConfig) {
+      // 如果传入了配置对象，从中获取排序选项
+      if (typeof propConfig === "object" && propConfig !== null) {
+        return {
+          order: propConfig.order || "asc",
+          nullsPosition: propConfig.nullsPosition || "last",
+          ...propConfig,
+        };
+      }
+    },
+    // 通用比较函数
+    compareValue(a, b, field, sortOptions = {}) {
       // 检查是否有自定义排序
-      const sortMethod = this.crudOptions.sortMethod;
+      const sortMethod = sortOptions.sortMethod;
       if (sortMethod) {
-        const result = sortMethod(field, a, b);
+        const result = sortMethod(a, b, sortOptions);
         if (result !== undefined) return result;
       }
+
+      const { order = "asc", nullsPosition = "last" } = sortOptions;
       const aValue = a[field];
       const bValue = b[field];
-      if (aValue === bValue) return 0;
-      if (aValue === null || aValue === undefined) return -1;
-      if (bValue === null || bValue === undefined) return 1;
+
+      // 处理空值
+      const aIsEmpty = aValue === null || aValue === undefined || aValue === "";
+      const bIsEmpty = bValue === null || bValue === undefined || bValue === "";
+
+      if (aIsEmpty && bIsEmpty) return 0;
+      if (aIsEmpty) return nullsPosition === "first" ? -1 : 1;
+      if (bIsEmpty) return nullsPosition === "first" ? 1 : -1;
 
       // 数字比较
       if (!isNaN(aValue) && !isNaN(bValue)) {
-        return Number(aValue) - Number(bValue);
+        return order === "asc"
+          ? Number(aValue) - Number(bValue)
+          : Number(bValue) - Number(aValue);
       }
+
       // 字符串比较
-      return String(aValue).localeCompare(String(bValue));
+      return order === "asc"
+        ? String(aValue).localeCompare(String(bValue))
+        : String(bValue).localeCompare(String(aValue));
     },
     spanMethod(params) {
       const { row, column, rowIndex } = params;
