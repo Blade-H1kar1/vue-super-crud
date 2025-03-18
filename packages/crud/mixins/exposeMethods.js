@@ -12,5 +12,8 @@ export default {
       this.$refs.tableFormRef && this.$refs.tableFormRef.resetFields();
       this.$emit("reset");
     },
+    sortedData() {
+      this._sortedData(this.list);
+    },
   },
 };

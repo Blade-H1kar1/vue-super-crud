@@ -47,8 +47,10 @@ export default {
       });
     },
     // 多级排序实现
-    sortedData() {
-      const sortProps = [...(this.crudOptions.sortProps || this.sameRowSpans)];
+    _sortedData(data, props) {
+      const sortProps = [
+        ...(props || this.crudOptions.sortProps || this.sameRowSpans),
+      ];
       if (!sortProps.length) return;
 
       // 逐级排序
@@ -63,20 +65,25 @@ export default {
           typeof currentProp === "string" ? currentProp : currentProp.prop;
 
         // 对数据进行分组排序
-        this.sortByFieldWithinGroups(currentField, previousFields, currentProp);
+        this.sortByFieldWithinGroups(
+          currentField,
+          previousFields,
+          currentProp,
+          data
+        );
       });
     },
 
     // 在已有分组内进行排序
-    sortByFieldWithinGroups(currentField, previousFields, currentProp) {
+    sortByFieldWithinGroups(currentField, previousFields, currentProp, data) {
       if (!previousFields.length) {
         // 第一个字段直接排序
-        this.sortByField(currentField, currentProp);
+        this.sortByField(currentField, currentProp, data);
         return;
       }
 
       // 根据之前的字段分组
-      const groups = this.groupByFields(this.list, previousFields);
+      const groups = this.groupByFields(data, previousFields);
 
       // 记录每组的起始索引
       let currentIndex = 0;
@@ -95,7 +102,7 @@ export default {
 
         // 将排序后的组数据写回原数组
         group.forEach((item, i) => {
-          this.list[currentIndex + i] = item;
+          data[currentIndex + i] = item;
         });
 
         currentIndex += group.length;
@@ -116,9 +123,9 @@ export default {
     },
 
     // 单字段排序 - 直接修改原数组
-    sortByField(field, propConfig) {
+    sortByField(field, propConfig, data) {
       const sortOptions = this.getSortOptions(field, propConfig);
-      this.list.sort((a, b) => this.compareValue(a, b, field, sortOptions));
+      data.sort((a, b) => this.compareValue(a, b, field, sortOptions));
     },
 
     // 获取字段的排序选项

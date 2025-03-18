@@ -33,7 +33,7 @@ export default {
         const isUpdated = newVal !== oldVal;
         if (isUpdated && this.showSelection) {
           this.$nextTick(() => {
-            this.updateSelection(true);
+            this.updateSelection();
           });
         } else if (newVal && this.showSingleSelection) {
           this.singleSelect = newVal[this.operateKey];
@@ -69,6 +69,9 @@ export default {
     },
     operateKey() {
       return this.selection.spanProp || this.valueKey;
+    },
+    selectedOperateKeys() {
+      return this.selected.map((item) => item[this.operateKey]);
     },
   },
   methods: {
@@ -201,34 +204,41 @@ export default {
       }
     },
     // 更新选中状态
-    updateSelection(syncData) {
+    updateSelection() {
       if (!this.$refs.tableRef) return;
 
       this.$refs.tableRef.clearSelection();
       if (!this.selected?.length) return;
+
+      const updatedSelected = [];
       this.list.forEach((row, index) => {
-        const selectedIndex = this.selected.findIndex(
-          (selected) => selected[this.operateKey] === row[this.operateKey]
+        const selectedIndex = this.selectedOperateKeys.indexOf(
+          row[this.operateKey]
         );
         if (selectedIndex > -1) {
-          // 同步表格数据
-          if (syncData) {
-            Object.assign(row, this.selected[selectedIndex]);
-            this.$set(this.data, index, row);
-          }
+          updatedSelected.push(row);
           // 同步选中状态
           this.$refs.tableRef.toggleRowSelection(row, true);
-          // 同步选中数据
-          this.selected.splice(selectedIndex, 1, row);
         }
       });
+
+      // 保留不在当前页的选中项
+      this.selected.forEach((item) => {
+        const inCurrentPage = this.list.some(
+          (row) => row[this.operateKey] === item[this.operateKey]
+        );
+        if (!inCurrentPage) {
+          updatedSelected.push(item);
+        }
+      });
+
+      // 更新选中数组
+      this.selected.splice(0, this.selected.length, ...updatedSelected);
     },
     selectionChange(arr) {
       this.selectionRow = arr;
-      this.$emit("selection-change", arr);
     },
     select(selection, row) {
-      this.$emit("select", selection, row);
       if (!this.selected) return;
       if (row[this.operateKey] === undefined) {
         console.error(
@@ -237,58 +247,26 @@ export default {
         return;
       }
       if (selection.indexOf(row) > -1) {
-        if (this.selection.spanProp) {
-          const exists = this.selected.some(
-            (item) => item[this.operateKey] === row[this.operateKey]
-          );
-          if (!exists) {
-            this.list.forEach((item) => {
-              const exists = this.selected.some(
-                (item) => item[this.operateKey] === row[this.operateKey]
-              );
-              if (!exists && item[this.operateKey] === row[this.operateKey]) {
-                this.selected.push(item);
-              }
-            });
-          }
-        } else {
-          selection.forEach((row) => {
-            const exists = this.selected.some(
-              (item) => item[this.operateKey] === row[this.operateKey]
-            );
-            if (!exists) {
-              this.selected.push(row);
-            }
-          });
-        }
+        this.addSelection(row);
       } else {
-        if (this.selection.spanProp) {
-          for (let i = this.selected.length - 1; i >= 0; i--) {
-            if (this.selected[i][this.operateKey] === row[this.operateKey]) {
-              this.selected.splice(i, 1);
-            }
-          }
-          this.updateSelection();
-        } else {
-          this.selected.splice(this.selected.indexOf(row), 1);
-        }
+        this.removeSelection(row);
       }
     },
     selectAll(selection) {
-      this.$emit("select-all", selection);
       if (!this.selected) return;
       const isAllSelected = this.$refs.tableRef.store.states.isAllSelected;
       const currentPageKeys = new Set(
         this.list.map((item) => item[this.operateKey])
       );
       if (isAllSelected) {
-        const newSelections = selection.filter(
-          (item) =>
-            !this.selected.some(
-              (s) => s[this.operateKey] === item[this.operateKey]
-            )
-        );
-        this.selected.push(...newSelections);
+        selection.forEach((row) => {
+          if (this.selected.indexOf(row) === -1) {
+            this.selected.push(row);
+          }
+        });
+        if (this.selection.spanProp) {
+          this._sortedData(this.selected);
+        }
       }
       // 取消全选当前页
       else {
@@ -307,6 +285,23 @@ export default {
         }
       }
     },
+    addSelection(row) {
+      if (!this.selected) return;
+      if (this.selection.spanProp) {
+        this.removeSelection(row);
+        this.list.forEach((item) => {
+          if (item[this.operateKey] === row[this.operateKey]) {
+            this.selected.push(item);
+            this.$refs.tableRef.toggleRowSelection(item, true);
+          }
+        });
+      } else {
+        if (this.selectedOperateKeys.indexOf(row[this.operateKey]) === -1) {
+          this.selected.push(row);
+          this.$refs.tableRef.toggleRowSelection(row, true);
+        }
+      }
+    },
     removeSelection(row) {
       if (!this.selectionSelectable(row, row.$index)) {
         return;
@@ -314,15 +309,14 @@ export default {
       if (!this.selected) return;
       if (this.selection.spanProp) {
         for (let i = this.selected.length - 1; i >= 0; i--) {
-          if (this.selected[i][this.operateKey] === row[this.operateKey]) {
+          const item = this.selected[i];
+          if (item[this.operateKey] === row[this.operateKey]) {
             this.selected.splice(i, 1);
+            this.$refs.tableRef.toggleRowSelection(item, false);
           }
         }
-        this.updateSelection();
       } else {
-        const index = this.selected.findIndex(
-          (item) => item[this.operateKey] === row[this.operateKey]
-        );
+        const index = this.selectedOperateKeys.indexOf(row[this.operateKey]);
         if (index > -1) {
           this.selected.splice(index, 1);
           this.$refs.tableRef.toggleRowSelection(row, false);

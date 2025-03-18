@@ -9,7 +9,7 @@
 
 `selected` 绑定响应式选中数据，存在数据时会自动选中 </br>
 `selection` 开启表格多选选中 </br>
-`selection.reserveSelection` 开启支持跨分页选中 </br>
+`selection.reserveSelection` 开启数据更新时保持选中状态 </br>
 
 <ClientOnly>
 <common-code-format>
