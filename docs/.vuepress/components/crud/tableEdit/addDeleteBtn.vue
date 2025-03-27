@@ -5,9 +5,8 @@
       :options="options"
       :data="data"
       @add="add"
-      @edit="edit"
-      @view="view"
-      @save="save"
+      @delete="handleDelete"
+      @batchDelete="handleBatchDelete"
     >
     </sc-crud>
   </div>
@@ -18,24 +17,83 @@ export default {
   data() {
     return {
       searchForm: {},
-      options: {
+      data: [
+        {
+          id: 1,
+          name: "张三",
+          gender: "男",
+          age: 20,
+          city: "北京",
+          date: "2021-01-01",
+        },
+        {
+          id: 2,
+          name: "李四",
+          gender: "女",
+          age: 21,
+          city: "上海",
+          date: "2021-01-02",
+        },
+        {
+          id: 3,
+          name: "王五",
+          gender: "男",
+          age: 22,
+          city: "广州",
+          date: "2021-01-03",
+        },
+        {
+          id: 4,
+          name: "赵六",
+          gender: "女",
+          age: 23,
+          city: "深圳",
+          date: "2021-01-04",
+        },
+        {
+          id: 5,
+          name: "孙七",
+          gender: "男",
+          age: 24,
+          city: "成都",
+          date: "2021-01-05",
+        },
+        {
+          id: 6,
+          name: "周八",
+          gender: "女",
+          age: 25,
+          city: "重庆",
+          date: "2021-01-06",
+        },
+      ],
+    };
+  },
+  computed: {
+    options() {
+      return {
+        selection: true,
         editConfig: {
-          mode: "dialog",
+          mode: "row",
           edit: {},
           add: {
-            addType: "first",
+            addType: "last",
           },
-          view: {},
-          delete: true,
           lastAdd: {},
+          delete: {
+            confirm: (scope) => `是否删除序号为${scope.$index + 1}的数据？`, // 删除提示
+          },
+          batchDelete: {
+            confirm: (rows) =>
+              `是否删除序号为${rows
+                .map((row) => row.$index + 1)
+                .join(",")}的数据？`, // 删除提示
+          },
         },
-        dialog: {}, // 自定义弹窗配置
-        formOptions: {}, // 自定义表单配置
         renderColumns: [
           {
             prop: "name",
             label: "姓名",
-            form: {},
           },
           {
             prop: "gender",
@@ -95,77 +153,21 @@ export default {
             },
           },
         ],
-      },
-      data: [
-        {
-          id: 1,
-          name: "张三",
-          gender: "男",
-          age: 20,
-          city: "北京",
-          date: "2021-01-01",
-        },
-        {
-          id: 2,
-          name: "李四",
-          gender: "女",
-          age: 21,
-          city: "上海",
-          date: "2021-01-02",
-        },
-        {
-          id: 3,
-          name: "王五",
-          gender: "男",
-          age: 22,
-          city: "广州",
-          date: "2021-01-03",
-        },
-        {
-          id: 4,
-          name: "赵六",
-          gender: "女",
-          age: 23,
-          city: "深圳",
-          date: "2021-01-04",
-        },
-        {
-          id: 5,
-          name: "孙七",
-          gender: "男",
-          age: 24,
-          city: "成都",
-          date: "2021-01-05",
-        },
-        {
-          id: 6,
-          name: "周八",
-          gender: "女",
-          age: 25,
-          city: "重庆",
-          date: "2021-01-06",
-        },
-      ],
-    };
+      };
+    },
   },
   methods: {
     add(done, scope) {
-      this.$message("点击新增");
+      console.log("add", scope);
       done();
     },
-    edit(done, scope) {
-      this.$message("点击编辑");
+    handleDelete(done, scope) {
+      console.log("handleDelete", scope);
       done();
     },
-    view(done, scope) {
-      this.$message("点击查看");
+    handleBatchDelete(done, rows) {
+      console.log("handleBatchDelete", rows);
       done();
-    },
-    save(done, scope) {
-      setTimeout(() => {
-        done();
-        this.$message("点击保存");
-      }, 500);
     },
   },
 };

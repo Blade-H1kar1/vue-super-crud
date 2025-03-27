@@ -1,6 +1,13 @@
 <template>
   <div>
-    <sc-crud :search.sync="searchForm" :options="options" :data="data">
+    <sc-crud
+      :search.sync="searchForm"
+      :options="options"
+      :data="data"
+      @edit="edit"
+      @save="save"
+      @cancel="cancel"
+    >
     </sc-crud>
   </div>
 </template>
@@ -51,7 +58,11 @@ export default {
     options() {
       return {
         editConfig: {
-          mode: "free",
+          mode: "row",
+          trigger: "manual",
+          edit: {
+            hasPermi: ["xx:xx:xx"],
+          }, // 操作列按钮配置
         },
         renderColumns: [
           { prop: "name", label: "姓名" },
@@ -62,15 +73,6 @@ export default {
           {
             prop: "age",
             label: "年龄",
-            form: {
-              comp: {
-                name: "el-select",
-                options: [
-                  { value: "1", label: "选项1" },
-                  { value: "2", label: "选项2" },
-                ],
-              },
-            },
           },
           {
             prop: "city",
@@ -82,6 +84,23 @@ export default {
           },
         ],
       };
+    },
+  },
+  methods: {
+    edit(done, scope) {
+      console.log("edit", scope);
+      this.$message.info("点击编辑", scope);
+      done();
+    },
+    save(done, scope) {
+      console.log("save", scope);
+      this.$message.success("点击保存", scope);
+      done();
+    },
+    cancel(done, scope) {
+      console.log("cancel", scope);
+      this.$message.warning("点击取消", scope);
+      done();
     },
   },
 };

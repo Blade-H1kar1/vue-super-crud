@@ -54,6 +54,9 @@
         @select="select"
         @select-all="selectAll"
         @row-click="rowClick"
+        @row-dblclick="rowDblclick"
+        @cell-click="cellClick"
+        @cell-dblclick="cellDblclick"
         :row-key="valueKey"
         :row-style="defineRowIndex"
         :cell-class-name="cellClassName_"
@@ -98,9 +101,9 @@
       </el-tooltip>
     </el-form>
     <div
-      v-if="crudOptions.footerAddBtn"
+      v-if="editConfig.lastAdd"
       :class="b('add-button')"
-      @click="handleRowAdd({}, 'last')"
+      @click="handleLastAdd"
     >
       <i class="el-icon-plus" /> 新增一行
     </div>
@@ -444,31 +447,43 @@ export default create({
           })
         : null;
     },
+    _runWithoutDeps(fn) {
+      const originalWatcher = Vue.prototype._target;
+      Vue.prototype._target = null; // 临时禁用依赖收集
+      try {
+        return fn();
+      } finally {
+        Vue.prototype._target = originalWatcher; // 恢复原状态
+      }
+    },
     cellClassName_({ row, column, rowIndex, columnIndex }) {
-      let cellName = this.crudOptions.cellClassName
-        ? this.crudOptions.cellClassName.call(null, {
-            row,
-            column,
-            rowIndex,
-            columnIndex,
-          })
-        : "";
-      const col = column.col;
-      if (!col) return;
-      if (
-        !col.type &&
-        this.crudOptions.editTheme &&
-        this.validateEdit(col, { row, $index: rowIndex })
-      ) {
-        cellName += (cellName ? " " : "") + "edit-cell";
-      }
-      if (this.validateIsError(row.$index, col.form?.prop || col.prop)) {
-        cellName += (cellName ? " " : "") + "error-badge";
-      }
-      if (!col.type && !this.isDefaultColumn(col)) {
-        cellName += (cellName ? " " : "") + "custom-cell";
-      }
-      return cellName;
+      return this._runWithoutDeps(() => {
+        let cellName = this.crudOptions.cellClassName
+          ? this.crudOptions.cellClassName.call(null, {
+              row,
+              column,
+              rowIndex,
+              columnIndex,
+            })
+          : "";
+        const col = column.col;
+        if (!col) return;
+
+        if (
+          !col.type &&
+          this.crudOptions.editTheme &&
+          this.validateEdit(col, { row, $index: rowIndex })
+        ) {
+          cellName += (cellName ? " " : "") + "edit-cell";
+        }
+        if (this.validateIsError(row.$index, col.form?.prop || col.prop)) {
+          cellName += (cellName ? " " : "") + "error-badge";
+        }
+        if (!col.type && !this.isDefaultColumn(col)) {
+          cellName += (cellName ? " " : "") + "custom-cell";
+        }
+        return cellName;
+      });
     },
     // 校验按钮隐藏
     checkHiddenButtons(key, buttons, scope) {
@@ -489,6 +504,31 @@ export default create({
       if (this.showPopperNum > 0) {
         this.$emit("closeSearchPopover");
       }
+    },
+    // 强制更新表格列
+    forceUpdate() {
+      this.$refs?.tableRef?.store?.updateColumns();
+    },
+    rowClick(row, column, event) {
+      this.selectRowClick(row, column, event);
+      event.stopPropagation();
+      if (!column) return;
+      this.handleRowClick({ row, $index: row.$index }, column.col.prop);
+    },
+    rowDblclick(row, column, event) {
+      event.stopPropagation();
+      if (!column) return;
+      this.handleRowClick({ row, $index: row.$index }, column.col.prop);
+    },
+    cellClick(row, column, cell, event) {
+      event.stopPropagation();
+      if (!column) return;
+      this.handleCellClick({ row, $index: row.$index }, column.col);
+    },
+    cellDblclick(row, column, cell, event) {
+      event.stopPropagation();
+      if (!column) return;
+      this.handleCellClick({ row, $index: row.$index }, column.col);
     },
   },
 });

@@ -90,7 +90,7 @@ export default {
       ) {
         return false;
       }
-      if (this.isEdit && col.isEdit !== false) {
+      if (this.editConfig.mode && col.isEdit !== false) {
         return false;
       }
       return true;

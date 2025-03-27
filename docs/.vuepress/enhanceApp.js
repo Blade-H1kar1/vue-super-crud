@@ -38,6 +38,7 @@ export default async ({ Vue }) => {
     Vue.use(Package, {
       crudOptions: {
         gap: 0,
+        border: true,
       },
       dict: {
         request: (key) => {

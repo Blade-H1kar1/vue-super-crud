@@ -74,7 +74,7 @@ export default {
       if (!this.showSummary) return;
 
       const { columns } = param;
-      const data = this.list;
+      const data = this.crudOptions.summaryData || this.list;
       let sumsList = {};
       let sums = new Array(columns.length).fill("");
 

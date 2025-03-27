@@ -220,40 +220,50 @@ export const mockApi = {
     });
   },
 
-  getList({ pageNum, pageSize }) {
-    return new Promise((resolve) => {
-      const total = 23;
-      const start = (pageNum - 1) * pageSize;
+  getList: (() => {
+    let cachedData = null;
+    const total = 33;
 
-      // 模拟数据生成
+    const generateAllData = () => {
       const mockData = [];
       const cities = ["北京", "上海", "广州"];
-      for (let i = 0; i < pageSize; i++) {
-        const index = start + i;
-        if (index >= total) break;
+
+      for (let i = 0; i < total; i++) {
         const age = Math.floor(Math.random() * 20) + 20;
         mockData.push({
-          id: index + 1,
-          name: `用户${index + 1}`,
-          gender: Math.random() > 0.5 ? "男" : "女",
+          id: i + 1, // 使用固定的自增ID
+          name: `用户${i + 1}`,
+          gender: i % 2 === 0 ? "男" : "女", // 使用固定规则
           age: age,
           is30: age > 30 ? "是" : "否",
-          city: cities[Math.floor(Math.random() * cities.length)],
+          city: cities[i % cities.length], // 循环使用城市
           date: dayjs()
-            .subtract(Math.floor(Math.random() * 30), "day")
+            .subtract(i, "day") // 按顺序递减日期
             .format("YYYY-MM-DD"),
-          status: Math.random() > 0.5 ? 1 : 0,
+          status: i % 2, // 使用固定规则
         });
       }
+      return mockData;
+    };
 
-      setTimeout(() => {
-        resolve({
-          data: mockData,
-          total,
-        });
-      }, 300);
-    });
-  },
+    return ({ pageNum, pageSize }) => {
+      return new Promise((resolve) => {
+        if (!cachedData) {
+          cachedData = generateAllData();
+        }
+
+        const start = (pageNum - 1) * pageSize;
+        const end = Math.min(start + pageSize, total);
+
+        setTimeout(() => {
+          resolve({
+            data: cachedData.slice(start, end),
+            total,
+          });
+        }, 300);
+      });
+    };
+  })(),
   // 生成更多测试数据
 
   // 模拟API请求函数

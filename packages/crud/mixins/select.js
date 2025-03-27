@@ -133,7 +133,7 @@ export default {
       // }
       return rowName;
     },
-    rowClick(row, column, event) {
+    selectRowClick(row, column, event) {
       if (
         this.showSingleSelection &&
         this.singleSelection.ctrlSelect !== false &&
@@ -329,6 +329,7 @@ export default {
     },
     clearSelection() {
       this.$refs.tableRef.clearSelection();
+      this.selectionRow = [];
       if (!this.selected) return;
       // 获取禁用的选中数据
       const disabledSelection = this.selected.filter((item) => {

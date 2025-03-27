@@ -44,9 +44,6 @@ export default create({
     },
   },
   computed: {
-    isDefaultColumn() {
-      return this.ctx.isDefaultColumn(this.col);
-    },
     defaultMinWidth() {
       // 计算头部默认宽度
       const labelSpan = document.createElement("span");
@@ -125,15 +122,15 @@ export default create({
       showSearchHeader,
       showOverflowTooltip,
       isShow,
-      isDefaultColumn,
       fixed,
       colWidth,
       colMinWidth,
     } = this;
+    const isDefaultColumn = this.ctx.isDefaultColumn(col);
     if (!isShow) return null;
 
     const cellRender = (scope) => {
-      return <columnCell col={col} scope={scope} />;
+      return <columnCell col={col} scope={scope} ctx={ctx} />;
     };
     const columnHeader = () => {
       return (

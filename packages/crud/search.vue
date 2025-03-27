@@ -30,7 +30,6 @@ export default create({
     options() {
       return merge(
         {
-          size: this.ctx.crudOptions.size,
           shrinkLabel: false,
           columnWidth: "300px",
           action: {

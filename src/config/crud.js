@@ -1,5 +1,5 @@
 import { renderItem, buttonItem, presetButtonType } from "./common";
-import { isPlainObject } from "lodash-es";
+import { isPlainObject, merge } from "lodash-es";
 
 const tableColumnKeys = [
   "type",
@@ -77,6 +77,7 @@ export default {
       type: String,
       default: "small",
     },
+    summaryData: Array, // 外部传入的统计数据
     // 是否禁用
     disabled: Boolean,
     // 是否开启初始化
@@ -97,7 +98,59 @@ export default {
     rowAddType: {
       type: String,
       enum: ["first", "last"],
-      default: "first",
+    },
+    editConfig: {
+      type: Object,
+      strict: true,
+      default: () => ({}),
+      properties: {
+        mode: {
+          // 编辑模式
+          type: String,
+          enum: ["free", "cell", "row", "dialog"],
+        },
+        trigger: {
+          // 触发方式
+          type: String,
+          enum: ["manual", "click", "dblclick"],
+          default: "manual",
+        },
+        edit: buttonItem, // 编辑按钮配置
+        batch: merge(buttonItem, {
+          // 批量操作按钮配置，仅限`row`模式
+          properties: {
+            isSelect: Boolean,
+          },
+        }),
+        add: merge(buttonItem, {
+          // 新增按钮配置
+          properties: {
+            addType: {
+              type: String,
+              enum: ["first", "last"],
+            },
+          },
+        }),
+        lastAdd: merge(buttonItem, {
+          // 底部新增行按钮配置
+          properties: {
+            addType: {
+              type: String,
+              enum: ["first", "last"],
+            },
+          },
+        }),
+        batchDelete: buttonItem, // 批量删除按钮配置
+        delete: buttonItem, // 删除按钮配置
+        view: buttonItem, // 查看按钮配置，仅限`dialog`模式
+        isRowEdit: Function, // 控制行是否可编辑
+        autofocus: {
+          // 是否自动聚焦，支持字符串(prop)
+          type: [Boolean, String],
+          default: true,
+        },
+        exclusive: Boolean, // 行编辑是否互斥(同时只能编辑一行)
+      },
     },
     // 是否开启批量删除按钮
     batchDeleteBtn: Boolean,
@@ -305,7 +358,6 @@ export default {
     // 行操作配置
     handleRow: {
       type: [Boolean, Object],
-      strict: true,
       properties: {
         show: Boolean,
         hidden: Boolean,
@@ -325,14 +377,13 @@ export default {
       properties: {
         show: Boolean,
         hidden: Boolean,
-        batchEdit: presetButtonType,
-        batchSave: presetButtonType,
-        batchCancel: presetButtonType,
         zoom: presetButtonType,
         search: presetButtonType,
         refresh: presetButtonType,
         reset: presetButtonType,
         column: presetButtonType,
+        excelImport: presetButtonType,
+        excelExport: presetButtonType,
         handles: {
           type: Array,
           arrayOf: buttonItem,
@@ -418,8 +469,20 @@ export default {
           isEdit: [Boolean, Function], // 是否允许编辑
           summary: {
             // 是否开启汇总
-            type: [String, Function],
-            enum: ["sum", "avg", "max", "min"],
+            type: Object,
+            strict: true,
+            properties: {
+              type: String,
+              enum: ["sum", "avg", "count", "max", "min", "custom"],
+              path: String, // 汇总字段
+              prefix: String, // 前缀
+              suffix: String, // 后缀
+              decimals: Number, // 小数位数
+              ignoreZero: Boolean, // 忽略0值
+              absolute: Boolean, // 取绝对值
+              predicate: Function, // 条件
+              method: Function, // 自定义方法
+            },
           },
           add: {
             // 新增配置
