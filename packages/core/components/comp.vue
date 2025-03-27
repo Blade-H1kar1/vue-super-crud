@@ -200,7 +200,10 @@ export default {
         nativeOn={this.nativeOn}
         scopedSlots={scopedSlots}
         clearable={this.clearable}
-        ref="target"
+        ref={(el) => {
+          if (this.comp.ref) this.comp.ref(el);
+          this.$refs.target = el;
+        }}
         directives={this.directives}
       >
         {renderChildren(this.children)}

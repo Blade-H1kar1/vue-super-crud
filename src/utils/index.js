@@ -160,11 +160,7 @@ export function checkVisibility(item, scope, defaultShow) {
 
 export function resolveRender(render, h, scope, ...args) {
   if (!render) return null;
-  const VNode = isFunction(render)
-    ? render.length >= 2
-      ? render(h, scope, ...args)
-      : render(scope)
-    : render;
+  const VNode = isFunction(render) ? render(h, scope, ...args) : render;
   if (VNode) {
     return isVNode(VNode) ? VNode : <span>{VNode}</span>;
   }

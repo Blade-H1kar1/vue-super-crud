@@ -100,6 +100,11 @@ module.exports = {
           collapsable: true,
           children: ["tabs/base"],
         },
+        {
+          title: "问题合集",
+          collapsable: true,
+          children: ["question/base"],
+        },
       ],
     },
   },
