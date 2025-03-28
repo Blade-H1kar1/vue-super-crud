@@ -156,9 +156,7 @@ export default {
     // 行添加事件
     handleRowAdd(params, type) {
       type = type || this.crudOptions.rowAddType || "last";
-      let newRow = {
-        [this.valueKey]: "temp_" + uniqueId(),
-      };
+      let newRow = {};
       this.trueRenderColumns.forEach((col) => {
         if (newRow[col.prop] === undefined) {
           newRow[col.prop] = col.initValue ?? "";
@@ -171,9 +169,14 @@ export default {
           newRow = Object.assign(newRow, data, params);
 
           // 设置添加状态
-          this.editState.setRowEditStatus(newRow, true, "add", {
-            addType: type,
-          });
+          this.editState.setRowEditStatus(
+            newRow,
+            true,
+            this.editConfig.mode === "row" ? "add" : "edit",
+            {
+              addType: type,
+            }
+          );
 
           if (type === "first") {
             this.list.unshift(newRow);
@@ -254,14 +257,14 @@ export default {
     },
 
     // 批量行保存事件
-    handleBatchRowSave(changeBatchButton) {
+    handleBatchRowSave(changeBatchButton, topRows) {
       this.validate().then(() => {
         const editRows = this.editState
           .getEditingRows()
           .map((item) => item.row);
         this.changeLoading(true);
         const callBack = (rows) => {
-          (rows || editRows).forEach((row) => {
+          (topRows || rows || editRows).forEach((row) => {
             this.editState.setRowEditStatus(row, false);
           });
           changeBatchButton();
@@ -298,9 +301,9 @@ export default {
     },
 
     // 批量行取消事件
-    handleBatchRowCancel() {
+    handleBatchRowCancel(topRows) {
       this.runBefore(["batchCancel"], (rows) => {
-        (rows || this.list).forEach((row, index) => {
+        (topRows || rows || this.list).forEach((row, index) => {
           if (this.editState.isRowEditing(row)) {
             const editInfo = this.editState.getRowEditInfo(row);
             if (editInfo?.data) {

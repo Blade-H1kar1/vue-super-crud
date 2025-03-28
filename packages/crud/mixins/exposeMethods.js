@@ -62,6 +62,20 @@ export default {
     },
 
     /**
+     * 批量设置行编辑状态
+     * @param {String} type 操作类型: 'edit'  | 'save' | 'cancel'
+     * @param {Array} rows 行数据数组
+     */
+    setBatchEdit(type = "edit", rows) {
+      if (type === "edit") {
+        this.handleBatchRowEdit(rows);
+      } else if (type === "save") {
+        this.handleBatchRowSave(undefined, rows);
+      } else if (type === "cancel") {
+        this.handleBatchRowCancel(rows);
+      }
+    },
+    /**
      * 设置单元格编辑状态
      * @param {Object|Array} rows 行数据或行数据数组
      * @param {String} prop 列属性

@@ -13,6 +13,7 @@ class EditState {
     this.trigger = options.trigger;
     this.isRowEdit = options.isRowEdit;
     this.exclusive = options.exclusive || false;
+    this._internalIdCounter = 1; // 添加计数器用于生成唯一ID
     this.eventBus = new Vue();
   }
 
@@ -81,7 +82,18 @@ class EditState {
     });
   }
   getRowKey(row) {
-    return row[this.valueKey];
+    const valueKey = row[this.valueKey];
+    if (valueKey) return valueKey;
+    console.log(row, row._internalId, "row");
+
+    if (row._internalId) return row._internalId;
+    const internalId = `internalId_${this._internalIdCounter++}`;
+    Object.defineProperty(row, "_internalId", {
+      value: internalId,
+      enumerable: false, // 使该属性不可枚举，不会影响JSON序列化
+      configurable: true, // 允许后续删除该属性
+    });
+    return internalId;
   }
 
   /**
@@ -94,7 +106,6 @@ class EditState {
    */
   setRowEditStatus(row, isEditing, type = "edit", { addType, prop } = {}) {
     const rowKey = this.getRowKey(row);
-    if (!rowKey) return;
     const editInfo = this.getRowEditInfo(row);
     if (this.isRowEdit) {
       const disabled = this.isRowEdit({ row, $index: row.$index }) === false;
@@ -159,7 +170,6 @@ class EditState {
    */
   setCellEditStatus(row, prop) {
     const rowKey = this.getRowKey(row);
-    if (!rowKey) return;
 
     if (this.isCellEditing(row, prop)) return;
 
@@ -210,7 +220,6 @@ class EditState {
   getRowEditInfo(row) {
     const rowKey = this.getRowKey(row);
     const nullObj = { isEditing: false, data: null, type: null };
-    if (!rowKey) return nullObj;
     const rowEditInfo = this.editingRows.get(rowKey);
     if (!rowEditInfo) return nullObj;
     return {
@@ -264,6 +273,7 @@ class EditState {
     if (this._isSetting) return;
     this.editingRows.clear();
     this.currentEditCell = null;
+    this._internalIdCounter = 1;
   }
 
   // 触发编辑状态更新事件

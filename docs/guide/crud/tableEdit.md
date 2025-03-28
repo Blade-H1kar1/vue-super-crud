@@ -356,13 +356,14 @@ options: {
 
 ### Methods
 
-| 方法名         | 说明                 | 参数                                                        | 返回值 |
-| -------------- | -------------------- | ----------------------------------------------------------- | ------ |
-| setRowEdit     | 设置行编辑状态       | (rows: object/array, options: {type: string, prop: string}) | -      |
-| setCellEdit    | 设置单元格编辑状态   | (row: object, prop: string)                                 | -      |
-| addRow         | 新增表格行           | (params: object, type: first/last)                          | -      |
-| clearAllEdit   | 清除所有编辑状态     | -                                                           | -      |
-| getEditingRows | 获取所有编辑状态的行 | -                                                           | array  |
+| 方法名         | 说明                                     | 参数                                                        | 返回值 |
+| -------------- | ---------------------------------------- | ----------------------------------------------------------- | ------ |
+| setRowEdit     | 设置行编辑状态                           | (rows: object/array, options: {type: string, prop: string}) | -      |
+| setBatchEdit   | 批量设置行编辑状态，不传rows则设置所有行 | (type: string, rows: object/array)                          | -      |
+| setCellEdit    | 设置单元格编辑状态                       | (row: object, prop: string)                                 | -      |
+| addRow         | 新增表格行                               | (params: object, type: first/last)                          | -      |
+| clearAllEdit   | 清除所有编辑状态                         | -                                                           | -      |
+| getEditingRows | 获取所有编辑状态的行                     | -                                                           | array  |
 
 ### options 快捷配置
 
