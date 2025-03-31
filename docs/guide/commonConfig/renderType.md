@@ -168,7 +168,6 @@ children 属性用于配置组件的子元素，支持多种配置方式，常�
 | slots    | Object                | 组件的插槽配置，接收render函数                     | {default: (h, scope) => []}                |
 | children | Array/Object/Function | 子组件配置或默认插槽内容                           | [{name: 'el-option'}]                      |
 | nativeOn | Object                | 原生事件监听                                       | {click: () => {}}                          |
-| ref      | Function(ref)         | 获取组件实例                                       | (ref) => {}                                |
 | mounted  | Function(scope, ref)  | 组件挂载后调用                                     | (scope, ref) => {}                         |
 
 

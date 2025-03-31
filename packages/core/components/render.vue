@@ -93,7 +93,23 @@ export default {
       this.matcher = this.createMatcher(this.compStrategy);
     }
     if (this.controlCtx) {
-      this.controlCtx.$on("mockData", () => {
+      this.setupMockDataListener();
+    }
+  },
+  mounted() {
+    if (this.item.ref && typeof this.item.ref === "function") {
+      this.item.ref(this.$vnode.componentInstance);
+    }
+  },
+  destroyed() {
+    if (this.controlCtx && this.mockDataListener) {
+      this.controlCtx.$off("mockData", this.mockDataListener);
+      this.mockDataListener = null;
+    }
+  },
+  methods: {
+    setupMockDataListener() {
+      this.mockDataListener = () => {
         if (
           (this.elForm || {}).disabled ||
           (!isEmptyData(this.$value) && this.$value !== 0)
@@ -111,15 +127,10 @@ export default {
           pattern: this.getPattern(),
         });
         !isEmptyData(mockValue) && this.setFormatValue(mockValue);
-      });
-    }
-  },
-  mounted() {
-    if (this.item.ref && typeof this.item.ref === "function") {
-      this.item.ref(this.$vnode.componentInstance);
-    }
-  },
-  methods: {
+      };
+
+      this.controlCtx.$on("mockData", this.mockDataListener);
+    },
     getComponentConfig() {
       return getComponentConfig(this.$vnode);
     },
