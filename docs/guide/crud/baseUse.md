@@ -103,21 +103,6 @@
 </common-code-format>
 </ClientOnly>
 
-## 选择列
-
-`selection` 选择列 </br>
-`selection.ctrlSelect` 按下ctrl键点击整行选中（默认启用） </br>
-`selection.shiftSelect` 按下shift键批量多选（默认启用）
-
-<ClientOnly>
-<common-code-format>
-  <crud-baseUse-selection slot="source"></crud-baseUse-selection>
-  
-<<< @/docs/.vuepress/components/crud/baseUse/selection.vue
-</common-code-format>
-</ClientOnly>
-
-
 ## 组件加载
 
 `loading` 外部控制加载状态，支持`.sync`双向绑定</br>

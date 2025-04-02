@@ -80,20 +80,22 @@ export default {
       }
     },
     isDefaultColumn(col) {
-      if (
-        col.comp ||
-        col.render ||
-        col.html ||
-        col.isEdit ||
-        this.extendsScopedSlots[col.prop] ||
-        col.position
-      ) {
-        return false;
-      }
-      if (this.isEdit && col.isEdit !== false) {
-        return false;
-      }
-      return true;
+      return this._runWithoutDeps(() => {
+        if (
+          col.comp ||
+          col.render ||
+          col.html ||
+          col.isEdit ||
+          this.extendsScopedSlots[col.prop] ||
+          col.position
+        ) {
+          return false;
+        }
+        if (this.editConfig.mode && col.isEdit !== false) {
+          return false;
+        }
+        return true;
+      });
     },
     getDefaultColumnMinWidth(col) {
       if (this.labelMinWidthMap.has(col.label)) {

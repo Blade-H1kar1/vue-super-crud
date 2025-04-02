@@ -44,9 +44,6 @@ export default create({
     },
   },
   computed: {
-    isDefaultColumn() {
-      return this.ctx.isDefaultColumn(this.col);
-    },
     defaultMinWidth() {
       // 计算头部默认宽度
       const labelSpan = document.createElement("span");
@@ -62,7 +59,7 @@ export default create({
     showOverflowTooltip() {
       const col = this.col;
       if (col.showOverflowTooltip !== undefined) return col.showOverflowTooltip;
-      return this.isDefaultColumn;
+      return this.ctx.isDefaultColumn(col);
     },
     calcOpts() {
       return { ...this.ctx.crudOptions.calcColumnWidth, ...this.col };
@@ -117,6 +114,15 @@ export default create({
         columnConfig.col = this.col;
       }
     },
+    getTopProps() {
+      return {
+        size: this.ctx.crudOptions.size,
+        isTree: this.ctx.isTree,
+        valueKey: this.ctx.valueKey,
+        extendsScopedSlots: this.ctx.extendsScopedSlots,
+        defaultRender: this.ctx.crudOptions.defaultRender,
+      };
+    },
   },
   render(h) {
     const {
@@ -125,15 +131,15 @@ export default create({
       showSearchHeader,
       showOverflowTooltip,
       isShow,
-      isDefaultColumn,
       fixed,
-      colWidth,
-      colMinWidth,
     } = this;
+    const isDefaultColumn = this.ctx.isDefaultColumn(col);
     if (!isShow) return null;
-
+    const topProps = this.getTopProps();
     const cellRender = (scope) => {
-      return <columnCell col={col} scope={scope} />;
+      return (
+        <columnCell col={col} scope={scope} ctx={ctx} topProps={topProps} />
+      );
     };
     const columnHeader = () => {
       return (

@@ -142,14 +142,15 @@ options: {
 
 ### Options 配置
 
-| 参数          | 说明           | 类型     | 默认值 |
-| ------------- | -------------- | -------- | ------ |
-| showSummary   | 是否显示统计行 | boolean  | false  |
-| summaryMethod | 自定义统计方法 | function | -      |
+| 参数          | 说明                                         | 类型     | 默认值 |
+| ------------- | -------------------------------------------- | -------- | ------ |
+| summaryData   | 不使用表格data数据，而使用外部传入的统计数据 | array    | -      |
+| showSummary   | 是否显示统计行                               | boolean  | false  |
+| summaryMethod | 自定义统计方法                               | function | -      |
 
 ### 内置统计类型
 
-| 类型   | 说明       | 支持的选项            |
+| 类型   | 说明       | 可选值                |
 | ------ | ---------- | --------------------- |
 | sum    | 求和       | ignoreZero, absolute  |
 | avg    | 平均值     | ignoreZero            |

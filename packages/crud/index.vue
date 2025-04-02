@@ -35,59 +35,71 @@
       @validate="createListError"
       class="height--form"
     >
-      <el-table
-        ref="tableRef"
-        :key="key"
-        v-loading="loadingStatus"
-        :element-loading-text="crudOptions.loadingText"
-        :element-loading-spinner="crudOptions.loadingSpinner"
-        :element-loading-background="crudOptions.loadingBackground"
-        highlight-current-row
-        highlight-selection-row
-        v-bind="tableProps"
-        v-on="{ ...$listeners, ...crudOptions }"
+      <component
+        :is="virtualized ? 'virtualScroll' : 'div'"
         :data="list"
-        @cell-mouse-enter="cellMouseEnter"
-        @cell-mouse-leave="cellMouseLeave"
-        @row-contextmenu="openContextMenu"
-        @selection-change="selectionChange"
-        @select="select"
-        @select-all="selectAll"
-        @row-click="rowClick"
-        :row-key="valueKey"
-        :row-style="defineRowIndex"
-        :cell-class-name="cellClassName_"
-        :row-class-name="rowClassName_"
-        :lazy="crudOptions.lazy || crudOptions.autoLazy"
-        :load="lazyLoad"
-        :spanMethod="spanMethod"
-        :summary-method="summaryMethod"
-        :show-summary="showSummary"
+        :key-prop="valueKey"
+        :virtualized="virtualized"
+        v-bind="$attrs"
+        @change="(renderData) => (virtualList = renderData)"
       >
-        <template slot="empty">
-          <div :class="b('empty')" v-if="showEmpty">
-            <slot name="empty" v-if="$scopedSlots.empty"></slot>
-            <el-empty
-              v-else
-              :image="crudOptions.empty.image"
-              :image-size="crudOptions.empty.size"
-              :description="crudOptions.empty.text"
-            ></el-empty>
-          </div>
-        </template>
-        <defaultColumn
-          v-for="col in defaultColumns"
-          :col="col"
-          :key="col.type"
-        />
-        <slot></slot>
-        <column
-          v-for="col in columns"
-          :col="col"
-          :key="col.prop || col.label"
-        />
-        <columnAction />
-      </el-table>
+        <el-table
+          ref="tableRef"
+          :key="key"
+          v-loading="loadingStatus"
+          :element-loading-text="crudOptions.loadingText"
+          :element-loading-spinner="crudOptions.loadingSpinner"
+          :element-loading-background="crudOptions.loadingBackground"
+          highlight-current-row
+          highlight-selection-row
+          v-bind="tableProps"
+          v-on="{ ...$listeners, ...crudOptions }"
+          :data="virtualized ? virtualList : list"
+          @cell-mouse-enter="cellMouseEnter"
+          @cell-mouse-leave="cellMouseLeave"
+          @row-contextmenu="openContextMenu"
+          @selection-change="selectionChange"
+          @select="select"
+          @select-all="selectAll"
+          @row-click="rowClick"
+          @row-dblclick="rowDblclick"
+          @cell-click="cellClick"
+          @cell-dblclick="cellDblclick"
+          :row-key="valueKey"
+          :row-style="defineRowIndex"
+          :cell-class-name="cellClassName_"
+          :row-class-name="rowClassName_"
+          :lazy="crudOptions.lazy || crudOptions.autoLazy"
+          :load="lazyLoad"
+          :spanMethod="spanMethod"
+          :summary-method="summaryMethod"
+          :show-summary="showSummary"
+        >
+          <template slot="empty">
+            <div :class="b('empty')" v-if="showEmpty">
+              <slot name="empty" v-if="$scopedSlots.empty"></slot>
+              <el-empty
+                v-else
+                :image="crudOptions.empty.image"
+                :image-size="crudOptions.empty.size"
+                :description="crudOptions.empty.text"
+              ></el-empty>
+            </div>
+          </template>
+          <defaultColumn
+            v-for="col in defaultColumns"
+            :col="col"
+            :key="col.type"
+          />
+          <slot></slot>
+          <column
+            v-for="col in columns"
+            :col="col"
+            :key="col.prop || col.label"
+          />
+          <columnAction />
+        </el-table>
+      </component>
       <el-tooltip
         effect="light"
         :popper-class="b('error-tip')"
@@ -98,9 +110,9 @@
       </el-tooltip>
     </el-form>
     <div
-      v-if="crudOptions.footerAddBtn"
+      v-if="editConfig.lastAdd"
       :class="b('add-button')"
-      @click="handleRowAdd({}, 'last')"
+      @click="handleLastAdd"
     >
       <i class="el-icon-plus" /> 新增一行
     </div>
@@ -144,6 +156,7 @@ import defaultColumn from "./defaultColumn.vue";
 import pagination from "./pagination.vue";
 import group from "../group/index.vue";
 import selectBanner from "./selectBanner.vue";
+import virtualScroll from "el-table-virtual-scroll";
 import {
   toCamelCase,
   toTreeArray,
@@ -168,6 +181,7 @@ export default create({
     group,
     position,
     selectBanner,
+    virtualScroll,
   },
   mixins: [
     init("crudOptions"),
@@ -254,6 +268,9 @@ export default create({
     this.refactorTableHeaderClick();
   },
   computed: {
+    virtualized() {
+      return this.crudOptions.virtualized;
+    },
     valueKey() {
       if (this.crudOptions.uniqueId) return "$uniqueId";
       if (this.crudOptions.rowKey) return this.crudOptions.rowKey;
@@ -444,6 +461,26 @@ export default create({
           })
         : null;
     },
+    _runWithoutDeps(fn) {
+      // 获取 Vue 实例内部的 Dep
+      const Dep = this.$data.__ob__.dep.constructor;
+
+      // 保存当前的 watcher 栈
+      const targetStack = [];
+      while (Dep.target) {
+        targetStack.push(Dep.target);
+        Dep.target = null;
+      }
+
+      try {
+        return fn();
+      } finally {
+        // 恢复 watcher 栈
+        while (targetStack.length) {
+          Dep.target = targetStack.pop();
+        }
+      }
+    },
     cellClassName_({ row, column, rowIndex, columnIndex }) {
       let cellName = this.crudOptions.cellClassName
         ? this.crudOptions.cellClassName.call(null, {
@@ -455,6 +492,7 @@ export default create({
         : "";
       const col = column.col;
       if (!col) return;
+
       if (
         !col.type &&
         this.crudOptions.editTheme &&
@@ -475,20 +513,31 @@ export default create({
       buttons = filterButtons(buttons, this.crudOptions, scope, key);
       return buttons;
     },
-    controlScopeProps(prop, mode, scope) {
-      if (this.crudOptions.controlCellProps) {
-        const cellProps = this.crudOptions.controlScopeProps(prop, mode, scope);
-        if (cellProps) {
-          this.initColumn(cellProps);
-          return cellProps;
-        }
-      }
-      return;
-    },
     handleWrapperClick() {
       if (this.showPopperNum > 0) {
         this.$emit("closeSearchPopover");
       }
+    },
+    // 强制更新表格列
+    forceUpdate() {
+      this.$refs?.tableRef?.store?.updateColumns();
+    },
+    rowClick(row, column, event) {
+      this.selectRowClick(row, column, event);
+      if (!column) return;
+      this.handleRowClick({ row, $index: row.$index }, column.col.prop);
+    },
+    rowDblclick(row, column, event) {
+      if (!column) return;
+      this.handleRowClick({ row, $index: row.$index }, column.col.prop);
+    },
+    cellClick(row, column, cell, event) {
+      if (!column) return;
+      this.handleCellClick({ row, $index: row.$index }, column.col);
+    },
+    cellDblclick(row, column, cell, event) {
+      if (!column) return;
+      this.handleCellClick({ row, $index: row.$index }, column.col);
     },
   },
 });

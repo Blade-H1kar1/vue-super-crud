@@ -34,12 +34,7 @@ export default {
     slots: Object,
     mode: [String, Boolean],
     scope: {},
-    config: {
-      type: Object,
-      default() {
-        return {};
-      },
-    },
+    size: String,
     controlDefault: Function, // 控制已有的默认渲染
     defaultRender: Function, // 自定义默认渲染
     position: Boolean, // 是否渲染位置
@@ -299,8 +294,7 @@ export default {
             v-model={this.$value}
             props={{ ...comp, comp }}
             prop={this.prop}
-            size={this.config.size}
-            config={this.config}
+            size={this.size}
             scope={scope}
           />
         );
@@ -332,7 +326,6 @@ export default {
       ...this.scope,
       item: this.item,
       mode: this.mode,
-      config: this.config,
       dict: this.dictData,
       self: this,
       $value: {

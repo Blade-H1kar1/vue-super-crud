@@ -58,3 +58,9 @@ options: {
 | order         | 排序方向       | 'asc' / 'desc'   | 'asc'  |
 | nullsPosition | 空值位置       | 'first' / 'last' | 'last' |
 | sortMethod    | 自定义排序方法 | Function(a, b)   | -      |
+
+### Methods 方法
+
+| 方法名     | 说明                                            | 参数          | 返回值 |
+| ---------- | ----------------------------------------------- | ------------- | ------ |
+| sortedData | 排序方法，默认使用 sortProps 配置并排序所有数据 | (data, props) | -      |

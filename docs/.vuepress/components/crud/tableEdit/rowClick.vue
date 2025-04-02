@@ -1,6 +1,12 @@
 <template>
   <div>
-    <sc-crud :search.sync="searchForm" :options="options" :data="data">
+    <sc-crud
+      :search.sync="searchForm"
+      :options="options"
+      :data="data"
+      @edit="edit"
+      @save="save"
+    >
     </sc-crud>
   </div>
 </template>
@@ -51,7 +57,8 @@ export default {
     options() {
       return {
         editConfig: {
-          mode: "free",
+          mode: "row",
+          trigger: "click",
         },
         renderColumns: [
           { prop: "name", label: "姓名" },
@@ -62,15 +69,6 @@ export default {
           {
             prop: "age",
             label: "年龄",
-            form: {
-              comp: {
-                name: "el-select",
-                options: [
-                  { value: "1", label: "选项1" },
-                  { value: "2", label: "选项2" },
-                ],
-              },
-            },
           },
           {
             prop: "city",
@@ -82,6 +80,18 @@ export default {
           },
         ],
       };
+    },
+  },
+  methods: {
+    edit(done, scope) {
+      this.$message.info("编辑");
+      console.log(scope, "edit");
+      done();
+    },
+    save(done, scope) {
+      this.$message.success("保存");
+      console.log(scope, "save");
+      done();
     },
   },
 };

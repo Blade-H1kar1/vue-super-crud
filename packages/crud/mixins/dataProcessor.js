@@ -56,7 +56,7 @@ export default {
       // 处理行数据
       this.processRowData(list);
 
-      // 恢复编辑状态
+      // 恢复新增状态
       this.restoreEditState(list);
 
       // 处理树形数据
@@ -104,10 +104,6 @@ export default {
       const isGenUniqueId = this.crudOptions.uniqueId;
 
       list.forEach((item) => {
-        // 设置编辑状态
-        if ((this.rowEdit || this.cellEdit) && item.$edit === undefined) {
-          this.$set(item, "$edit", null);
-        }
         // 生成唯一ID
         if (isGenUniqueId && !item.$uniqueId) {
           item.$uniqueId = uniqueId();
@@ -115,35 +111,33 @@ export default {
       });
     },
 
-    // 恢复编辑状态
+    // 恢复新增状态
     restoreEditState(list) {
-      if (this.pendingChanges.size === 0) return;
+      const addedRows = this.editState?.getAddedRows() || [];
 
-      // 恢复编辑行
-      list.forEach((row) => {
-        const key = row[this.valueKey];
-        const pending = this.pendingChanges.get(key);
-        if (pending && pending.type === "edit") {
-          Object.assign(row, pending.data);
-          this.pendingChanges.delete(key);
-        }
-      });
-
-      // 恢复新增行
-      const pendingAdds = Array.from(this.pendingChanges.values())
-        .filter((item) => item.type === "add")
-        .map((item) => item.data);
-
-      if (pendingAdds.length) {
-        if (this._processRowAddType === "last") {
-          list.push(...pendingAdds);
-        } else {
-          list.unshift(...pendingAdds);
-        }
-        pendingAdds.forEach((item) => {
-          this.pendingChanges.delete(item.$add);
+      if (addedRows.length > 0) {
+        addedRows.forEach((item) => {
+          const { addType, row } = item;
+          if (addType === "first") {
+            list.unshift(row);
+          } else if (addType === "last") {
+            list.push(row);
+          }
         });
       }
+
+      const editingRows = this.editState.editingRows || [];
+      list.forEach((row) => {
+        const key = row[this.valueKey];
+        const editInfo = editingRows.get(key);
+        if (editInfo) {
+          Object.defineProperty(row, "$edit", {
+            value: true,
+            enumerable: false,
+            configurable: true,
+          });
+        }
+      });
     },
 
     // 处理树形数据

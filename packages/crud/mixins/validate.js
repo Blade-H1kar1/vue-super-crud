@@ -32,11 +32,6 @@ export default {
       if (column.property === "action") return;
       const col = column.col;
       if (!col) return;
-      const scope = {
-        row,
-        $index: row.$index,
-      };
-      if (!this.validateEdit(col, scope)) return;
       // col.form?.prop || col.prop 优先form下的prop
       this.errorContent = this.listError[
         [`list.${row.$index}.${col?.form?.prop || col?.prop}`]

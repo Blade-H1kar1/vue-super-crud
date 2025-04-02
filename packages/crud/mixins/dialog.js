@@ -26,12 +26,12 @@ export default {
     changeDialogLoading(bool = false) {
       this.dialogLoading = bool;
     },
-    handleAdd() {
+    handleAdd(addType) {
       this.runBefore(
         ["add"],
         (data = {}) => {
           this.form = data;
-          this.openDialogForm("add", {});
+          this.openDialogForm("add", {}, addType);
         },
         { mode: "add" }
       );
@@ -59,26 +59,29 @@ export default {
       };
       this.runBefore(["edit"], callBack, { ...scope, mode: "view" });
     },
-    handleSave(scope, done) {
+    handleSave(scope, done, addType) {
       this.$refs.crudForm.validate().then(() => {
         this.changeDialogLoading(true);
         const callBack = (row) => {
           if (scope.mode === "add") {
-            this.list.unshift(row || this.form);
+            if (addType === "first") {
+              this.list.unshift(row || this.form);
+            } else {
+              this.list.push(row || this.form);
+            }
           } else {
             this.$set(this.list, scope.$index, row || this.form);
           }
 
           done();
           this.changeDialogLoading();
-          this.successTip(scope);
           this.getList();
         };
         this.runBefore(["save"], callBack, scope, this.changeDialogLoading);
       });
     },
 
-    openDialogForm(mode, scope = {}) {
+    openDialogForm(mode, scope = {}, addType) {
       scope = { ...scope, row: this.form, mode };
       this.$refs.dialogVm = dialog({
         title: this.title[mode],
@@ -95,7 +98,7 @@ export default {
             ...scope,
             formRef: this.$refs.crudForm,
           };
-          this.handleSave(params, done);
+          this.handleSave(params, done, addType);
         },
         footer: mode === "view" ? false : true,
         ...this.dialogOptions,

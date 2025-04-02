@@ -28,7 +28,8 @@ import create from "core/create";
 import { batchMerge } from "utils/mergeTemp";
 import { checkVisibility } from "utils";
 import button_ from "pak/button";
-import { cloneDeep, debounce, isFunction, merge, omit } from "lodash-es";
+import { cloneDeep, debounce } from "lodash-es";
+
 export default create({
   name: "crud-action-column",
   components: {
@@ -62,14 +63,15 @@ export default create({
       return this.ctx.setOptions.fixed[this.action.prop];
     },
     action() {
+      const editConfig = this.ctx.editConfig;
       return {
         type: "action",
-        delete: this.ctx.crudOptions.deleteBtn,
-        view: this.ctx.crudOptions.viewBtn,
-        edit: this.ctx.crudOptions.editBtn,
-        rowEdit: this.ctx.rowEdit,
-        rowSave: this.ctx.rowEdit,
-        rowCancel: this.ctx.rowEdit,
+        delete: editConfig.delete,
+        view: editConfig.view,
+        edit: editConfig.edit,
+        rowEdit: editConfig.rowEdit,
+        rowSave: editConfig.rowEdit,
+        rowCancel: editConfig.rowEdit,
         ...cloneDeep(this.ctx.crudOptions.action),
       };
     },
@@ -92,22 +94,26 @@ export default create({
     },
     actionTemps() {
       return {
-        rowEdit: (item, { ctx }) => {
-          return {
-            icon: "el-icon-edit",
-            label: "编辑",
-            innerHide: (scope) =>
-              this.isRowEdit(scope) || this.ctx.disabledRowEdit(scope),
-            onClick: (scope) => {
-              this.ctx.handleRowEdit(scope);
-            },
-          };
-        },
+        rowEdit: (item, { ctx }) => ({
+          icon: "el-icon-edit",
+          label: "编辑",
+          order: 9,
+          disabled: (scope) => {
+            return this.ctx.disabledRowEdit({
+              row: scope.row,
+              $index: scope.$index,
+            });
+          },
+          innerHide: (scope) => this.isRowEditing(scope),
+          onClick: (scope) => {
+            this.ctx.handleRowEdit(scope);
+          },
+        }),
         rowSave: (item, { ctx }) => ({
           icon: "el-icon-circle-check",
           label: "保存",
-          innerHide: (scope) =>
-            !this.isRowEdit(scope) || this.ctx.disabledRowEdit(scope),
+          order: 10,
+          innerHide: (scope) => !this.isRowEditing(scope),
           onClick: (scope) => {
             this.ctx.handleRowSave(scope);
           },
@@ -115,8 +121,8 @@ export default create({
         rowCancel: (item, { ctx }) => ({
           icon: "el-icon-circle-close",
           label: "取消",
-          innerHide: (scope) =>
-            !this.isRowEdit(scope) || this.ctx.disabledRowEdit(scope),
+          order: 11,
+          innerHide: (scope) => !this.isRowEditing(scope),
           onClick: (scope) => {
             this.ctx.handleRowCancel(scope);
           },
@@ -124,23 +130,25 @@ export default create({
         view: (item, { ctx }) => ({
           icon: "el-icon-view",
           label: "查看",
+          order: 8,
           onClick: (scope) => {
             this.ctx.handleView(scope);
           },
         }),
-        edit: (item, { ctx }) => {
-          return {
-            icon: "el-icon-edit",
-            label: "编辑",
-            onClick: (scope) => {
-              this.ctx.handleEdit(scope);
-            },
-          };
-        },
+        edit: (item, { ctx }) => ({
+          icon: "el-icon-edit",
+          label: "编辑",
+          order: 9,
+          onClick: (scope) => {
+            this.ctx.handleEdit(scope);
+          },
+        }),
         delete: (item, { ctx }) => ({
           icon: "el-icon-delete",
           label: "删除",
-          innerHide: (scope) => this.ctx.rowEdit && this.isRowEdit(scope),
+          order: 12,
+          innerHide: (scope) =>
+            this.ctx.editConfig.mode === "row" && this.isRowEditing(scope),
           onClick: (scope) => {
             this.ctx.handleDelete(scope);
           },
@@ -155,12 +163,19 @@ export default create({
         columnConfig.col = this.action;
       }
     },
-    isRowEdit(scope) {
-      return scope.row.$edit || scope.row.$add;
+    isRowEditing(scope) {
+      return this.ctx.editState.isRowEditing(scope.row);
     },
     handleActionButtons(scope) {
       let buttons = this.actionButtons;
-      buttons = this.ctx.checkHiddenButtons("action", buttons, scope);
+
+      buttons = buttons.filter((btn) => {
+        if (btn.innerHide && btn.innerHide(scope)) {
+          return false;
+        }
+        return true;
+      });
+
       this.ctx.buttonList[scope.$index] = this.buttonList[
         scope.$index
       ] = buttons;

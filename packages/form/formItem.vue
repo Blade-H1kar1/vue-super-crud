@@ -167,7 +167,7 @@ export default create({
             slots={this.formCtx.slots}
             mode={this.formOptions.mode}
             scope={this.formCtx.formScope}
-            config={this.formOptions}
+            size={this.formOptions.size}
             rawRules={this.rawRules}
             defaultRender={this.formOptions.defaultRender}
             controlDefault={(defaultRender, scope) => {

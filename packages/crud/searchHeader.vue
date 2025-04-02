@@ -159,7 +159,7 @@ export default create({
             row: this.ctx.query,
           }}
           mode="searchHeader"
-          config={this.ctx.crudOptions}
+          size={this.ctx.crudOptions.size}
           compStrategy={this.componentStrategy}
           commonCompStrategy={{
             mounted: (scope, ref) => {
@@ -182,7 +182,6 @@ export default create({
             <el-button
               icon="el-icon-search"
               type="primary"
-              size={this.ctx.crudOptions.size}
               onClick={this.search}
               style="margin-left: 10px;"
             ></el-button>
@@ -190,7 +189,6 @@ export default create({
           {this.mergeConfig.resetBtn && (
             <el-button
               icon="el-icon-refresh-right"
-              size={this.ctx.crudOptions.size}
               onClick={this.reset}
               style="margin-left: 10px;"
             ></el-button>

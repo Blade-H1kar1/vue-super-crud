@@ -83,7 +83,7 @@
     .is-required::before {
       position: absolute;
       top: 0;
-      left: -8px;
+      left: 4px;
       content: "*";
       color: var(--color-danger);
       margin-right: 4px;
@@ -91,12 +91,21 @@
   }
   // 编辑框透明-单元格样式
   .edit-cell {
+    .cell {
+      padding: 0 !important;
+    }
     input {
       border: 0px;
       background-color: transparent;
     }
-    .el-input__inner {
-      padding: 0;
+    .el-input,
+    .el-select {
+      .el-input__inner {
+        padding: 0 15px;
+      }
+      .el-input__suffix {
+        right: -5px;
+      }
     }
   }
   .edit-cell:before {

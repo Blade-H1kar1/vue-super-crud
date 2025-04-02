@@ -170,7 +170,6 @@ export default (options = {}) => {
             prop="value"
             props={this.dialogOptions}
             item={this.dialogOptions}
-            config={this.dialogOptions}
             scope={{
               ref: this,
               row: this,

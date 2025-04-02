@@ -1,6 +1,18 @@
 <template>
   <div>
-    <sc-crud :search.sync="searchForm" :options="options" :data="data">
+    <el-button @click="isSelection = !isSelection"
+      >切换为批量编辑选中项</el-button
+    >
+    <el-button @click="isAll = !isAll">切换为编辑所有项</el-button>
+    <sc-crud
+      ref="crud"
+      :search.sync="searchForm"
+      :options="options"
+      :data="data"
+      @batchEdit="batchEdit"
+      @batchSave="batchSave"
+      @batchCancel="batchCancel"
+    >
     </sc-crud>
   </div>
 </template>
@@ -45,14 +57,22 @@ export default {
         },
       ],
       isEdit: true,
+      isSelection: false,
+      isAll: false,
     };
   },
   computed: {
     options() {
       return {
         editConfig: {
-          mode: "free",
+          mode: "row",
+          trigger: "manual",
+          batch: {
+            isSelect: this.isSelection,
+            hasPermi: ["xx:xx:xx"],
+          }, // 批量操作按钮配置
         },
+        selection: this.isSelection,
         renderColumns: [
           { prop: "name", label: "姓名" },
           {
@@ -62,15 +82,6 @@ export default {
           {
             prop: "age",
             label: "年龄",
-            form: {
-              comp: {
-                name: "el-select",
-                options: [
-                  { value: "1", label: "选项1" },
-                  { value: "2", label: "选项2" },
-                ],
-              },
-            },
           },
           {
             prop: "city",
@@ -82,6 +93,23 @@ export default {
           },
         ],
       };
+    },
+  },
+  methods: {
+    batchEdit(done) {
+      console.log("batchEdit");
+      this.$message.info("点击批量编辑");
+      done(this.isAll ? this.data : this.data.slice(0, 2));
+    },
+    batchSave(done, rows) {
+      console.log("batchSave", rows);
+      this.$message.success("点击批量保存", rows);
+      done();
+    },
+    batchCancel(done, rows) {
+      console.log("batchCancel", rows);
+      this.$message.warning("点击批量取消", rows);
+      done();
     },
   },
 };

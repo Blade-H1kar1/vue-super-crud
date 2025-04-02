@@ -13,7 +13,7 @@ export default {
       {
         prop: "province",
         label: "省份",
-        render: ({ row }) => {
+        render: (h, { row }) => {
           // 使用不同颜色区分不同省份
           const colors = {
             浙江: "#409EFF", // 蓝色

@@ -48,6 +48,8 @@ export const renderItem = {
         validator: Function,
         message: String,
         trigger: String,
+        regular: RegExp,
+        msg: String,
       },
     },
   }, // 验证规则
@@ -55,7 +57,7 @@ export const renderItem = {
 };
 
 export const buttonItem = {
-  type: [Object, String],
+  type: [Object, String, Boolean],
   strict: true,
   properties: {
     label: [String, Function],
@@ -78,7 +80,7 @@ export const buttonItem = {
     hidden: [Boolean, Function],
     show: [Boolean, Function],
     hasPermi: Array,
-    confirm: String, // 操作确认
+    confirm: [String, Function], // 操作确认
     successBack: Function, // 操作成功回调
   },
 };

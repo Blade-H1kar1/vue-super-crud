@@ -1,9 +1,48 @@
 # 表格编辑
 
+表格编辑功能允许用户直接在表格中编辑数据，支持行编辑、单元格编辑和自由编辑等多种模式，以及多种触发方式。
+
+## 基础配置
+通过 editConfig 配置表格的编辑模式和触发方式。 </br>
+编辑模式下，默认渲染`input`组件，需要通过包裹一层 `form` 对象才能自定义配置编辑组件。
+
+```js
+options: {
+  editConfig: {
+    // 编辑模式：row(行编辑)、cell(单元格编辑)、free(自由编辑)、dialog(弹窗编辑)
+    mode: 'row',
+    // 触发方式：manual(手动)、click(单击)、dblclick(双击)
+    trigger: 'manual',
+    // 编辑按钮触发
+    edit: true,
+  },
+  renderColumns: [
+    {
+      prop: 'name',
+      label: '姓名',
+      form: { // 自定义编辑组件配置
+        comp: {
+          name: 'el-select',
+          options: [
+            {
+              label: '选项1',
+              value: '选项1',
+            }
+          ]
+        },
+      }
+    }
+  ]
+}
+```
+
+
 ## 自由编辑
 
-`freeEdit` 自由编辑 </br>
-renderColumns项中的 `isEdit` 为`true`时，也可自由编辑
+### 全局自由编辑
+
+`mode: free` 自由编辑 </br>
+自由编辑模式下，所有可编辑的单元格始终处于编辑状态。
 
 <ClientOnly>
 <common-code-format>
@@ -13,61 +52,125 @@ renderColumns项中的 `isEdit` 为`true`时，也可自由编辑
 </common-code-format>
 </ClientOnly>
 
-## 表格编辑
+### 单列自由编辑
 
-`batchEdit` 批量编辑 </br>
-`@batchEdit`,`@batchSave`,`@batchCancel` 分别为批量编辑、保存、取消事件
+`isEdit` 设置单列自由编辑 </br>
 
 <ClientOnly>
 <common-code-format>
-  <crud-tableEdit-batchEdit slot="source"></crud-tableEdit-batchEdit>
+  <crud-tableEdit-freeColumn slot="source"></crud-tableEdit-freeColumn>
   
-<<< @/docs/.vuepress/components/crud/tableEdit/batchEdit.vue
+<<< @/docs/.vuepress/components/crud/tableEdit/freeColumn.vue
 </common-code-format>
 </ClientOnly>
+
 
 ## 行编辑
 
-`rowEdit` 行编辑
+### 手动触发 - 操作列
+
+通过操作列编辑按钮 `edit`触发编辑状态。
+
+```js
+editConfig: {
+  mode: "row",
+  trigger: "manual",
+  edit: {} // 操作列按钮配置
+}
+```
+
+#### 事件处理
+
+`@edit(done, scope)` 点击编辑触发，参数`done(params)`，可设置编辑后的行数据 </br>
+`@save(done, scope, unLoading)` 点击保存触发，参数`done(params)`，可设置保存后的行数据 </br>
+`@cancel(done, scope)` 点击取消触发 </br>
 
 <ClientOnly>
 <common-code-format>
-  <crud-tableEdit-rowEdit slot="source"></crud-tableEdit-rowEdit>
+  <crud-tableEdit-rowAction slot="source"></crud-tableEdit-rowAction>
   
-<<< @/docs/.vuepress/components/crud/tableEdit/rowEdit.vue
+<<< @/docs/.vuepress/components/crud/tableEdit/rowAction.vue
 </common-code-format>
 </ClientOnly>
 
-## 批量行编辑
+### 手动触发 - 批量编辑
 
-`batchRowEdit` 批量行编辑 </br>
-`@batchEdit`,`@batchSave`,`@batchCancel` 分别为批量编辑、保存、取消事件
+通过批量编辑按钮 `batch` 触发编辑状态。
+
+```js
+editConfig: {
+  mode: "row",
+  trigger: "manual",
+  batch: {
+    isSelect: true, // 是否批量编辑选中项，搭配selection使用
+  } // 批量操作按钮配置
+}
+```
+
+#### 事件处理
+
+`@batchEdit(done, rows)` 点击批量编辑触发，参数`done(rows)`，可传递需要编辑的行，默认编辑所有行 </br>
+`@batchSave(done, rows)` 点击批量保存触发，参数`done(rows)`，可传递需要保存的行，默认保存所有编辑行 </br>
+`@batchCancel(done, rows)` 点击批量取消触发，参数`done(rows)`，可传递需要取消的行，默认取消所有编辑行 </br>
 
 <ClientOnly>
 <common-code-format>
-  <crud-tableEdit-batchRowEdit slot="source"></crud-tableEdit-batchRowEdit>
+  <crud-tableEdit-rowBatch slot="source"></crud-tableEdit-rowBatch>
   
-<<< @/docs/.vuepress/components/crud/tableEdit/batchRowEdit.vue
+<<< @/docs/.vuepress/components/crud/tableEdit/rowBatch.vue
 </common-code-format>
 </ClientOnly>
 
-## 控制编辑状态
-
-`isRowEdit` 控制行编辑状态 </br>
-renderColumns项中的 `isEdit` 可控制单元格或列是否可编辑
+### 手动触发 - 调用方法
 
 <ClientOnly>
 <common-code-format>
-  <crud-tableEdit-controlEdit slot="source"></crud-tableEdit-controlEdit>
+  <crud-tableEdit-methods slot="source"></crud-tableEdit-methods>
   
-<<< @/docs/.vuepress/components/crud/tableEdit/controlEdit.vue
+<<< @/docs/.vuepress/components/crud/tableEdit/methods.vue
+</common-code-format>
+</ClientOnly>
+
+
+### 单击触发
+
+点击行时触发编辑状态。
+
+```js
+editConfig: {
+  mode: "row",
+  trigger: "click",
+}
+```
+
+#### 事件处理
+
+`@edit(done, scope)` 点击编辑触发，参数`done(params)`，可设置编辑后的行数据 </br>
+`@save(done, scope, unLoading)` 点击保存触发，参数`done(params)`，可设置保存后的行数据 </br>
+
+<ClientOnly>
+<common-code-format>
+  <crud-tableEdit-rowClick slot="source"></crud-tableEdit-rowClick>
+  
+<<< @/docs/.vuepress/components/crud/tableEdit/rowClick.vue
 </common-code-format>
 </ClientOnly>
 
 
 ## 单元格编辑
 
-`cellEdit` 单元格编辑
+单元格编辑模式下，点击或双击单元格时，只有该单元格进入编辑状态
+
+```js
+editConfig: {
+  mode: "cell",
+}
+```
+
+#### 事件处理
+
+`@edit(done, scope, column)` 点击编辑触发，参数`done(params)`，可设置编辑后的数据 </br>
+`@save(done, value, scope, column, unLoading)` 点击保存触发，参数`done(params)`，可设置保存后的数据 </br>
 
 <ClientOnly>
 <common-code-format>
@@ -77,11 +180,112 @@ renderColumns项中的 `isEdit` 可控制单元格或列是否可编辑
 </common-code-format>
 </ClientOnly>
 
+## 控制编辑状态
+
+`isRowEdit` 控制行编辑状态 </br>
+`isEdit` 控制列与单元格编辑状态
+
+```js
+options: {
+  editConfig: {
+    isRowEdit: (row) => { //控制行编辑状态
+      return row.id % 2 === 0;
+    }
+  }
+  renderColumns: [
+    {
+      prop: 'name',
+      label: '姓名',
+      isEdit: (row) => { //控制单元格编辑状态
+        return row.id % 2 === 0;
+      }
+    }
+  ]
+}
+```
+<ClientOnly>
+<common-code-format>
+  <crud-tableEdit-controlEdit slot="source"></crud-tableEdit-controlEdit>
+  
+<<< @/docs/.vuepress/components/crud/tableEdit/controlEdit.vue
+</common-code-format>
+</ClientOnly>
+
+
+## 新增删除操作
+
+### 基本配置
+
+```js
+editConfig: {
+  mode: 'row',
+  trigger: 'manual',
+  rowEdit: {
+    hasPermi: ['xx'] // 可以用于设置按钮权限等
+  },
+  // 底部新增行按钮配置
+  lastAdd: {
+    type: 'last', // first(第一行新增)、last(最后一行新增)
+  },
+  // 新增行按钮配置
+  rowAdd: {
+    type: 'first', // first(第一行新增)、last(最后一行新增)
+  },
+  // 批量删除按钮配置
+  batchDelete: {
+    confirm: (rows) => `是否删除序号为${rows.map(row => row.$index + 1).join(',')}的数据？`, // 删除提示
+  },
+  // 删除按钮配置
+  delete: {
+    confirm: (scope) => `是否删除序号为${scope.$index + 1}的数据？`, // 删除提示
+  },
+},
+```
+
+### 事件处理
+
+`@add` 点击新增触发，参数`done(params)`，可设置新增的行数据 </br>
+`@delete` 点击删除触发 </br>
+`@batchDelete` 点击批量删除触发 </br>
+
+
+<ClientOnly>
+<common-code-format>
+  <crud-tableEdit-addDeleteBtn slot="source"></crud-tableEdit-addDeleteBtn>
+  
+<<< @/docs/.vuepress/components/crud/tableEdit/addDeleteBtn.vue
+</common-code-format>
+</ClientOnly>
+
 
 ## 弹窗编辑
 
-`dialog` 自定义弹窗配置（具体参考函数式弹窗组件配置） </br>
-`formOptions` 自定义表单配置（具体参考表单组件配置）
+### 基本配置
+
+```js
+options: {
+  editConfig: {
+    mode: 'dialog',
+    // 编辑按钮配置
+    edit: {},
+    // 新增按钮配置
+    add: {
+      type: 'first', // first(第一行新增)、last(最后一行新增)
+    },
+    // 查看按钮配置
+    view: {},
+  },
+  dialog: {}, // 自定义弹窗配置
+  formOptions: {}, // 自定义表单配置
+}
+```
+
+### 事件处理
+
+`@add` 点击新增触发 </br>
+`@edit` 点击编辑触发 </br>
+`@save` 点击保存触发 </br>
+`@view` 点击查看触发 </br>
 
 <ClientOnly>
 <common-code-format>
@@ -91,56 +295,83 @@ renderColumns项中的 `isEdit` 可控制单元格或列是否可编辑
 </common-code-format>
 </ClientOnly>
 
-## 自定义编辑组件
 
-`#[prop]-form` 插槽自定义编辑组件 </br>
-`column.form` 列配置编辑组件字段
+## API
 
-<ClientOnly>
-<common-code-format>
-  <crud-tableEdit-custom slot="source"></crud-tableEdit-custom>
-  
-<<< @/docs/.vuepress/components/crud/tableEdit/custom.vue
-</common-code-format>
-</ClientOnly>
+### editConfig 配置
 
-## 操作触发事件
+| 参数        | 说明                             | 类型                    | 可选值                |
+| ----------- | -------------------------------- | ----------------------- | --------------------- |
+| mode        | 编辑模式                         | string                  | free,cell,row,dialog  |
+| trigger     | 触发方式                         | string                  | manual,click,dblclick |
+| edit        | 编辑按钮配置                     | object                  | -                     |
+| batch       | 批量操作按钮配置，仅限`row`模式  | object                  | -                     |
+| add         | 新增按钮配置                     | object                  | -                     |
+| lastAdd     | 底部新增行按钮配置               | object                  | -                     |
+| batchDelete | 批量删除按钮配置                 | object                  | -                     |
+| delete      | 删除按钮配置                     | object                  | -                     |
+| view        | 查看按钮配置，仅限`dialog`模式   | object                  | -                     |
+| isRowEdit   | 控制行是否可编辑                 | function({row, $index}) | -                     |
+| autofocus   | 是否自动聚焦，支持字符串(prop)   | boolean/string          | true                  |
+| exclusive   | 行编辑是否互斥(同时只能编辑一行) | boolean                 | false                 |
 
-`@add` 点击新增触发 </br>
-`@edit` 点击编辑触发 </br>
-`@save` 点击保存触发（自由编辑不存在save） </br>
-`@view` 点击查看触发 </br>
-`@delete` 点击删除触发 </br>
-`@cancel` 点击取消触发（自由编辑不存在cancel） </br>
-`@getDetail` 获取查看、编辑表单详情 </br>
+### Column 配置
 
-事件参数： </br>
-`done` 回调函数，成功后执行，可以传递一个参数 </br>
-`scope` 一系列参数，包含行数据row，当前操作模式等</br>
-`unLoading` 是否取消loading，失败时可手动关闭loading
+| 参数              | 说明                 | 类型                            | 默认值            |
+| ----------------- | -------------------- | ------------------------------- | ----------------- |
+| isEdit            | 是否可编辑           | boolean/function({row, $index}) | false             |
+| add               | 仅自定义新增组件     | boolean/Object                  | 默认继承form配置  |
+| edit              | 仅自定义编辑组件     | boolean/Object                  | 默认继承form配置  |
+| form              | 自定义编辑、新增组件 | boolean/Object                  | -                 |
+| form.prop         | 编辑字段             | boolean/Object                  | 默认继承列的prop  |
+| form.comp         | 编辑组件             | object                          | el-input          |
+| form.render       | 编辑组件渲染函数     | function                        | -                 |
+| form.validateProp | 编辑组件验证字段     | string                          | 默认继承form.prop |
 
+### slots
 
-<ClientOnly>
-<common-code-format>
-  <crud-tableEdit-events slot="source"></crud-tableEdit-events>
-  
-<<< @/docs/.vuepress/components/crud/tableEdit/events.vue
-</common-code-format>
-</ClientOnly>
-
-## 删除、操作成功提示
-
-自定义提示信息，接收一个函数或字符串 </br>
-
-`deleteMsgTip` 自定义删除提示，传`false` 则不提示 </br>
-`batchDeleteMsgTip` 自定义批量删除提示，传`false` 则不提示 </br>
-`successTip` 自定义操作成功提示，传`false` 则不提示 </br>
+| 插槽名        | 说明                 | 默认值       |
+| ------------- | -------------------- | ------------ |
+| `{prop}-form` | 自定义编辑、新增组件 | -            |
+| `{prop}-add`  | 仅自定义新增组件     | 默认继承form |
+| `{prop}-edit` | 仅自定义编辑组件     | 默认继承form |
 
 
-<ClientOnly>
-<common-code-format>
-  <crud-tableEdit-deleteTip slot="source"></crud-tableEdit-deleteTip>
-  
-<<< @/docs/.vuepress/components/crud/tableEdit/deleteTip.vue
-</common-code-format>
-</ClientOnly>
+### Events
+
+
+| 事件名            | 说明                              | 参数                            |
+| ----------------- | --------------------------------- | ------------------------------- |
+| @add              | 点击新增按钮时                    | done(params), scope             |
+| @edit             | 点击编辑按钮时                    | done(params), scope             |
+| @save             | 点击保存按钮时                    | done(params), scope, unLoading  |
+| @cancel           | 点击取消按钮时                    | done(params), scope             |
+| @delete           | 点击删除按钮时                    | done, scope, unLoading          |
+| @view             | 点击查看按钮时，仅限`dialog`模式  | done, scope                     |
+| @batchEdit        | 点击批量编辑按钮时，仅限`row`模式 | done(rows), rows                |
+| @batchSave        | 点击批量保存按钮时，仅限`row`模式 | done(rows), rows, unLoading     |
+| @batchCancel      | 点击批量取消按钮时，仅限`row`模式 | done(rows)                      |
+| @batchDelete      | 点击批量删除按钮时，仅限`row`模式 | done, rows, unLoading           |
+| @editStatusChange | 编辑状态变化时触发                | {mode, rowKey, row, prop, type} |
+
+### Methods
+
+| 方法名         | 说明                                     | 参数                                                        | 返回值 |
+| -------------- | ---------------------------------------- | ----------------------------------------------------------- | ------ |
+| setRowEdit     | 设置行编辑状态                           | (rows: object/array, options: {type: string, prop: string}) | -      |
+| setBatchEdit   | 批量设置行编辑状态，不传rows则设置所有行 | (type: string, rows: object/array)                          | -      |
+| setCellEdit    | 设置单元格编辑状态                       | (row: object, prop: string)                                 | -      |
+| addRow         | 新增表格行                               | (params: object, type: first/last)                          | -      |
+| clearAllEdit   | 清除所有编辑状态                         | -                                                           | -      |
+| getEditingRows | 获取所有编辑状态的行                     | -                                                           | array  |
+
+### options 快捷配置
+
+| 参数         | 说明                    | 类型                    | 默认值 |
+| ------------ | ----------------------- | ----------------------- | ------ |
+| freeEdit     | 启用自由编辑模式        | boolean                 | false  |
+| cellEdit     | 启用单元格编辑模式      | boolean                 | false  |
+| rowEdit      | 启用行编辑模式          | boolean                 | false  |
+| batchEdit    | 启用批量编辑模式        | boolean                 | false  |
+| batchRowEdit | 启用行编辑+批量编辑模式 | boolean                 | false  |
+| isRowEdit    | 控制行是否可编辑的函数  | function({row, $index}) | -      |

@@ -54,19 +54,6 @@
 </common-code-format>
 </ClientOnly>
 
-## 列宽度
-
-`calcColumnWidth` 配置列宽度自动计算规则 </br>
-`column.width`、`column.minWidth` 设置为`auto`，会自适应列宽度 </br>
-`column.widthType...` 独立配置列宽度自动计算规则
-
-<ClientOnly>
-<common-code-format>
-  <crud-table-2 slot="source"></crud-table-2>
-  
-<<< @/docs/.vuepress/components/crud/table/2.vue
-</common-code-format>
-</ClientOnly>
 
 ## 操作列
 

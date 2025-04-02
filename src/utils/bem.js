@@ -28,20 +28,22 @@ const prefix = (name, mods) => {
   return ret;
 };
 
+export const bem = (name, el, mods, onlyPrefix) => {
+  if (el && typeof el !== "string") {
+    mods = el;
+    el = "";
+  }
+  el = join(name, el, ELEMENT);
+  if (onlyPrefix && mods) {
+    return prefix(el, mods);
+  }
+  return mods ? [el, prefix(el, mods)] : el;
+};
+
 export default {
   methods: {
     b(el, mods, onlyPrefix) {
-      const { name } = this.$options;
-
-      if (el && typeof el !== "string") {
-        mods = el;
-        el = "";
-      }
-      el = join(name, el, ELEMENT);
-      if (onlyPrefix && mods) {
-        return prefix(el, mods);
-      }
-      return mods ? [el, prefix(el, mods)] : el;
+      return bem(this.$options.name, el, mods, onlyPrefix);
     },
   },
 };

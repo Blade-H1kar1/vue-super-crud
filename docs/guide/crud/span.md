@@ -77,10 +77,10 @@ spanMethod: ({ row, column, rowIndex, columnIndex }) => {
 
 ### Column 配置
 
-| 参数       | 说明                 | 类型              | 默认值 |
-| ---------- | -------------------- | ----------------- | ------ |
-| spanProp   | 是否启用列合并       | boolean \| string | false  |
-| spanMethod | 列级别自定义合并方法 | Function          | -      |
+| 参数       | 说明                 | 类型           | 默认值 |
+| ---------- | -------------------- | -------------- | ------ |
+| spanProp   | 是否启用列合并       | boolean/string | false  |
+| spanMethod | 列级别自定义合并方法 | Function       | -      |
 
 ### Options 配置
 

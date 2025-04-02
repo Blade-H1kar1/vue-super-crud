@@ -1,20 +1,29 @@
 <template>
   <div :class="b()">
-    <div v-if="showHandleRow" :class="b('handleRow')">
+    <div v-if="showHandleRow" :class="b('handleRow')" style="flex: 1;">
       <position
         slotName="handleRow"
         :slots="ctx.$scopedSlots"
         :scope="ctx.crudOptions"
-        ><button_
-          v-for="(btn, index) in handleRowButtons"
-          :type="btn.type || 'text'"
-          :size="ctx.crudOptions.size"
-          v-bind="btn"
-          :key="btn.key || btn.title || index"
-          :scope="ctx"
-          :loading="ctx.loadingStatus"
-          :disabled="ctx.crudOptions.disabled"
-      /></position>
+        style="width: 100%;"
+        ><div
+          style="display: flex; width: 100%;"
+          v-if="handleRowButtons.length > 0"
+        >
+          <button_
+            v-for="(btn, index) in handleRowButtons"
+            :type="btn.type"
+            v-bind="btn"
+            :key="btn.key || btn.title || index"
+            :scope="btn.key === 'batchDelete' ? ctx.selectionRow : null"
+            :loading="ctx.loadingStatus"
+            :disabled="
+              btn.disabled === undefined
+                ? ctx.crudOptions.disabled
+                : btn.disabled
+            "
+          /></div
+      ></position>
     </div>
     <div v-if="showToolbar" :class="b('toolbar')">
       <position
@@ -24,10 +33,8 @@
         ><button_
           v-for="(btn, index) in toolbarButtons"
           :type="btn.type"
-          :size="ctx.crudOptions.size"
           v-bind="btn"
           :key="btn.key || btn.title || index"
-          :scope="ctx"
           :loading="ctx.loadingStatus"
       /></position>
     </div>
@@ -52,6 +59,21 @@ export default create({
       showDrawer: false,
     };
   },
+  mounted() {
+    // 订阅编辑状态变更事件
+    if (this.ctx.editState) {
+      this.ctx.editState.on("edit-status-change", () => {
+        if (!this.ctx.editConfig.batch) return;
+        const editRowKeys = this.ctx.editState.getEditingRowKeys();
+        if (editRowKeys.length === 0) {
+          this.isBatchEdit = false;
+        }
+        if (editRowKeys.length === this.ctx.list.length) {
+          this.isBatchEdit = true;
+        }
+      });
+    }
+  },
   computed: {
     showHandleRow() {
       return checkVisibility(this.handleRow, null, true);
@@ -61,21 +83,23 @@ export default create({
     },
     handleRow() {
       const handleRow = { ...(this.ctx.crudOptions.handleRow || {}) };
+      const editConfig = this.ctx.editConfig;
       return {
-        add: this.ctx.crudOptions.addBtn,
-        rowAdd: this.ctx.crudOptions.rowAddBtn,
-        batchDelete: this.ctx.crudOptions.batchDeleteBtn,
+        add: editConfig.add,
+        rowAdd: editConfig.rowAdd,
+        batchEdit: editConfig.batch,
+        batchSave: editConfig.batch,
+        batchCancel: editConfig.batch,
+        batchDelete: editConfig.batchDelete,
         ...handleRow,
       };
     },
     toolbar() {
       const toolbar = { ...(this.ctx.crudOptions.toolbar || {}) };
-      const isBatchEdit = this.ctx.batchRowEdit || this.ctx.batchEdit;
       return {
-        batchEdit: isBatchEdit,
-        batchSave: isBatchEdit,
-        batchCancel: isBatchEdit,
         search: this.hasSearch,
+        // excelImport: true,
+        // excelExport: true,
         zoom: true,
         refresh: true,
         reset: true,
@@ -127,13 +151,14 @@ export default create({
           label: "新增",
           type: "primary",
           onClick: () => {
-            this.ctx.handleAdd();
+            this.ctx.handleAdd(this.ctx.editConfig.add?.addType || "last");
           },
         },
         batchDelete: {
           icon: "el-icon-delete",
           label: "删除",
           type: "danger",
+          disabled: this.ctx.selectionRow.length === 0,
           onClick: () => {
             this.ctx.handleBatchDelete();
           },
@@ -143,17 +168,22 @@ export default create({
           label: "新增",
           type: "primary",
           onClick: () => {
-            this.ctx.handleRowAdd();
+            const editConfig = this.ctx.editConfig;
+            this.ctx.handleRowAdd(editConfig.rowAdd?.addType);
           },
         },
-      };
-    },
-    toolbarTemps() {
-      return {
         batchEdit: {
-          label: this.ctx.batchEdit ? "编辑" : "批量编辑",
+          label: "批量编辑",
           type: "primary",
+          style: {
+            marginRight: "10px",
+            marginLeft: "auto",
+          },
           innerHide: this.isBatchEdit,
+          disabled:
+            this.ctx.list.length === 0 ||
+            (this.ctx.editConfig.batch?.isSelect &&
+              this.ctx.selectionRow.length === 0),
           onClick: () => {
             this.isBatchEdit = true;
             this.ctx.handleBatchRowEdit();
@@ -162,6 +192,9 @@ export default create({
         batchSave: {
           type: "primary",
           label: "保存",
+          style: {
+            marginLeft: "auto",
+          },
           innerHide: !this.isBatchEdit,
           onClick: () => {
             this.ctx.handleBatchRowSave(() => {
@@ -171,9 +204,32 @@ export default create({
         },
         batchCancel: {
           label: "取消",
+          style: {
+            marginRight: "10px",
+          },
           innerHide: !this.isBatchEdit,
           onClick: () => {
             this.resetBatchEdit();
+          },
+        },
+      };
+    },
+    toolbarTemps() {
+      return {
+        excelImport: {
+          icon: "el-icon-upload",
+          title: "导入",
+          circle: true,
+          onClick: () => {
+            this.ctx.showExcelImportDialog();
+          },
+        },
+        excelExport: {
+          icon: "el-icon-download",
+          title: "导出",
+          circle: true,
+          onClick: () => {
+            this.ctx.exportToExcel();
           },
         },
         zoom: {

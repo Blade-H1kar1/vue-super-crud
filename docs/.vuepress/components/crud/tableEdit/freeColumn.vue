@@ -1,5 +1,8 @@
 <template>
   <div>
+    <el-button type="primary" @click="isEdit = !isEdit"
+      >切换第三列编辑状态</el-button
+    >
     <sc-crud :search.sync="searchForm" :options="options" :data="data">
     </sc-crud>
   </div>
@@ -50,27 +53,17 @@ export default {
   computed: {
     options() {
       return {
-        editConfig: {
-          mode: "free",
-        },
         renderColumns: [
           { prop: "name", label: "姓名" },
           {
             prop: "gender",
             label: "性别",
+            isEdit: true,
           },
           {
             prop: "age",
             label: "年龄",
-            form: {
-              comp: {
-                name: "el-select",
-                options: [
-                  { value: "1", label: "选项1" },
-                  { value: "2", label: "选项2" },
-                ],
-              },
-            },
+            isEdit: this.isEdit,
           },
           {
             prop: "city",
@@ -79,6 +72,7 @@ export default {
           {
             prop: "date",
             label: "日期",
+            isEdit: true,
           },
         ],
       };
