@@ -86,7 +86,7 @@ export default create({
     const formProp = getFormProp(item);
     const { rules, rawRules } = generateRules(item, scope);
     const isValidate = editMode && rules.length;
-    const CompName = editMode ? "el-form-item" : "div";
+    const CompName = editMode && isValidate ? "el-form-item" : "div";
     const VNode = cellRender(item, editMode, rawRules);
     return (
       <CompName
@@ -101,6 +101,11 @@ export default create({
         prop={formProp}
         rules={rules}
         style="width:100%"
+        on={{
+          "hook:destroyed": () => {
+            ctx.clearErrorMsg(scope.$index, item.prop);
+          },
+        }}
       >
         {VNode}
       </CompName>

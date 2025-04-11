@@ -87,16 +87,17 @@ export default create({
       return {
         add: editConfig.add,
         rowAdd: editConfig.rowAdd,
-        batchEdit: editConfig.batch,
-        batchSave: editConfig.batch,
-        batchCancel: editConfig.batch,
         batchDelete: editConfig.batchDelete,
         ...handleRow,
       };
     },
     toolbar() {
       const toolbar = { ...(this.ctx.crudOptions.toolbar || {}) };
+      const editConfig = this.ctx.editConfig;
       return {
+        batchEdit: editConfig.batch,
+        batchSave: editConfig.batch,
+        batchCancel: editConfig.batch,
         search: this.hasSearch,
         // excelImport: true,
         // excelExport: true,
@@ -172,13 +173,13 @@ export default create({
             this.ctx.handleRowAdd(editConfig.rowAdd?.addType);
           },
         },
+      };
+    },
+    toolbarTemps() {
+      return {
         batchEdit: {
           label: "批量编辑",
           type: "primary",
-          style: {
-            marginRight: "10px",
-            marginLeft: "auto",
-          },
           innerHide: this.isBatchEdit,
           disabled:
             this.ctx.list.length === 0 ||
@@ -212,10 +213,6 @@ export default create({
             this.resetBatchEdit();
           },
         },
-      };
-    },
-    toolbarTemps() {
-      return {
         excelImport: {
           icon: "el-icon-upload",
           title: "导入",

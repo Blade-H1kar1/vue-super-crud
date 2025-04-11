@@ -464,43 +464,52 @@ export default create({
     _runWithoutDeps(fn) {
       // 获取 Vue 实例内部的 Dep
       const Dep = this.$data.__ob__.dep.constructor;
-
-      // 保存当前的 watcher 栈
-      const targetStack = [];
-      while (Dep.target) {
-        targetStack.push(Dep.target);
+      const target = Dep.target;
+      if (Dep.target) {
         Dep.target = null;
       }
 
       try {
         return fn();
       } finally {
-        // 恢复 watcher 栈
-        while (targetStack.length) {
-          Dep.target = targetStack.pop();
-        }
+        Dep.target = target;
       }
     },
+
+    // 根据依赖收集状态执行回调函数
+    executeWithDeps(callback, collectDep = true, ...args) {
+      if (!callback) return;
+
+      if (collectDep === false) {
+        return this._runWithoutDeps(() => {
+          return callback.call(null, ...args);
+        });
+      }
+
+      return callback.call(null, ...args);
+    },
     cellClassName_({ row, column, rowIndex, columnIndex }) {
-      let cellName = this.crudOptions.cellClassName
-        ? this.crudOptions.cellClassName.call(null, {
-            row,
-            column,
-            rowIndex,
-            columnIndex,
-          })
-        : "";
+      const { cellClassName, methodCollectDepends, editTheme } =
+        column?.options || {};
+
+      let cellName =
+        this.executeWithDeps(cellClassName, methodCollectDepends, {
+          row,
+          column,
+          rowIndex,
+          columnIndex,
+        }) || "";
       const col = column.col;
       if (!col) return;
 
       if (
         !col.type &&
-        this.crudOptions.editTheme &&
+        editTheme &&
         this.validateEdit(col, { row, $index: rowIndex })
       ) {
         cellName += (cellName ? " " : "") + "edit-cell";
       }
-      if (this.validateIsError(row.$index, col.form?.prop || col.prop)) {
+      if (this.validateIsError(row.$index, col)) {
         cellName += (cellName ? " " : "") + "error-badge";
       }
       if (!col.type && !this.isDefaultColumn(col)) {
@@ -518,8 +527,8 @@ export default create({
         this.$emit("closeSearchPopover");
       }
     },
-    // 强制更新表格列
-    forceUpdate() {
+    // 强制更新表格
+    _forceUpdate() {
       this.$refs?.tableRef?.store?.updateColumns();
     },
     rowClick(row, column, event) {

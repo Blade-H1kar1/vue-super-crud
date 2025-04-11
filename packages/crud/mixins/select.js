@@ -1,5 +1,5 @@
 import { checkVisibility } from "utils";
-import { isFunction } from "lodash-es";
+import { isFunction, merge } from "lodash-es";
 
 export default {
   props: {
@@ -216,6 +216,9 @@ export default {
           row[this.operateKey]
         );
         if (selectedIndex > -1) {
+          if (this.crudOptions.dataSyncSelected) {
+            merge(row, this.selected[selectedIndex]);
+          }
           updatedSelected.push(row);
           // 同步选中状态
           this.$refs.tableRef.toggleRowSelection(row, true);

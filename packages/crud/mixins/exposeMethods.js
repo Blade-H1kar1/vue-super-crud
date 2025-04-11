@@ -99,5 +99,9 @@ export default {
       this.resetBatchEdit();
       this.forceUpdate();
     },
+    // 强制更新表格
+    forceUpdate() {
+      this._forceUpdate();
+    },
   },
 };

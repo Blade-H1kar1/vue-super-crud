@@ -42,8 +42,16 @@ export default {
   components: {
     comp,
   },
-  computed: {
-    _on() {
+  methods: {
+    getOmitProps() {
+      const omitKeys = Object.keys(this._props);
+      const props = omit(this.comp, omitKeys);
+      if (isFunction(this.bind)) {
+        return Object.assign(props, this.bind(this.scope));
+      }
+      return Object.assign(props, this.bind);
+    },
+    getOn(omitProps) {
       const events = {};
       let scope = {
         ...this.scope,
@@ -55,11 +63,10 @@ export default {
         });
       }
 
-      // 处理以 on 开头的事件配置
-      Object.entries(this.omitProps)
+      Object.entries(omitProps)
         .filter(([key, value]) => /^on[A-Z]/.test(key) && isFunction(value))
         .forEach(([key, handler]) => {
-          const eventName = key.slice(2).toLowerCase(); // 优化事件名转换
+          const eventName = key.slice(2).toLowerCase();
           events[eventName] = (...args) => handler?.(...args, scope);
         });
 
@@ -75,23 +82,14 @@ export default {
         },
       };
     },
-    _attrs() {
-      // 优化属性过滤逻辑
+    getAttrs(omitProps, compName) {
       const componentProps =
-        this.$options.components[this.compName]?.options?.props || {};
+        this.$options.components[compName]?.options?.props || {};
       return Object.fromEntries(
-        Object.entries(this.omitProps).filter(([key]) => !componentProps[key])
+        Object.entries(omitProps).filter(([key]) => !componentProps[key])
       );
     },
-    omitProps() {
-      const omitKeys = Object.keys(this._props); // 忽略当前组件的props
-      const props = omit(this.comp, omitKeys);
-      if (isFunction(this.bind)) {
-        return Object.assign(props, this.bind(this.scope));
-      }
-      return Object.assign(props, this.bind);
-    },
-    placeholder() {
+    getPlaceholder(omitProps) {
       if (this.comp.placeholder) {
         return this.comp.placeholder;
       }
@@ -100,7 +98,7 @@ export default {
       }
       return "请选择" + this.scope.item.label;
     },
-    compName() {
+    getCompName() {
       if (this.isChildren || this.children) return this.name;
       const name = {
         "el-select": "sc-select",
@@ -114,14 +112,14 @@ export default {
       }
       return name[this.name] || this.name;
     },
-    clearable() {
-      if (this.omitProps.clearable !== undefined) {
-        return this.omitProps.clearable;
+    getClearable(omitProps) {
+      if (omitProps.clearable !== undefined) {
+        return omitProps.clearable;
       }
       return true;
     },
-    compSize() {
-      return this.omitProps.size || this.size || (this.$ELEMENT || {}).size;
+    getCompSize(omitProps) {
+      return omitProps.size || this.size || (this.$ELEMENT || {}).size;
     },
   },
   created() {
@@ -141,6 +139,8 @@ export default {
   },
   render(h) {
     const scopedSlots = {};
+    const omitProps = this.getOmitProps();
+    const compName = this.getCompName();
 
     if (this.scopedSlots || this.slots) {
       const slots = { ...this.scopedSlots, ...this.slots };
@@ -150,6 +150,7 @@ export default {
         };
       }
     }
+
     const renderChildren = (children) => {
       if (children) {
         if (isFunction(children)) {
@@ -184,28 +185,30 @@ export default {
       }
     };
     // 插入用来判断的具名插槽，防止组件判断条件为 v-if="$slots.prefix" 时不成立
+
     const fakeSlot = () => {
       return Object.keys(scopedSlots).map((slot) => <i slot={slot}></i>);
     };
+
     return (
-      <this.compName
-        placeholder={this.placeholder}
-        size={this.compSize}
-        disabled={this.omitProps.disabled ? true : false}
-        attrs={this._attrs}
-        props={this.omitProps}
+      <compName
+        placeholder={this.getPlaceholder(omitProps)}
+        size={this.getCompSize(omitProps)}
+        disabled={omitProps.disabled ? true : false}
+        attrs={this.getAttrs(omitProps, compName)}
+        props={omitProps}
         value={this.value}
         scope={this.scope}
-        on={this._on}
+        on={this.getOn(omitProps)}
         nativeOn={this.nativeOn}
         scopedSlots={scopedSlots}
-        clearable={this.clearable}
+        clearable={this.getClearable(omitProps)}
         ref="target"
         directives={this.directives}
       >
         {renderChildren(this.children)}
         {fakeSlot()}
-      </this.compName>
+      </compName>
     );
   },
 };

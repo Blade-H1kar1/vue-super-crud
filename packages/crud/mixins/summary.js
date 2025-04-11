@@ -82,7 +82,6 @@ export default {
       if (isFunction(this.crudOptions.summaryMethod)) {
         try {
           sums = this.crudOptions.summaryMethod(param);
-          this.processSummaryResults(columns, sums, sumsList);
         } catch (error) {
           console.error("自定义统计方法执行出错:", error);
           this.sumsList = {};

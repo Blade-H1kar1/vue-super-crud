@@ -111,7 +111,8 @@ export default create({
     bindColumnConfig() {
       const columnConfig = this.$refs.column?.columnConfig;
       if (columnConfig) {
-        columnConfig.col = this.col;
+        columnConfig.col = { ...this.col };
+        columnConfig.options = { ...this.ctx.crudOptions };
       }
     },
     getTopProps() {

@@ -48,7 +48,7 @@ export default create({
   },
   computed: {
     _options() {
-      return this.options || this.scope.dict;
+      return this.options || this.scope?.dict;
     },
     _active() {
       if (this._options?.length > 0) {

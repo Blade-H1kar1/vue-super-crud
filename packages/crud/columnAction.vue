@@ -11,7 +11,7 @@
     <template v-slot="scope">
       <div :class="b()" ref="actionRef">
         <button_
-          v-for="(btn, index) in handleActionButtons(scope)"
+          v-for="(btn, index) in handleActionButtons(scope, actionButtons)"
           :type="btn.type || 'text'"
           :size="ctx.crudOptions.size"
           :scope="scope"
@@ -160,14 +160,15 @@ export default create({
     bindColumnConfig() {
       const columnConfig = this.$refs.column?.columnConfig;
       if (columnConfig) {
-        columnConfig.col = this.action;
+        columnConfig.col = { ...this.action };
+        columnConfig.options = { ...this.ctx.crudOptions };
       }
     },
     isRowEditing(scope) {
       return this.ctx.editState.isRowEditing(scope.row);
     },
-    handleActionButtons(scope) {
-      let buttons = this.actionButtons;
+    handleActionButtons(scope, actionButtons) {
+      let buttons = actionButtons;
 
       buttons = buttons.filter((btn) => {
         if (btn.innerHide && btn.innerHide(scope)) {

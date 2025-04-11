@@ -50,7 +50,7 @@ export default create({
   },
   computed: {
     _options() {
-      return this.options || this.scope.dict;
+      return this.options || this.scope?.dict;
     },
     listeners() {
       return omit(this.$listeners, ["input", "change"]);

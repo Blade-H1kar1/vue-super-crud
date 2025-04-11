@@ -108,6 +108,13 @@ export default {
         if (isGenUniqueId && !item.$uniqueId) {
           item.$uniqueId = uniqueId();
         }
+        // 检查并添加缺失的列字段
+        this.trueRenderColumns.forEach((column) => {
+          if (column.prop && !(column.prop in item)) {
+            this.$set(item, column.form?.prop || column.prop, "");
+          }
+        });
+        this.$set(item, "$error", undefined);
       });
     },
 

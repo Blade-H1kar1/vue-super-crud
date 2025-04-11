@@ -1,34 +1,34 @@
 <template>
   <el-button
-    v-if="isShow && !bindAttrs.children"
-    :disabled="isDebounce || bindAttrs.disabled"
-    v-bind="bindAttrs"
+    v-if="getIsShow() && !attrs.children"
+    :disabled="isDebounce || attrs.disabled"
+    v-bind="attrs"
     :size="size"
     :class="b()"
     @click="handleClick()"
   >
-    <span v-if="bindAttrs.label">{{ bindAttrs.label }}</span>
+    <span v-if="attrs.label">{{ attrs.label }}</span>
     <slot v-if="$slots.default"></slot>
   </el-button>
   <el-dropdown
-    v-else-if="isShow"
-    v-bind="bindAttrs"
+    v-else-if="getIsShow()"
+    v-bind="attrs"
     trigger="click"
     :size="size"
-    :disabled="isDebounce || bindAttrs.disabled"
+    :disabled="isDebounce || attrs.disabled"
   >
     <el-button
       :class="b()"
       :size="size"
-      :disabled="isDebounce || bindAttrs.disabled"
-      v-bind="bindAttrs"
-      ><span v-if="bindAttrs.label">{{ bindAttrs.label }}</span
+      :disabled="isDebounce || attrs.disabled"
+      v-bind="attrs"
+      ><span v-if="attrs.label">{{ attrs.label }}</span
       ><slot v-if="$slots.default"></slot
       ><i class="el-icon-arrow-down el-icon--right"></i
     ></el-button>
     <el-dropdown-menu slot="dropdown">
       <el-dropdown-item
-        v-for="(child, idx) in bindAttrs.children"
+        v-for="(child, idx) in attrs.children"
         @click.native="handleClick(child)"
         :key="idx"
         v-bind="child"
@@ -60,10 +60,19 @@ export default create({
   data() {
     return {
       isDebounce: false,
+      attrs: {},
     };
   },
-  computed: {
-    bindAttrs() {
+  watch: {
+    $attrs() {
+      this.attrs = this.getBindAttrs();
+    },
+  },
+  created() {
+    this.attrs = this.getBindAttrs();
+  },
+  methods: {
+    getBindAttrs() {
       const attrs = {};
       Object.keys(this.$attrs).forEach((key) => {
         if (isFunction(this.$attrs[key])) {
@@ -74,13 +83,12 @@ export default create({
       });
       return attrs;
     },
-    isShow() {
-      if (this.bindAttrs.hidden === true) return false;
-      if (this.bindAttrs.show === false) return false;
+    getIsShow() {
+      const bindAttrs = this.attrs;
+      if (bindAttrs.hidden) return false;
+      if (bindAttrs.show === false) return false;
       return true;
     },
-  },
-  methods: {
     handleClick(item = this) {
       this.beforeClick((...args) => {
         if (item.onClick) {

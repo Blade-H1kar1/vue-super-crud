@@ -174,12 +174,14 @@ export default {
     },
     spanMethod(params) {
       const { row, column, rowIndex } = params;
-      if (this.crudOptions.spanMethod) {
-        const result = this.crudOptions.spanMethod(params);
+      const col = column.col;
+      const options = column.options;
+      if (!col && !options) return;
+
+      if (options?.spanMethod) {
+        const result = options.spanMethod(params);
         if (result) return result;
       }
-      const col = column.col;
-      if (!col) return;
 
       if (col.spanMethod) {
         return col.spanMethod(params);

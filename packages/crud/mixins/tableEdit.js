@@ -157,9 +157,7 @@ export default {
 
     // 校验单元格编辑状态
     validateEdit(col = {}, scope = {}) {
-      return this._runWithoutDeps(() => {
-        return this.editState.validateEdit(col, scope);
-      });
+      return this.editState.validateEdit(col, scope);
     },
 
     // 行添加事件

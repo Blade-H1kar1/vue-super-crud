@@ -1,6 +1,11 @@
 <template>
   <div>
-    <sc-crud :search.sync="searchForm" :options="options" :data="data">
+    <sc-crud
+      ref="crud"
+      :search.sync="searchForm"
+      :options="options"
+      :data="data"
+    >
     </sc-crud>
   </div>
 </template>
@@ -39,14 +44,14 @@ export default {
               label: "表格校验",
               type: "primary",
               onClick: (ctx) => {
-                ctx.validate();
+                this.$refs.crud.validate();
               },
             },
             {
               label: "清除校验",
               type: "primary",
               onClick: (ctx) => {
-                ctx.clearValidate();
+                this.$refs.crud.clearValidate();
               },
             },
           ],
