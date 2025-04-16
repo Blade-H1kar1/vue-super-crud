@@ -1,214 +1,221 @@
 <script>
 import { set, omit, isArray, isFunction, isPlainObject } from "lodash-es";
-import comp from "./comp.vue";
 import { isVNode } from "utils";
+import Comp from "./comp.vue";
+
+// 获取组件名称
+function getCompName(name, isChildren, children, comp) {
+  if (isChildren || children) return name;
+  const nameMap = {
+    "el-select": "sc-select",
+    "el-checkbox-group": "sc-checkbox",
+    "el-radio-group": "sc-radio",
+    "el-switch": "sc-switch",
+    "el-cascader": "sc-cascader",
+  };
+  if (comp.options && name === "el-input") {
+    return "sc-select";
+  }
+  return nameMap[name] || name;
+}
+
+// 获取事件处理函数
+function getOn(on, comp, scope, parent) {
+  const events = {};
+  if (on) {
+    Object.entries(on).forEach(([key, handler]) => {
+      events[key] = (...args) => handler?.(...args, scope);
+    });
+  }
+
+  // 处理以 on 开头的事件配置
+  Object.entries(comp)
+    .filter(([key, value]) => /^on[A-Z]/.test(key) && isFunction(value))
+    .forEach(([key, handler]) => {
+      const eventName = key.slice(2).toLowerCase();
+      events[eventName] = (...args) => handler?.(...args, scope);
+    });
+
+  return {
+    ...events,
+    input: (event) => {
+      parent.$value = event;
+      events.input && events.input(event);
+    },
+    change: (event) => {
+      parent.$value = event;
+      events.change && events.change(event);
+    },
+  };
+}
+
+// 获取插槽
+function getScopedSlots(scopedSlots, slots, h, scope) {
+  const result = {};
+  const allSlots = { ...scopedSlots, ...slots };
+
+  for (const key in allSlots) {
+    result[key] = () => allSlots[key](h, scope);
+  }
+
+  return result;
+}
+
+// 获取placeholder
+function getPlaceholder(comp, name, scope) {
+  if (comp.placeholder) {
+    return comp.placeholder;
+  }
+  if (name === "el-input") {
+    return "请输入" + scope.item.label;
+  }
+  return "请选择" + scope.item.label;
+}
+
+// 获取clearable
+function getClearable(comp) {
+  if (comp.clearable !== undefined) {
+    return comp.clearable;
+  }
+  return true;
+}
+
+// 获取组件尺寸
+function getCompSize(comp, size, ELEMENT) {
+  return comp.size || size || (ELEMENT || {}).size;
+}
+
+// 渲染子元素
+function renderChildren(children, h, scope) {
+  if (!children) return null;
+
+  if (isFunction(children)) {
+    if (children.length === 2) {
+      children = children(h, scope);
+      if (isVNode(children)) return children;
+    } else {
+      children = children(scope);
+    }
+  }
+
+  if (isArray(children)) {
+    return children.map((child) => {
+      if (isPlainObject(child)) {
+        return h(Comp, {
+          props: { ...child, comp: child, scope, isChildren: true },
+        });
+      }
+      return child;
+    });
+  }
+
+  return children;
+}
+
+// 生成假插槽
+function fakeSlot(h, scopedSlots, slots) {
+  const allSlots = { ...scopedSlots, ...slots };
+  return Object.keys(allSlots).map((slot) => h("i", { slot }));
+}
+
 export default {
   name: "comp",
+  functional: true,
   props: {
     value: {},
-    setValue: {},
     prop: {},
-    // 组件名
     name: {
       default: "el-input",
     },
-    // 组件参数
     comp: Object,
     bind: [Object, Function],
-    // 监听组件事件
     on: Object,
-    // 插槽
     scopedSlots: Object,
     slots: Object,
-    // 子元素
     children: {},
-    // 传入的数据
     scope: Object,
-    // 组件尺寸
     size: {},
-    isChildren: Boolean, // 是否子组件
-    nativeOn: Object, // 原生事件
+    isChildren: Boolean,
+    nativeOn: Object,
     directives: {
       type: Object,
       default: () => ({}),
-    }, // 指令
-    created: Function, // 创建
-    mounted: Function, // 挂载
-    updated: Function, // 更新
-    beforeDestroy: Function, // 销毁前
-    destroyed: Function, // 销毁
-    h: {},
-  },
-  components: {
-    comp,
-  },
-  methods: {
-    getOmitProps() {
-      const omitKeys = Object.keys(this._props);
-      const props = omit(this.comp, omitKeys);
-      if (isFunction(this.bind)) {
-        return Object.assign(props, this.bind(this.scope));
-      }
-      return Object.assign(props, this.bind);
     },
-    getOn(omitProps) {
-      const events = {};
-      let scope = {
-        ...this.scope,
-        ref: this.$refs.target,
-      };
-      if (this.on) {
-        Object.entries(this.on).forEach(([key, handler]) => {
-          events[key] = (...args) => handler?.(...args, scope);
-        });
-      }
+    created: Function,
+    mounted: Function,
+  },
+  render(h, context) {
+    const { props, data, parent } = context;
+    const { name, comp, scope, isChildren, children, bind } = props;
 
-      Object.entries(omitProps)
-        .filter(([key, value]) => /^on[A-Z]/.test(key) && isFunction(value))
-        .forEach(([key, handler]) => {
-          const eventName = key.slice(2).toLowerCase();
-          events[eventName] = (...args) => handler?.(...args, scope);
-        });
+    // 获取组件props
+    const getComponentProps = (compName) => {
+      const component = parent.$options.components[compName];
+      return component?.options?.props || {};
+    };
 
-      return {
-        ...events,
-        input: (event) => {
-          this.$emit("input", event);
-          events.input && events.input(event);
-        },
-        change: (event) => {
-          this.$emit("change", event);
-          events.change && events.change(event);
-        },
-      };
-    },
-    getAttrs(omitProps, compName) {
-      const componentProps =
-        this.$options.components[compName]?.options?.props || {};
-      return Object.fromEntries(
-        Object.entries(omitProps).filter(([key]) => !componentProps[key])
-      );
-    },
-    getPlaceholder(omitProps) {
-      if (this.comp.placeholder) {
-        return this.comp.placeholder;
-      }
-      if (this.name === "el-input") {
-        return "请输入" + this.scope.item.label;
-      }
-      return "请选择" + this.scope.item.label;
-    },
-    getCompName() {
-      if (this.isChildren || this.children) return this.name;
-      const name = {
-        "el-select": "sc-select",
-        "el-checkbox-group": "sc-checkbox",
-        "el-radio-group": "sc-radio",
-        "el-switch": "sc-switch",
-        "el-cascader": "sc-cascader",
-      };
-      if (this.comp.options && this.name === "el-input") {
-        return "sc-select";
-      }
-      return name[this.name] || this.name;
-    },
-    getClearable(omitProps) {
-      if (omitProps.clearable !== undefined) {
-        return omitProps.clearable;
-      }
-      return true;
-    },
-    getCompSize(omitProps) {
-      return omitProps.size || this.size || (this.$ELEMENT || {}).size;
-    },
-  },
-  created() {
-    this.created && this.created(this.scope);
-  },
-  mounted() {
-    this.mounted && this.mounted(this.scope, this.$refs.target);
-  },
-  updated() {
-    this.updated && this.updated(this.scope, this.$refs.target);
-  },
-  beforeDestroy() {
-    this.beforeDestroy && this.beforeDestroy(this.scope, this.$refs.target);
-  },
-  destroyed() {
-    this.destroyed && this.destroyed(this.scope, this.$refs.target);
-  },
-  render(h) {
-    const scopedSlots = {};
-    const omitProps = this.getOmitProps();
-    const compName = this.getCompName();
-
-    if (this.scopedSlots || this.slots) {
-      const slots = { ...this.scopedSlots, ...this.slots };
-      for (const key in slots) {
-        scopedSlots[key] = () => {
-          return slots[key](h, this.scope);
-        };
-      }
+    // 处理bind属性
+    let processedComp = comp;
+    if (isFunction(bind)) {
+      processedComp = { ...comp, ...bind(scope) };
+    } else if (bind) {
+      processedComp = { ...comp, ...bind };
     }
 
-    const renderChildren = (children) => {
-      if (children) {
-        if (isFunction(children)) {
-          if (children.length === 2) {
-            children = children(h, this.scope);
-            if (isVNode(children)) return children;
-          } else {
-            children = children(this.scope);
-          }
-        }
-        if (isArray(children)) {
-          return children.map((i) => {
-            return (
-              <comp
-                props={{ ...i, comp: i }}
-                scope={this.scope}
-                isChildren={true}
-              />
-            );
-          });
-        } else if (isPlainObject(children) === "object") {
-          return (
-            <comp
-              props={{ ...i, comp: i }}
-              scope={this.scope}
-              isChildren={true}
-            />
-          );
-        } else {
-          return children;
-        }
+    // 获取组件名称
+    const compName = getCompName(name, isChildren, children, processedComp);
+
+    // 获取组件声明的props
+    const componentProps = getComponentProps(compName);
+
+    // 分离props和attrs
+    const propsToPass = {};
+    const attrsToPass = {};
+
+    Object.entries(processedComp).forEach(([key, value]) => {
+      if (componentProps[key]) {
+        propsToPass[key] = value;
+      } else if (!(key in props)) {
+        attrsToPass[key] = value;
       }
-    };
-    // 插入用来判断的具名插槽，防止组件判断条件为 v-if="$slots.prefix" 时不成立
+    });
 
-    const fakeSlot = () => {
-      return Object.keys(scopedSlots).map((slot) => <i slot={slot}></i>);
-    };
-
-    return (
-      <compName
-        placeholder={this.getPlaceholder(omitProps)}
-        size={this.getCompSize(omitProps)}
-        disabled={omitProps.disabled ? true : false}
-        attrs={this.getAttrs(omitProps, compName)}
-        props={omitProps}
-        value={this.value}
-        scope={this.scope}
-        on={this.getOn(omitProps)}
-        nativeOn={this.nativeOn}
-        scopedSlots={scopedSlots}
-        clearable={this.getClearable(omitProps)}
-        ref="target"
-        directives={this.directives}
-      >
-        {renderChildren(this.children)}
-        {fakeSlot()}
-      </compName>
+    // 生命周期钩子
+    if (props.created) {
+      props.created(scope);
+    }
+    return h(
+      compName,
+      {
+        props: {
+          ...propsToPass,
+          value: props.value || parent.$value,
+          scope,
+        },
+        attrs: {
+          ...attrsToPass,
+          size: getCompSize(processedComp, props.size, parent.$ELEMENT),
+          placeholder: getPlaceholder(processedComp, compName, scope),
+          clearable: getClearable(processedComp),
+          disabled: processedComp.disabled ? true : false,
+        },
+        on: getOn(props.on, processedComp, scope, parent),
+        nativeOn: props.nativeOn,
+        scopedSlots: getScopedSlots(props.scopedSlots, props.slots, h, scope),
+        directives: props.directives,
+        ref: (el) => {
+          if (props.mounted) {
+            props.mounted(props.scope, el);
+          }
+          if (props.ref) {
+            props.ref(props.scope, el);
+          }
+        },
+      },
+      [
+        renderChildren(children, h, scope),
+        ...fakeSlot(h, props.scopedSlots, props.slots),
+      ]
     );
   },
 };

@@ -3,6 +3,7 @@ import create from "core/create";
 import { generateRules } from "core";
 import Render from "core/components/render";
 import { bem } from "src/utils/bem";
+import { defaultRender } from "core";
 
 export default create({
   functional: true,
@@ -80,6 +81,30 @@ export default create({
       );
     };
 
+    const cellDefaultRender = (item) => {
+      const _scope = {
+        ...scope,
+        item,
+        $value: {
+          get: scope.row[item.prop],
+        },
+      };
+      return defaultRender.formatter(h, _scope);
+    };
+
+    const isDefaultRender = (item) => {
+      if (
+        item.comp ||
+        item.render ||
+        ctx.extendsScopedSlots[item.prop] ||
+        item.position ||
+        item.formatData
+      ) {
+        return false;
+      }
+      return true;
+    };
+
     // 主渲染逻辑
     const editMode = ctx.validateEdit(col, scope);
     const item = getItem(editMode);
@@ -87,10 +112,15 @@ export default create({
     const { rules, rawRules } = generateRules(item, scope);
     const isValidate = editMode && rules.length;
     const CompName = editMode && isValidate ? "el-form-item" : "div";
-    const VNode = cellRender(item, editMode, rawRules);
+    let VNode;
+
+    if (isDefaultRender(item) && !editMode) {
+      VNode = cellDefaultRender(item);
+    } else {
+      VNode = cellRender(item, editMode, rawRules);
+    }
     return (
       <CompName
-        key={scope.$index + item.prop}
         class={[
           rules.required && editMode ? "is-required" : "",
           b([col.align || "center"]),

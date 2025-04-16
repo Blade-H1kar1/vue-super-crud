@@ -30,7 +30,7 @@ class EditState {
    * @param {Object} scope 行作用域
    * @returns {String|Boolean} 编辑模式或false
    */
-  validateEdit(column, scope) {
+  validateEdit(column, scope, canEdit) {
     if (!scope || !column) return false;
 
     const { row, $index } = scope;
@@ -42,14 +42,6 @@ class EditState {
 
     // 检查列是否禁用了该编辑模式
     if (column[editMode] === false) return false;
-
-    // 评估列的编辑条件
-    const canEdit =
-      typeof column.isEdit === "function"
-        ? column.isEdit({ row, $index, mode: editMode })
-        : column.isEdit;
-
-    if (canEdit === false) return false;
 
     // 根据编辑模式判断
     if (this.mode === "cell") {

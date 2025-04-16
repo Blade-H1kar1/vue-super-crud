@@ -114,7 +114,6 @@ export default {
             this.$set(item, column.form?.prop || column.prop, "");
           }
         });
-        this.$set(item, "$error", undefined);
       });
     },
 

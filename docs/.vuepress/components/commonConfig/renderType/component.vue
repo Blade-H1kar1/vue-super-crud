@@ -147,7 +147,7 @@ export default {
       // 表格数据
       form: {
         id: 1,
-        type: "1",
+        type: ["1"],
         name: "测试数据",
         gender: "male",
         custom: "",

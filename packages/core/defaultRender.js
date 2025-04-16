@@ -1,11 +1,10 @@
 import tooltip from "../tooltip";
 export default {
-  input: (h, { item, config, self }) => {
+  input: (h, { item, $value }) => {
     return h("el-input", {
       class: "sc-default-input",
       props: {
-        value: self.$value,
-        size: config?.size,
+        value: $value.get,
         clearable: true,
       },
       attrs: {
@@ -13,7 +12,7 @@ export default {
       },
       on: {
         input: (v) => {
-          self.$value = v;
+          $value.set(v);
         },
       },
     });

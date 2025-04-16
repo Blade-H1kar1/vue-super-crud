@@ -14,20 +14,39 @@ export default {
   },
   methods: {
     handleValidateError(index, field, msg, isValid = true) {
+      const cell = this.$el
+        .querySelector(".el-table__body")
+        .querySelector(
+          `[data-row-key="${
+            this.list[index][this.valueKey]
+          }"][data-prop="${field}"]`
+        );
+
+      if (!cell) return;
+
+      // 向上查找父元素直到找到 el-table__cell
+      let targetCell = cell;
+      let loopCount = 0;
+      const maxLoops = 8;
+
+      while (
+        targetCell &&
+        !targetCell.classList.contains("el-table__cell") &&
+        loopCount < maxLoops
+      ) {
+        targetCell = targetCell.parentElement;
+        loopCount++;
+      }
+
+      if (!targetCell || loopCount >= maxLoops) return;
+
       if (!isValid) {
-        if (!this.list[index]["$error"]) {
-          this.$set(this.list[index], "$error", [field]);
-        } else if (!this.list[index]["$error"].includes(field)) {
-          this.list[index]["$error"].push(field);
-        }
+        // 添加错误状态
+        targetCell.classList.add("error-badge");
         this.errorMap.set(`${index}-${field}`, msg);
       } else {
-        if (this.list[index]["$error"]) {
-          const fieldIndex = this.list[index]["$error"].indexOf(field);
-          if (fieldIndex > -1) {
-            this.list[index]["$error"].splice(fieldIndex, 1);
-          }
-        }
+        // 移除错误状态
+        targetCell.classList.remove("error-badge");
         this.errorMap.delete(`${index}-${field}`);
       }
     },
@@ -125,9 +144,6 @@ export default {
       this.$refs.tableFormRef.clearValidate();
       this.errorMap.clear();
       this.errorContent = "";
-      this.list.forEach((i) => {
-        if (i["$error"]) i["$error"] = [];
-      });
     },
   },
 };

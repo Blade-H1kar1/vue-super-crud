@@ -292,7 +292,6 @@ export default {
         }
         return (
           <Comp
-            v-model={this.$value}
             props={{ ...comp, comp }}
             prop={this.prop}
             size={this.size}

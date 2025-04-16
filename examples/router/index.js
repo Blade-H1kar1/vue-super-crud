@@ -42,6 +42,12 @@ const routes = [
         meta: { title: "Dashboard", icon: "dashboard" },
       },
       {
+        path: "dashboard1",
+        name: "Dashboard1",
+        component: () => import("#/views/dashboard/index1"),
+        meta: { title: "Dashboard", icon: "dashboard" },
+      },
+      {
         path: "formTest",
         name: "formTest",
         component: () => import("#/views/formTest/index"),

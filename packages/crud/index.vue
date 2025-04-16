@@ -37,7 +37,7 @@
     >
       <component
         :is="virtualized ? 'virtualScroll' : 'div'"
-        :data="list"
+        :data="virtualized ? list : null"
         :key-prop="valueKey"
         :virtualized="virtualized"
         v-bind="$attrs"
@@ -65,7 +65,7 @@
           @row-dblclick="rowDblclick"
           @cell-click="cellClick"
           @cell-dblclick="cellDblclick"
-          :row-key="valueKey"
+          :row-key="rowKey_"
           :row-style="defineRowIndex"
           :cell-class-name="cellClassName_"
           :row-class-name="rowClassName_"
@@ -268,6 +268,16 @@ export default create({
     this.refactorTableHeaderClick();
   },
   computed: {
+    rowKey_() {
+      if (
+        this.isTree ||
+        this.crudOptions.selection.reserveSelection ||
+        this.crudOptions.selection["reserve-selection"] ||
+        this.crudOptions.rowKey
+      ) {
+        return this.valueKey;
+      }
+    },
     virtualized() {
       return this.crudOptions.virtualized;
     },
@@ -491,7 +501,6 @@ export default create({
     cellClassName_({ row, column, rowIndex, columnIndex }) {
       const { cellClassName, methodCollectDepends, editTheme } =
         column?.options || {};
-
       let cellName =
         this.executeWithDeps(cellClassName, methodCollectDepends, {
           row,
@@ -499,9 +508,11 @@ export default create({
           rowIndex,
           columnIndex,
         }) || "";
-      const col = column.col;
-      if (!col) return;
 
+      const col = column.col;
+      if (!col) return cellName;
+
+      // 添加编辑状态类
       if (
         !col.type &&
         editTheme &&
@@ -509,12 +520,12 @@ export default create({
       ) {
         cellName += (cellName ? " " : "") + "edit-cell";
       }
-      if (this.validateIsError(row.$index, col)) {
-        cellName += (cellName ? " " : "") + "error-badge";
-      }
+
+      // 添加自定义单元格类
       if (!col.type && !this.isDefaultColumn(col)) {
         cellName += (cellName ? " " : "") + "custom-cell";
       }
+
       return cellName;
     },
     // 校验按钮隐藏

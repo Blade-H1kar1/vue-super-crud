@@ -157,7 +157,13 @@ export default {
 
     // 校验单元格编辑状态
     validateEdit(col = {}, scope = {}) {
-      return this.editState.validateEdit(col, scope);
+      // 评估列的编辑条件
+      const canEdit =
+        typeof col.isEdit === "function" ? col.isEdit(scope) : col.isEdit;
+      if (canEdit === false) return false;
+      return this._runWithoutDeps(() => {
+        return this.editState.validateEdit(col, scope, canEdit);
+      });
     },
 
     // 行添加事件

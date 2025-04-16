@@ -1,6 +1,8 @@
 <template>
   <div>
+    <el-button @click="visible = !visible">visible</el-button>
     <sc-crud
+      v-if="visible"
       init
       :search.sync="searchForm"
       :options="options"
@@ -16,11 +18,18 @@
 export default {
   data() {
     return {
-      searchForm: {},
+      visible: false,
+      searchForm: {
+        pageSize: 1000,
+      },
       options: {
+        // action: {
+        //   width: "200",
+        // },
         editConfig: {
           mode: "row",
-          edit: true,
+          // trigger: "click",
+          // edit: true,
         },
         height: "auto", // 设置为`auto`，会自适应窗口高度，配合calcHeight参数去调节范围
         renderColumns: [
@@ -28,6 +37,13 @@ export default {
           {
             prop: "select",
             label: "选择器",
+            // comp: {
+            //   name: "el-select",
+            //   options: [
+            //     { value: "1", label: "选项1" },
+            //     { value: "2", label: "选项2" },
+            //   ],
+            // },
             form: {
               comp: {
                 name: "el-select",
@@ -41,6 +57,27 @@ export default {
           {
             prop: "cascader",
             label: "级联选择器",
+            // comp: {
+            //   name: "el-cascader",
+            //   options: [
+            //     {
+            //       value: "1",
+            //       label: "选项1",
+            //       children: [
+            //         { value: "1-1", label: "选项1-1" },
+            //         { value: "1-2", label: "选项1-2" },
+            //       ],
+            //     },
+            //     {
+            //       value: "2",
+            //       label: "选项2",
+            //       children: [
+            //         { value: "2-1", label: "选项2-1" },
+            //         { value: "2-2", label: "选项2-2" },
+            //       ],
+            //     },
+            //   ],
+            // },
             form: {
               comp: {
                 name: "el-cascader",
@@ -123,7 +160,7 @@ export default {
         // 模拟分页数据
         this.data = this.allData.slice(start, end);
         this.total = this.allData.length;
-      }, 300);
+      }, 0);
     },
     generateData(count) {
       const baseData = [
