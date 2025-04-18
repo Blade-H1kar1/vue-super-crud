@@ -8,6 +8,7 @@
         :type="item[props.color]"
         @click="onClick(item)"
         :effect="item.effect"
+        disable-transitions
         v-bind="$attrs"
       >
         {{ item[props.label] }}

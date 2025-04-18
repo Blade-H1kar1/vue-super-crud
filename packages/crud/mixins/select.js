@@ -207,7 +207,7 @@ export default {
     updateSelection() {
       if (!this.$refs.tableRef) return;
 
-      this.$refs.tableRef.clearSelection();
+      // this.$refs.tableRef.clearSelection();
       if (!this.selected?.length) return;
 
       const updatedSelected = [];
@@ -267,9 +267,6 @@ export default {
             this.selected.push(row);
           }
         });
-        if (this.selection.spanProp) {
-          this._sortedData(this.selected);
-        }
       }
       // 取消全选当前页
       else {

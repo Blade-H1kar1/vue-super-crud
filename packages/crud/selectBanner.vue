@@ -6,10 +6,11 @@
         <span :class="b('selected-items')">
           <el-tag
             v-for="row in selected"
-            :key="row[labelKey]"
+            :key="row[ctx.operateKey]"
             :class="b('remove-tag')"
             size="small"
             closable
+            disable-transitions
             @close="ctx.removeSelection(row)"
             >{{ row[labelKey] }}</el-tag
           >
@@ -25,10 +26,11 @@
             <span :class="b('popover-selected-preview')">
               <el-tag
                 v-for="row in selected.slice(0, selection.maxDisplay)"
-                :key="row[labelKey]"
+                :key="row[ctx.operateKey]"
                 :class="b('remove-tag')"
                 size="small"
                 closable
+                disable-transitions
                 @close="ctx.removeSelection(row)"
                 >{{ row[labelKey] }}</el-tag
               >
@@ -38,7 +40,7 @@
           <div :class="b('popover-list')">
             <div
               v-for="row in selected.slice(selection.maxDisplay)"
-              :key="row[labelKey]"
+              :key="row[ctx.operateKey]"
               :class="b('popover-item')"
             >
               <span>{{ row[labelKey] }}</span>
@@ -46,6 +48,7 @@
                 :class="b('popover-remove-tag')"
                 size="small"
                 closable
+                disable-transitions
                 @close="ctx.removeSelection(row)"
               />
             </div>
@@ -69,6 +72,7 @@
           :class="b('remove-tag')"
           size="small"
           closable
+          disable-transitions
           @close="ctx.removeSingleSelection"
           >{{ selected[labelKey] }}</el-tag
         >

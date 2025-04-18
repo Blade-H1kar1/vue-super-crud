@@ -91,10 +91,19 @@ export default create({
       }
       this.ctx.setOptions.pageSize = val;
       this.ctx.saveLocalCache(false);
-      !this.ctx.crudOptions.localPagination && this.ctx.getList();
+      this.handleDataChange();
     },
     handleCurrentChange(val) {
-      !this.ctx.crudOptions.localPagination && this.ctx.getList();
+      this.handleDataChange();
+    },
+    handleDataChange() {
+      if (this.ctx.crudOptions.localPagination) {
+        this.$nextTick(() => {
+          this.ctx.updateSelection();
+        });
+      } else {
+        this.ctx.getList();
+      }
     },
   },
 });
