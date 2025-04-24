@@ -1,4 +1,5 @@
-import { debounce } from "lodash-es";
+import { debounce, get, omit } from "lodash-es";
+import { findTreeNodePath } from "../utils";
 export default {
   data() {
     return {
@@ -13,21 +14,16 @@ export default {
     );
   },
   methods: {
-    handleValidateError(index, field, msg, isValid = true) {
+    handleValidateError(fullProp, msg, isValid = true) {
       const cell = this.$el
         .querySelector(".el-table__body")
-        .querySelector(
-          `[data-row-key="${
-            this.list[index][this.valueKey]
-          }"][data-prop="${field}"]`
-        );
-
+        .querySelector(`[data-full-prop="${fullProp}"]`);
       if (!cell) return;
 
       // 向上查找父元素直到找到 el-table__cell
       let targetCell = cell;
       let loopCount = 0;
-      const maxLoops = 8;
+      const maxLoops = 5;
 
       while (
         targetCell &&
@@ -43,38 +39,36 @@ export default {
       if (!isValid) {
         // 添加错误状态
         targetCell.classList.add("error-badge");
-        this.errorMap.set(`${index}-${field}`, msg);
+        this.errorMap.set(fullProp, msg);
+        this.showErrorTooltip(cell);
       } else {
         // 移除错误状态
         targetCell.classList.remove("error-badge");
-        this.errorMap.delete(`${index}-${field}`);
+        this.errorMap.delete(fullProp);
+        this.cellMouseLeave();
       }
     },
     createListError(prop, valid, msg) {
-      const [_, index, field] = prop.split(".");
-      this.handleValidateError(index, field, msg, valid);
+      this.handleValidateError(prop, msg, valid);
     },
-    validateIsError(index, col) {
-      if (!col.required && !col.rules) return;
-      const prop = col.form?.prop || col.prop;
-      // 只依赖行级别的响应式数据
-      const error = this.list[index] && this.list[index]["$error"];
-      if (error && error.includes(prop)) {
-        return this.errorMap.has(`${index}-${prop}`);
-      }
-      return false;
-    },
-    clearErrorMsg(index, prop) {
-      this.handleValidateError(index, prop, "", true);
+    clearErrorMsg(row, prop) {
+      const targetPath =
+        "list." +
+        findTreeNodePath(this.list, (node) => node === row, "children") +
+        "." +
+        prop;
+      this.handleValidateError(targetPath, "", true);
     },
     cellMouseEnter(row, column, cell, event) {
-      if (column.property === "action") return;
-      const col = column.col;
-      if (!col) return;
-      const prop = col.form?.prop || col.prop;
-      this.errorContent = this.errorMap.get(`${row.$index}-${prop}`);
+      const el = cell.querySelector("[data-full-prop]");
+      if (!el) return;
+      this.showErrorTooltip(el);
+    },
+    showErrorTooltip(el) {
+      const targetPath = el.getAttribute("data-full-prop");
+      this.errorContent = this.errorMap.get(targetPath);
       const tooltip = this.$refs.tooltip;
-      tooltip.referenceElm = cell;
+      tooltip.referenceElm = el;
       tooltip.$refs.popper && (tooltip.$refs.popper.style.display = "none");
       tooltip.doDestroy();
       if (!this.errorContent) return;
@@ -118,32 +112,108 @@ export default {
         });
       });
     },
-    validateField(index) {
+    validateField(params) {
+      const options = typeof params === "number" ? { index: params } : params;
+      return this._validateField(options);
+    },
+    _validateField(options = {}) {
       return new Promise((resolve, reject) => {
-        const fields = this.$refs.tableFormRef.fields.filter(
-          (field) => field.prop.split(".")[1] == index
-        );
+        const { index, id, row, prop } = options;
+
+        // 查找目标行的路径
+        let targetPath = null;
+
+        if (index !== undefined) {
+          // 通过索引直接定位
+          targetPath = `list.${index}`;
+        } else if (id) {
+          // 通过 ID 查找路径
+          targetPath =
+            "list." +
+            findTreeNodePath(
+              this.list,
+              (node) => node[this.valueKey] === id,
+              "children"
+            );
+        } else if (row) {
+          // 通过对象引用查找路径
+          targetPath =
+            "list." +
+            findTreeNodePath(this.list, (node) => node === row, "children");
+        }
+
+        if (!targetPath) {
+          reject(new Error("未找到目标行"));
+          return;
+        }
+
+        // 获取需要校验的字段
+        const fields = this.$refs.tableFormRef.fields.filter((field) => {
+          const fieldPath = field.prop.split(".");
+
+          // 如果指定了具体字段，则只校验该字段
+          if (prop) {
+            return field.prop === `${targetPath}.${prop}`;
+          }
+
+          // 否则校验该行所有字段
+          return fieldPath.slice(0, -1).join(".") === targetPath;
+        });
+
+        if (fields.length === 0) {
+          resolve();
+          return;
+        }
+
+        // 执行校验
         const validates = [];
-        fields.forEach((field) => {
-          field.validate("", (v) => {
-            if (v) {
-              validates.push(false);
-            } else {
-              validates.push(true);
-            }
+        const errors = [];
+
+        const validatePromises = fields.map((field) => {
+          return new Promise((fieldResolve) => {
+            field.validate("", (errorMsg) => {
+              if (errorMsg) {
+                validates.push(false);
+                errors.push({
+                  field: field.prop.split(".").pop(),
+                  message: errorMsg,
+                });
+              } else {
+                validates.push(true);
+              }
+              fieldResolve();
+            });
           });
         });
-        if (validates.every((i) => i)) {
-          resolve();
-        } else {
-          reject();
-        }
+
+        // 等待所有字段校验完成
+        Promise.all(validatePromises).then(() => {
+          if (validates.every((v) => v)) {
+            resolve({
+              valid: true,
+              path: targetPath,
+            });
+          } else {
+            reject({
+              valid: false,
+              path: targetPath,
+              errors: errors,
+            });
+          }
+        });
       });
     },
     clearValidate() {
       this.$refs.tableFormRef.clearValidate();
       this.errorMap.clear();
       this.errorContent = "";
+      const cells =
+        this.$el
+          .querySelector(".el-table__body")
+          .querySelectorAll(".error-badge") || [];
+      cells.forEach((c) => {
+        c.classList.remove("error-badge");
+      });
     },
   },
 };

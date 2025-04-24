@@ -100,7 +100,9 @@ function handleRegularRule(rules, scope) {
         const validator = item.validator;
         return {
           ...item,
-          validator: (...args) => validator(...args, scope),
+          validator: (...args) => {
+            validator(...args.slice(0, 3), scope);
+          },
         };
       }
       return item;

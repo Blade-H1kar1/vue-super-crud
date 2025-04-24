@@ -55,9 +55,6 @@ export default {
             },
           ],
         },
-        action: {
-          delete: true,
-        },
         renderColumns: [
           {
             prop: "name",
@@ -75,34 +72,6 @@ export default {
                 trigger: "change",
               },
             ],
-          },
-          {
-            prop: "username",
-            label: "姓名",
-            isEdit: ({ row }) => row.id === 56,
-          },
-          {
-            prop: "gender",
-            label: "性别",
-            isEdit: this.isEdit,
-            form: {
-              // 使用form字段自定义编辑模式的组件
-              comp: {
-                name: "el-select",
-                children: [
-                  {
-                    name: "el-option",
-                    label: "男",
-                    value: "男",
-                  },
-                  {
-                    name: "el-option",
-                    label: "女",
-                    value: "女",
-                  },
-                ],
-              },
-            },
           },
         ],
       };

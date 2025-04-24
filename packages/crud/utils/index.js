@@ -54,3 +54,45 @@ export function focusFormElement(dom, isSelect = false) {
 
   return false;
 }
+
+/**
+ * 查找树形数据中指定节点的路径
+ * @param {Array} tree - 树形数据
+ * @param {Function} predicate - 判断条件函数
+ * @param {string} childrenKey - 子节点的键名，默认为 'children'
+ * @param {string} parentPath - 父节点路径（递归用）
+ * @returns {string|null} - 返回找到的路径或 null
+ */
+export function findTreeNodePath(
+  tree,
+  predicate,
+  childrenKey = "children",
+  parentPath = ""
+) {
+  if (!Array.isArray(tree)) return null;
+
+  for (let i = 0; i < tree.length; i++) {
+    const node = tree[i];
+    const currentPath = parentPath ? `${parentPath}.${i}` : `${i}`;
+
+    // 判断当前节点是否符合条件
+    if (predicate(node)) {
+      return currentPath;
+    }
+
+    // 如果有子节点，递归查找
+    if (node[childrenKey] && Array.isArray(node[childrenKey])) {
+      const childPath = findTreeNodePath(
+        node[childrenKey],
+        predicate,
+        childrenKey,
+        `${currentPath}.${childrenKey}`
+      );
+      if (childPath) {
+        return childPath;
+      }
+    }
+  }
+
+  return null;
+}

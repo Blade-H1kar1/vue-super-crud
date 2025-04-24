@@ -20,7 +20,7 @@ function getCompName(name, isChildren, children, comp) {
 }
 
 // 获取事件处理函数
-function getOn(on, comp, scope, parent) {
+function getOn(on, comp, scope, parent, props) {
   const events = {};
   if (on) {
     Object.entries(on).forEach(([key, handler]) => {
@@ -45,6 +45,15 @@ function getOn(on, comp, scope, parent) {
     change: (event) => {
       parent.$value = event;
       events.change && events.change(event);
+    },
+    "hook:mounted": () => {
+      const instance = parent.$vnode.componentInstance.$children[0];
+      if (props.mounted) {
+        props.mounted(scope, instance);
+      }
+      if (props.ref) {
+        props.ref(scope, instance);
+      }
     },
   };
 }
@@ -199,18 +208,10 @@ export default {
           clearable: getClearable(processedComp),
           disabled: processedComp.disabled ? true : false,
         },
-        on: getOn(props.on, processedComp, scope, parent),
+        on: getOn(props.on, processedComp, scope, parent, props),
         nativeOn: props.nativeOn,
         scopedSlots: getScopedSlots(props.scopedSlots, props.slots, h, scope),
         directives: props.directives,
-        ref: (el) => {
-          if (props.mounted) {
-            props.mounted(props.scope, el);
-          }
-          if (props.ref) {
-            props.ref(props.scope, el);
-          }
-        },
       },
       [
         renderChildren(children, h, scope),

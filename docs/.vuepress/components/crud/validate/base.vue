@@ -77,9 +77,6 @@ export default {
             },
           ],
         },
-        action: {
-          delete: true,
-        },
         renderColumns: [
           {
             prop: "name",

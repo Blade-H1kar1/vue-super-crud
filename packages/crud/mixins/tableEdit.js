@@ -1,7 +1,7 @@
 import { isEqual, cloneDeep, isFunction, uniqueId } from "lodash-es";
 import { executeFunction } from "utils";
 import EditState from "../utils/EditState";
-import { focusFormElement } from "../utils/focus";
+import { focusFormElement } from "../utils";
 
 export default {
   data() {
@@ -259,7 +259,7 @@ export default {
 
     // 行保存事件
     handleRowSave(scope, callback) {
-      this.validateField(scope.$index).then(() => {
+      this.validateField(scope.row).then(() => {
         this.changeLoading(true);
         const callBack = (row) => {
           if (row) {
@@ -312,7 +312,7 @@ export default {
             });
           }
           this.editState.setRowEditStatus(scope.row, false);
-          this.clearErrorMsg(scope.$index, scope.column?.property);
+          this.clearErrorMsg(scope.row, scope.column?.property);
         },
         scope
       );
@@ -422,7 +422,7 @@ export default {
     },
 
     handleCellSave(scope, col, callback) {
-      this.validateField(scope.$index).then(() => {
+      this.validateField(scope.row).then(() => {
         this.changeLoading(true);
         const callBack = (data) => {
           if (data) {

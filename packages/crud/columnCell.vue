@@ -59,7 +59,7 @@ export default create({
     };
 
     // 单元格渲染
-    const cellRender = (item, editMode, rawRules) => {
+    const cellRender = (item, editMode, rawRules, formProp) => {
       return (
         <Render
           props={item}
@@ -76,7 +76,8 @@ export default create({
             }
           }}
           data-row-key={scope.row[topProps.valueKey]}
-          data-prop={col.prop}
+          data-full-prop={formProp}
+          data-prop={item.prop}
         ></Render>
       );
     };
@@ -117,7 +118,7 @@ export default create({
     if (isDefaultRender(item) && !editMode) {
       VNode = cellDefaultRender(item);
     } else {
-      VNode = cellRender(item, editMode, rawRules);
+      VNode = cellRender(item, editMode, rawRules, formProp);
     }
     return (
       <CompName
@@ -133,7 +134,7 @@ export default create({
         style="width:100%"
         on={{
           "hook:destroyed": () => {
-            ctx.clearErrorMsg(scope.$index, item.prop);
+            ctx.clearErrorMsg(scope.row, item.prop);
           },
         }}
       >
