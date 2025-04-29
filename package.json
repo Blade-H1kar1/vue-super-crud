@@ -1,8 +1,8 @@
 {
   "name": "vue-super-crud",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "main": "lib/super-crud.min.js",
-  "files": [ 
+  "files": [
     "lib",
     "src"
   ],
@@ -16,8 +16,7 @@
     "deploy": "deploy.bat",
     "release": "standard-version"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "dayjs": "^1.11.13",
     "el-table-virtual-scroll": "^1.4.6",
