@@ -29,9 +29,8 @@ module.exports = {
     sidebar: {
       "/guide/": [
         {
-          title: "指南",
-          collapsable: true,
-          children: [{ title: "快速使用", path: "start/base" }],
+          title: "快速使用",
+          path: "start/base",
         },
         {
           title: "渲染配置",

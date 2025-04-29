@@ -64,7 +64,11 @@ export default create({
     "ctx.query": {
       handler(val) {
         this.queryChange = true;
-        this.ctx.$emit("update:search", val);
+        Object.keys(val).forEach((key) => {
+          if (this.ctx.search[key] !== val[key]) {
+            this.ctx.search[key] = val[key];
+          }
+        });
         this.$nextTick(() => {
           this.queryChange = false;
         });
