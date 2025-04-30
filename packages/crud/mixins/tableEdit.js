@@ -259,7 +259,7 @@ export default {
 
     // 行保存事件
     handleRowSave(scope, callback) {
-      this.validateField(scope.row).then(() => {
+      this.validateField({ row: scope.row }).then(() => {
         this.changeLoading(true);
         const callBack = (row) => {
           if (row) {
@@ -422,7 +422,7 @@ export default {
     },
 
     handleCellSave(scope, col, callback) {
-      this.validateField(scope.row).then(() => {
+      this.validateField({ row: scope.row }).then(() => {
         this.changeLoading(true);
         const callBack = (data) => {
           if (data) {

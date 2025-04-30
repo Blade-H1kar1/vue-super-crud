@@ -65,6 +65,7 @@ export default {
       this.showErrorTooltip(el);
     },
     showErrorTooltip(el) {
+      if (this._manualValidate) return;
       const targetPath = el.getAttribute("data-full-prop");
       this.errorContent = this.errorMap.get(targetPath);
       const tooltip = this.$refs.tooltip;
@@ -83,6 +84,7 @@ export default {
       }
     },
     validate(callBack) {
+      this._manualValidate = true;
       return new Promise((resolve, reject) => {
         this.$refs.tableFormRef.validate((valid, obj) => {
           if (!valid) {
@@ -109,6 +111,9 @@ export default {
             callBack && callBack(this.list);
             resolve({ list: this.list });
           }
+          setTimeout(() => {
+            this._manualValidate = false;
+          }, 0);
         });
       });
     },
@@ -143,7 +148,7 @@ export default {
         }
 
         if (!targetPath) {
-          reject(new Error("未找到目标行"));
+          console.error(new Error("未找到目标行"));
           return;
         }
 
