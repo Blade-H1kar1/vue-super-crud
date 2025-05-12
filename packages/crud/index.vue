@@ -545,18 +545,22 @@ export default create({
     rowClick(row, column, event) {
       this.selectRowClick(row, column, event);
       if (!column) return;
+      if (column.col?.type === "action") return;
       this.handleRowClick({ row, $index: row.$index }, column.col.prop);
     },
     rowDblclick(row, column, event) {
       if (!column) return;
+      if (column.col?.type === "action") return;
       this.handleRowClick({ row, $index: row.$index }, column.col.prop);
     },
     cellClick(row, column, cell, event) {
       if (!column) return;
+      if (column.col?.type === "action") return;
       this.handleCellClick({ row, $index: row.$index }, column.col);
     },
     cellDblclick(row, column, cell, event) {
       if (!column) return;
+      if (column.col?.type === "action") return;
       this.handleCellClick({ row, $index: row.$index }, column.col);
     },
   },

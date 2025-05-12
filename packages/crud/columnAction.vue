@@ -17,6 +17,7 @@
           :scope="scope"
           v-bind="btn"
           :key="index"
+          v-show="!(btn.innerHide && btn.innerHide(scope))"
         />
       </div>
     </template>
@@ -98,6 +99,7 @@ export default create({
           icon: "el-icon-edit",
           label: "编辑",
           order: 9,
+          width: 120,
           disabled: (scope) => {
             return this.ctx.disabledRowEdit({
               row: scope.row,
@@ -165,18 +167,11 @@ export default create({
       }
     },
     isRowEditing(scope) {
-      return this.ctx.editState.isRowEditing(scope.row);
+      const isEditing = scope.row.$edit;
+      return isEditing;
     },
     handleActionButtons(scope, actionButtons) {
       let buttons = actionButtons;
-
-      buttons = buttons.filter((btn) => {
-        if (btn.innerHide && btn.innerHide(scope)) {
-          return false;
-        }
-        return true;
-      });
-
       this.ctx.buttonList[scope.$index] = this.buttonList[
         scope.$index
       ] = buttons;
@@ -195,7 +190,11 @@ export default create({
           let allWidth = 0;
           for (let i = 0; i < childList.length; i++) {
             const child = childList[i];
-            allWidth += child.offsetWidth + this.action.calcWidth;
+            if (child.style.display !== "none") {
+              allWidth +=
+                (Number(child.getAttribute("width")) || child.offsetWidth) +
+                this.action.calcWidth;
+            }
           }
           if (allWidth >= width) width = allWidth;
         });

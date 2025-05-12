@@ -101,29 +101,12 @@ class EditState {
         row,
         addType,
       });
-
-      // 添加编辑状态标记
-      const propName = type === "add" ? "$add" : "$edit";
-      if (!row[propName]) {
-        Object.defineProperty(row, propName, {
-          value: true,
-          enumerable: false,
-          configurable: true,
-        });
-      }
     } else {
       this.editingRows.delete(rowKey);
-
-      // 移除编辑状态标记
-      if (row.$edit) {
-        delete row.$edit;
-      }
-      if (row.$add) {
-        delete row.$add;
-      }
     }
 
     this.notifyEditStatusChange({
+      isEditing,
       mode: "row",
       rowKey: rowKey,
       row,
@@ -137,29 +120,21 @@ class EditState {
     for (const [rowKey, editInfo] of this.editingRows.entries()) {
       // 跳过新增的行和指定要排除的行
       if (editInfo.type === "add" || rowKey === excludeRowKey) continue;
+
+      const row = editInfo.row;
+
+      // 触发状态变更通知
+      this.notifyEditStatusChange({
+        isEditing: false,
+        mode: this.mode,
+        rowKey,
+        row,
+        prop: this.currentEditCell?.prop,
+        type: editInfo.type,
+      });
+
       this.editingRows.delete(rowKey);
-      if (editInfo.row.$edit) {
-        delete editInfo.row.$edit;
-      }
-      if (editInfo.row.$add) {
-        delete editInfo.row.$add;
-      }
     }
-  }
-
-  // 批量编辑
-  batchSetEditStatus(rows, isEditing, type = "edit") {
-    if (!Array.isArray(rows)) return;
-
-    rows.forEach((row) => {
-      this.setRowEditStatus(row, isEditing, type);
-    });
-
-    this.eventBus.$emit("batch-edit-status-change", {
-      rows: rows.map((row) => this.getRowKey(row)),
-      isEditing,
-      type,
-    });
   }
 
   /**
@@ -187,6 +162,7 @@ class EditState {
 
     // 通知状态更新
     this.notifyEditStatusChange({
+      isEditing: true,
       mode: "cell",
       rowKey,
       row,
@@ -272,31 +248,50 @@ class EditState {
   clearAllEditStatus() {
     if (this._isSetting) return;
 
+    // 保存所有需要清除状态的行信息，以便后续通知
+    const editingRows = Array.from(this.editingRows.entries());
+
     // 移除所有行的编辑状态标记
-    this.editingRows.forEach((editInfo) => {
+    editingRows.forEach(([rowKey, editInfo]) => {
       const row = editInfo.row;
-      if (row.$edit) {
-        delete row.$edit;
-      }
-      if (row.$add) {
-        delete row.$add;
-      }
+      // 为每一行触发状态变更通知
+      this.notifyEditStatusChange({
+        isEditing: false,
+        mode: this.mode,
+        rowKey,
+        row,
+        prop: this.currentEditCell?.prop,
+        type: editInfo.type,
+      });
     });
 
     this.editingRows.clear();
+
+    // 如果存在正在编辑的单元格，也需要触发其状态变更通知
+    if (this.currentEditCell) {
+      this.notifyEditStatusChange({
+        isEditing: false,
+        mode: "cell",
+        rowKey: this.currentEditCell.rowKey,
+        row: this.currentEditCell.row,
+        prop: this.currentEditCell.prop,
+        type: "edit",
+      });
+    }
+
     this.currentEditCell = null;
     this._internalIdCounter = 1;
   }
 
   // 触发编辑状态更新事件
-  notifyEditStatusChange({ mode, rowKey, row, prop, type }) {
+  notifyEditStatusChange({ isEditing, mode, rowKey, row, prop, type }) {
     this.eventBus.$emit("edit-status-change", {
+      isEditing,
       mode,
       rowKey,
       row,
       prop,
       type,
-      ...this.getRowEditInfo(row),
     });
   }
 

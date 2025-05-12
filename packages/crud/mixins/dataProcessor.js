@@ -114,6 +114,9 @@ export default {
             this.$set(item, column.form?.prop || column.prop, "");
           }
         });
+        if (this.isTriggerEdit) {
+          this.$set(item, "$edit", item.$edit || false);
+        }
       });
     },
 
@@ -137,11 +140,7 @@ export default {
         const key = row[this.valueKey];
         const editInfo = editingRows.get(key);
         if (editInfo) {
-          Object.defineProperty(row, "$edit", {
-            value: true,
-            enumerable: false,
-            configurable: true,
-          });
+          row.$edit = true;
         }
       });
     },
@@ -192,8 +191,10 @@ export default {
       this.loadingStatus = bool;
     },
     initQuery() {
-      this.query = Object.assign({}, this.query, this.searchParams);
-      this.getList();
+      this.$nextTick(() => {
+        this.query = Object.assign({}, this.query, this.searchParams);
+        this.getList();
+      });
     },
     getList() {
       this.$emit("getList");

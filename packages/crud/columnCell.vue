@@ -107,7 +107,10 @@ export default create({
     };
 
     // 主渲染逻辑
-    const editMode = ctx.validateEdit(col, scope);
+    const isEditing = scope.row.$edit;
+    const editMode = ctx.isTriggerEdit
+      ? isEditing && ctx.validateEdit(col, scope)
+      : ctx.validateEdit(col, scope);
     const item = getItem(editMode);
     const formProp = getFormProp(item);
     const { rules, rawRules } = generateRules(item, scope);

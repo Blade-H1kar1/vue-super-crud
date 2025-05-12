@@ -122,6 +122,7 @@ export default create({
         valueKey: this.ctx.valueKey,
         extendsScopedSlots: this.ctx.extendsScopedSlots,
         defaultRender: this.ctx.crudOptions.defaultRender,
+        isTriggerEdit: this.ctx.isTriggerEdit,
       };
     },
   },

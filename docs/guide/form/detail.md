@@ -23,16 +23,3 @@ renderColumn项中，`detail` 自定义详情渲染组件
 <<< @/docs/.vuepress/components/form/detail/border.vue
 </common-code-format>
 </ClientOnly>
-
-
-## 单个详情
-
-renderColumn项中，`isDetail` 配置单个详情模式
-
-<ClientOnly>
-<common-code-format>
-  <form-detail-singleDetail slot="source"></form-detail-singleDetail>
-  
-<<< @/docs/.vuepress/components/form/detail/singleDetail.vue
-</common-code-format>
-</ClientOnly>

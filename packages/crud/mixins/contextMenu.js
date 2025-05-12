@@ -81,18 +81,40 @@ export default {
       });
     },
     getActionButton(scope) {
-      let custom = this.buttonList[scope.$index] || [];
-      return custom.map(({ hidden, ...item }) => {
-        Object.keys(item).forEach((key) => {
-          if (key === "onClick") {
-            const rawClick = item[key];
-            item[key] = () => rawClick(scope);
-          } else if (isFunction(item[key]) && key !== "onClick") {
-            item[key] = item[key](scope);
+      let actionButtons = this.buttonList[scope.$index] || [];
+      const btnEl = this.$el.querySelectorAll(".sc-crud-action-column")[
+        scope.$index
+      ];
+
+      return actionButtons
+        .filter(({ hidden, ...item }) => {
+          // 直接通过 label 属性查找按钮
+          const button = btnEl.querySelector(`button[label="${item.label}"]`);
+          if (!button) return false;
+
+          // 检查按钮是否可见
+          const style = window.getComputedStyle(button);
+          return style.display !== "none";
+        })
+        .map(({ hidden, ...item }) => {
+          if (item.children) {
+            item.children.forEach((child) => {
+              const click = child.onClick;
+              child.onClick = () => {
+                click && click(scope);
+              };
+            });
+          } else {
+            item.onClick = () => {
+              const button = btnEl.querySelector(
+                `button[label="${item.label}"]`
+              );
+              if (button) button.click();
+            };
           }
+
+          return item;
         });
-        return item;
-      });
     },
   },
 };

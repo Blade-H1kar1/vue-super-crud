@@ -37,6 +37,9 @@ export default {
         return pre;
       }, {});
     },
+    isTriggerEdit() {
+      return ["row", "cell"].includes(this.editConfig.mode);
+    },
   },
   methods: {
     // 初始化编辑状态
@@ -53,8 +56,8 @@ export default {
       });
       this.editState.on(
         "edit-status-change",
-        ({ mode, rowKey, row, prop, type }) => {
-          this.forceUpdate();
+        ({ isEditing, mode, rowKey, row, prop, type }) => {
+          row.$edit = isEditing;
           if (prop && this.editConfig.autofocus) {
             prop =
               typeof this.editConfig.autofocus === "string"
@@ -169,7 +172,10 @@ export default {
     // 行添加事件
     handleRowAdd(params, type) {
       type = type || this.crudOptions.rowAddType || "last";
-      let newRow = {};
+      let newRow = {
+        $add: true,
+        $edit: true,
+      };
       this.trueRenderColumns.forEach((col) => {
         if (newRow[col.prop] === undefined) {
           newRow[col.prop] = col.initValue ?? "";
@@ -491,11 +497,9 @@ export default {
                   };
                   this.handleRowSave(scope, () => {
                     this.editState.clearOtherEditingRows();
-                    this.forceUpdate();
                   });
                 } else {
                   this.editState.clearOtherEditingRows();
-                  this.forceUpdate();
                 }
               } else {
                 const editCell = this.editState.getEditingCell();
@@ -505,12 +509,10 @@ export default {
                     editCell.prop,
                     () => {
                       this.editState.clearAllEditStatus();
-                      this.forceUpdate();
                     }
                   );
                 } else {
                   this.editState.clearAllEditStatus();
-                  this.forceUpdate();
                 }
               }
             }

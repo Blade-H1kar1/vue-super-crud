@@ -102,7 +102,9 @@ export default create({
           this.ctx.updateSelection();
         });
       } else {
-        this.ctx.getList();
+        this.$nextTick(() => {
+          this.ctx.getList();
+        });
       }
     },
   },
