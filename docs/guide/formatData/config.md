@@ -93,23 +93,6 @@ new Date() -> "2024年03月20日"
 | separator   | String  | " ~ "        | 日期分隔符                |
 | outputType  | String  | "array"      | 输出类型：array 或 string |
 
-### inputFormat（输入格式化）
-对输入内容进行格式化处理。
-
-**数据转换：**
-```javascript
-"abc123中文" -> "123" // type: number
-"abc123中文" -> "abc" // type: letter
-"abc123中文" -> "中文" // type: chinese
-"abc@123.com!" -> "abc@123.com" // type: email
-```
-
-| 配置项    | 类型   | 默认值    | 说明                                                                      |
-| --------- | ------ | --------- | ------------------------------------------------------------------------- |
-| inputType      | String | "number"  | 格式化类型：number/phone/decimal/letter/chinese/letterNumber/email/custom |
-| pattern   | String | -         | 自定义正则                                          |
-| maxLength | Number | undefined | 最大长度                                                                  |
-| decimal   | Number | undefined | 小数位数（type为decimal时使用）                                           |
 
 ### percentFormat（百分比格式化）
 对百分比数据进行格式化处理。

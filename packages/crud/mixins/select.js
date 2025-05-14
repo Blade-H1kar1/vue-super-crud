@@ -206,8 +206,9 @@ export default {
     // 更新选中状态
     updateSelection() {
       if (!this.$refs.tableRef) return;
-
-      // this.$refs.tableRef.clearSelection();
+      if (!this._isPaging) {
+        this.$refs.tableRef.clearSelection();
+      }
       if (!this.selected?.length) return;
 
       const updatedSelected = [];
@@ -237,6 +238,7 @@ export default {
 
       // 更新选中数组
       this.selected.splice(0, this.selected.length, ...updatedSelected);
+      this._isPaging = false;
     },
     selectionChange(arr) {
       this.selectionRow = arr;

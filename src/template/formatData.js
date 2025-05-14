@@ -241,12 +241,11 @@ export default {
   numberFormat: (item) => {
     const config = {
       precision: 2, // 精度（小数位数）
-      round: true, // 是否四舍五入
+      round: false, // 是否四舍五入
       toFixed: false, // 是否固定小数位数
       thousandth: false, // 是否显示千分位
       prefix: "", // 前缀
       suffix: "", // 后缀
-      keepZero: false, // 是否保留末尾0
       ...(get(item, "formatData") || item),
     };
 
@@ -258,23 +257,41 @@ export default {
     };
 
     // 处理数字精度
-    const formatPrecision = (num) => {
+    const formatPrecision = (num, originalStr = "") => {
       if (typeof num !== "number") return num;
-
-      if (config.precision !== undefined) {
-        const multiplier = Math.pow(10, config.precision);
-        num = config.round
-          ? Math.round(num * multiplier) / multiplier
-          : Math.floor(num * multiplier) / multiplier;
-      }
-
-      if (config.toFixed && config.precision !== undefined) {
-        num = num.toFixed(config.precision);
-        if (!config.keepZero) {
-          num = String(Number(num));
+      let result;
+      if (config.precision !== 0) {
+        const endsWithDot = originalStr.endsWith(".");
+        // 检查原始字符串是否以0结尾的小数
+        const endsWithZero =
+          originalStr.includes(".") && originalStr.endsWith("0");
+        const decimalPlaces = endsWithZero
+          ? originalStr.split(".")[1].length
+          : 0;
+        if (config.round) {
+          // 四舍五入
+          const multiplier = Math.pow(10, config.precision);
+          result = Math.round(num * multiplier) / multiplier;
+        } else {
+          // 直接截断
+          const multiplier = Math.pow(10, config.precision);
+          result = Math.floor(num * multiplier) / multiplier;
         }
+
+        // 如果原始输入以0结尾，使用原始小数位数
+        if (endsWithZero && !config.toFixed) {
+          result = Number(result).toFixed(
+            Math.min(config.precision, decimalPlaces)
+          );
+        } else if (endsWithDot && !String(result).includes(".")) {
+          result = result + ".";
+        } else if (config.toFixed) {
+          result = Number(result).toFixed(config.precision);
+        }
+      } else {
+        result = Number(num).toFixed(0);
       }
-      return num;
+      return result;
     };
 
     // 处理多个小数点的情况（只保留第一个）
@@ -297,25 +314,11 @@ export default {
             rawStr = String(value);
           }
 
-          // 校验是否为有效的数字格式（允许负号和小数点）
-          if (!/^-?\d*\.?\d*$/.test(rawStr)) {
-            return value;
-          }
+          const num = Number(rawStr) || 0;
 
-          // 检查原始字符串是否以小数点结尾
-          const endsWithDot = rawStr.endsWith(".");
-
-          const num = Number(rawStr);
-          if (isNaN(num)) {
-            return value;
-          }
-          let formatted = formatPrecision(num);
+          // 传入原始字符串，用于处理特殊情况
+          let formatted = formatPrecision(num, rawStr);
           formatted = String(formatted);
-
-          // 如果原始输入以小数点结尾，但格式化后中没有小数点，则补回
-          if (endsWithDot && !formatted.includes(".")) {
-            formatted += ".";
-          }
 
           if (config.thousandth) {
             formatted = formatThousandth(formatted);
@@ -354,48 +357,14 @@ export default {
       },
     };
   },
-  // 输入格式化
-  inputFormat: (item) => {
-    // 预设的正则规则
-    const REGEX_RULES = {
-      number: /[^\d]/g, // 仅数字
-      phone: /[^\d]/g, // 手机号
-      decimal: /[^\d.]/g, // 小数
-      letter: /[^a-zA-Z]/g, // 仅字母
-      chinese: /[^\u4e00-\u9fa5]/g, // 仅中文
-      letterNumber: /[^a-zA-Z0-9]/g, // 字母和数字
-      email: /[^a-zA-Z0-9@._-]/g, // 邮箱
-      custom: null, // 自定义正则
-    };
-
+  // 自定义正则格式化
+  regexFormat: (item) => {
     // 默认配置
     const config = {
-      inputType: "number", // 格式化类型
-      pattern: "", // 自定义正则
-      maxLength: undefined, // 最大长度
-      decimal: undefined, // 小数位数（type为decimal时使用）
+      pattern: "", // 自定义正则表达式
+      flags: "g", // 正则标志，默认全局匹配
+      replace: "", // 替换值，默认为空字符串
       ...(get(item, "formatData") || item),
-    };
-
-    // 处理小数格式化
-    const formatDecimal = (value) => {
-      if (!value) return value;
-
-      // 先去除非数字和小数点
-      let formatted = value.replace(/[^\d.]/g, "");
-
-      // 只保留第一个小数点
-      const parts = formatted.split(".");
-      if (parts.length > 2) {
-        formatted = parts[0] + "." + parts.slice(1).join("");
-      }
-
-      // 处理小数位数
-      if (config.decimal !== undefined && parts[1]) {
-        formatted = parts[0] + "." + parts[1].slice(0, config.decimal);
-      }
-
-      return formatted;
     };
 
     return {
@@ -405,28 +374,38 @@ export default {
         try {
           let formatted = String(value);
 
-          // 处理最大长度
-          if (config.maxLength) {
-            formatted = formatted.slice(0, config.maxLength);
+          // 验证并应用正则表达式
+          if (config.pattern) {
+            let regex;
+            if (config.pattern instanceof RegExp) {
+              // 如果已经是RegExp对象，直接使用
+              regex = config.pattern;
+            } else {
+              // 如果是字符串，创建RegExp对象
+              regex = new RegExp(config.pattern, config.flags);
+            }
+
+            // 如果是验证模式（以^开头且以$结尾），则进行完整匹配
+            if (
+              config.pattern.toString().startsWith("/^") &&
+              config.pattern.toString().endsWith("$/")
+            ) {
+              return regex.test(formatted) ? formatted : "";
+            } else {
+              // 否则进行替换
+              formatted = formatted.replace(regex, config.replace);
+            }
           }
 
-          // 小数特殊处理
-          if (config.inputType === "decimal") {
-            return formatDecimal(formatted);
-          }
-
-          // 优先使用自定义正则，如果没有则使用预设规则
-          const rule = config.pattern
-            ? new RegExp(config.pattern, "g")
-            : REGEX_RULES[config.inputType];
-
-          return formatted.replace(rule, "");
+          return formatted;
         } catch (error) {
-          console.warn("输入格式化失败:", error);
+          console.warn("自定义正则格式化失败:", error);
           return value;
         }
       },
-      output: (value) => value,
+      output: (value) => {
+        return value;
+      },
     };
   },
   // 百分比格式化

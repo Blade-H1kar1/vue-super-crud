@@ -97,6 +97,7 @@ export default create({
       this.handleDataChange();
     },
     handleDataChange() {
+      this.ctx._isPaging = true;
       if (this.ctx.crudOptions.localPagination) {
         this.$nextTick(() => {
           this.ctx.updateSelection();

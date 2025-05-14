@@ -118,6 +118,10 @@ export default {
       });
     },
     validateField(params) {
+      this._manualValidate = true;
+      setTimeout(() => {
+        this._manualValidate = false;
+      }, 0);
       const options = typeof params === "number" ? { index: params } : params;
       return this._validateField(options);
     },

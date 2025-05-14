@@ -34,6 +34,7 @@
       ref="tableFormRef"
       @validate="createListError"
       class="height--form"
+      @submit.native.prevent
     >
       <component
         :is="virtualized ? 'virtualScroll' : 'div'"

@@ -38,7 +38,7 @@ export default {
 
       // 行合并
       const span = item.spanProp || item.sameRowSpan;
-      if (span) {
+      if (span && !this.sameRowSpans.includes(span)) {
         if (typeof span === "string") {
           this.sameRowSpans.push(span);
         } else {
