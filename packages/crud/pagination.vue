@@ -82,7 +82,7 @@ export default create({
       this.$set(
         this.ctx.query,
         this.props.pageSize,
-        this.ctx.setOptions.pageSize || this.ctx.search[this.props.pageSize]
+        this.ctx.search[this.props.pageSize] || this.ctx.setOptions.pageSize
       );
     },
     handleSizeChange(val) {

@@ -268,14 +268,23 @@ export default {
         const decimalPlaces = endsWithZero
           ? originalStr.split(".")[1].length
           : 0;
-        if (config.round) {
-          // 四舍五入
-          const multiplier = Math.pow(10, config.precision);
-          result = Math.round(num * multiplier) / multiplier;
+
+        // 使用字符串操作来保持精确度
+        const numStr = String(num);
+        const parts = numStr.split(".");
+        if (parts.length > 1) {
+          const integerPart = parts[0];
+          const decimalPart = parts[1];
+          if (config.round) {
+            result = Number(Number(num).toFixed(config.precision));
+          } else {
+            // 直接截取所需的小数位数
+            result = Number(
+              integerPart + "." + decimalPart.slice(0, config.precision)
+            );
+          }
         } else {
-          // 直接截断
-          const multiplier = Math.pow(10, config.precision);
-          result = Math.floor(num * multiplier) / multiplier;
+          result = num;
         }
 
         // 如果原始输入以0结尾，使用原始小数位数

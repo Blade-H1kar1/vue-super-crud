@@ -1,4 +1,4 @@
-import { isFunction, cloneDeep, uniqueId } from "lodash-es";
+import { isFunction, cloneDeep, uniqueId, get } from "lodash-es";
 
 export default {
   data() {
@@ -110,7 +110,11 @@ export default {
         }
         // 检查并添加缺失的列字段
         this.trueRenderColumns.forEach((column) => {
-          if (column.prop && !(column.prop in item)) {
+          if (
+            column.prop &&
+            !column.prop.includes(".") &&
+            get(item, column.prop) === undefined
+          ) {
             this.$set(item, column.form?.prop || column.prop, "");
           }
         });
