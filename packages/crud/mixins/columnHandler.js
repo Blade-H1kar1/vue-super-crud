@@ -88,7 +88,8 @@ export default {
           col.isEdit ||
           this.extendsScopedSlots[col.prop] ||
           col.position ||
-          col.formatData
+          col.formatData ||
+          col.prop.includes(".")
         ) {
           return false;
         }

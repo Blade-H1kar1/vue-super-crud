@@ -103,25 +103,59 @@ export default {
     processRowData(list) {
       const isGenUniqueId = this.crudOptions.uniqueId;
 
-      list.forEach((item) => {
-        // 生成唯一ID
-        if (isGenUniqueId && !item.$uniqueId) {
-          item.$uniqueId = uniqueId();
-        }
-        // 检查并添加缺失的列字段
-        this.trueRenderColumns.forEach((column) => {
+      const processNode = (nodes, parent = null, level = 0) => {
+        if (!Array.isArray(nodes)) return;
+
+        nodes.forEach((item, index) => {
+          // 生成唯一ID
+          if (isGenUniqueId && !item.$uniqueId) {
+            item.$uniqueId = uniqueId();
+          }
+
+          // 添加树形数据的额外属性
+          if (this.isTree) {
+            // 设置父节点ID
+            if (parent !== null && !item.$parent) {
+              item.$parentId = parent[this.valueKey];
+              Object.defineProperty(item, "$parent", {
+                value: parent,
+                writable: true,
+                enumerable: false,
+              });
+            }
+            // 设置节点层级
+            if (!item.$level) {
+              item.$level = level;
+            }
+          }
+
+          // 检查并添加缺失的列字段
+          this.trueRenderColumns.forEach((column) => {
+            if (
+              column.prop &&
+              !column.prop.includes(".") &&
+              get(item, column.prop) === undefined
+            ) {
+              this.$set(item, column.form?.prop || column.prop, "");
+            }
+          });
+
+          if (this.isTriggerEdit) {
+            this.$set(item, "$edit", item.$edit || false);
+          }
+
+          // 递归处理子节点
           if (
-            column.prop &&
-            !column.prop.includes(".") &&
-            get(item, column.prop) === undefined
+            this.isTree &&
+            item[this.childrenKey] &&
+            item[this.childrenKey].length
           ) {
-            this.$set(item, column.form?.prop || column.prop, "");
+            processNode(item[this.childrenKey], item, level + 1);
           }
         });
-        if (this.isTriggerEdit) {
-          this.$set(item, "$edit", item.$edit || false);
-        }
-      });
+      };
+
+      processNode(list);
     },
 
     // 恢复新增状态

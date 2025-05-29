@@ -164,15 +164,17 @@ export default create({
             this.ctx.handleBatchDelete();
           },
         },
-        rowAdd: {
+        rowAdd: (item, { ctx }) => ({
           icon: "el-icon-plus",
           label: "新增",
           type: "primary",
           onClick: () => {
-            const editConfig = this.ctx.editConfig;
-            this.ctx.handleRowAdd(editConfig.rowAdd?.addType);
+            this.ctx.handleRowAdd(
+              item.addParams && item.addParams(),
+              item?.addType
+            );
           },
-        },
+        }),
       };
     },
     toolbarTemps() {

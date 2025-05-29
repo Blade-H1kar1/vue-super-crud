@@ -73,6 +73,7 @@ export default create({
         rowEdit: editConfig.rowEdit,
         rowSave: editConfig.rowEdit,
         rowCancel: editConfig.rowEdit,
+        addChild: editConfig.addChild,
         ...cloneDeep(this.ctx.crudOptions.action),
       };
     },
@@ -153,6 +154,18 @@ export default create({
             this.ctx.editConfig.mode === "row" && this.isRowEditing(scope),
           onClick: (scope) => {
             this.ctx.handleDelete(scope);
+          },
+        }),
+        addChild: (item, { ctx }) => ({
+          icon: "el-icon-plus",
+          label: "添加子级",
+          order: 13,
+          onClick: (scope) => {
+            this.ctx.handleRowAdd(
+              item.addParams && item.addParams(scope),
+              item?.addType,
+              scope.row
+            );
           },
         }),
       };

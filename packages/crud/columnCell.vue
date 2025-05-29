@@ -21,15 +21,22 @@ export default create({
     const b = (...args) => bem("sc-crud-cell", ...args);
 
     // 辅助函数
-    const findTreeProp = (tree, targetId, path = "") => {
+    const findTreeProp = (
+      tree,
+      targetId,
+      { key = "id", childrenKey = "children", path = "" }
+    ) => {
       for (let i = 0; i < tree.length; i++) {
         const node = tree[i];
-        if (node.id === targetId) {
+        if (node[key] === targetId) {
           return path + i;
         }
-        if (node.children && node.children.length > 0) {
-          const childPath = `${path}${i}.children.`;
-          const result = findTreeProp(node.children, targetId, childPath);
+        if (node[childrenKey] && node[childrenKey].length > 0) {
+          const childPath = `${path}${i}.${childrenKey}.`;
+          const result = findTreeProp(node[childrenKey], targetId, {
+            key,
+            path: childPath,
+          });
           if (result !== null) {
             return result;
           }
@@ -44,7 +51,10 @@ export default create({
       if (topProps.isTree) {
         return (
           "list." +
-          findTreeProp(ctx.list, scope.row[topProps.valueKey]) +
+          findTreeProp(ctx.list, scope.row[topProps.valueKey], {
+            key: topProps.valueKey,
+            childrenKey: topProps.childrenKey,
+          }) +
           "." +
           item.prop
         );

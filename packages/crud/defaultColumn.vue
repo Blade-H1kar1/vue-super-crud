@@ -99,7 +99,7 @@ export default {
               );
               const spanIndex = map?.spanIndex || scope.$index;
               if (this.col.render) {
-                return this.col.render(spanIndex + 1);
+                return this.col.render(h, spanIndex + 1);
               }
               return spanIndex + 1;
             }
@@ -115,7 +115,7 @@ export default {
           this.col.render || this.ctx.$scopedSlots[this.col.type]
             ? (scope) => {
                 if (this.col.render) {
-                  return this.col.render(scope);
+                  return this.col.render(h, scope);
                 }
                 if (this.ctx.$scopedSlots[this.col.type]) {
                   return this.ctx.$scopedSlots[this.col.type](scope);

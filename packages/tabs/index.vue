@@ -85,6 +85,10 @@ export default create({
       type: Array,
       default: () => [],
     },
+    lazy: {
+      type: Boolean,
+      default: true,
+    },
     cache: {
       type: Boolean,
       default: true,
@@ -224,6 +228,7 @@ export default create({
     },
 
     shouldRenderTab(item, index) {
+      if (this.lazy === false) return true;
       const tabName = this.getItemName(item, index);
       const shouldCache = item.cache === undefined ? this.cache : item.cache;
       return shouldCache

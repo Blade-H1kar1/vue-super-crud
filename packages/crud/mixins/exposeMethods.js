@@ -29,9 +29,10 @@ export default {
      * 新增表格行
      * @param {Object} params 行数据参数
      * @param {String} type 新增位置类型: 'first' | 'last'
+     * @param {Object} parentRow 父节点
      */
-    addRow(params = {}, type = "last") {
-      this.handleRowAdd(params, type);
+    addRow(params = {}, type = "last", parentRow) {
+      this.handleRowAdd(params, type, parentRow);
     },
     /**
      * 设置行编辑状态

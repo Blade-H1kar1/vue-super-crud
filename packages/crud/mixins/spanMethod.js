@@ -77,29 +77,42 @@ export default {
     // 在已有分组内进行排序
     sortByFieldWithinGroups(currentField, previousFields, currentProp, data) {
       if (!previousFields.length) {
-        // 第一个字段直接排序
-        this.sortByField(currentField, currentProp, data);
+        this.sortByFieldPreservingOrder(data, currentField);
+        if (isFunction(currentProp?.sortMethod)) {
+          data.sort((a, b) => {
+            return currentProp?.sortMethod(a, b);
+          });
+        }
+        if (currentProp?.order) {
+          data.sort((a, b) =>
+            this.compareValue(a, b, currentField, currentProp)
+          );
+        }
         return;
       }
-
       // 根据之前的字段分组
       const groups = this.groupByFields(data, previousFields);
+
+      const sortedKeys = Object.keys(groups);
 
       // 记录每组的起始索引
       let currentIndex = 0;
 
       // 对每个分组内部进行排序并更新原数组
-      Object.values(groups).forEach((group) => {
-        // 对当前组按字段排序
-        group.sort((a, b) =>
-          this.compareValue(
-            a,
-            b,
-            currentField,
-            this.getSortOptions(currentField, currentProp)
-          )
-        );
+      sortedKeys.forEach((groupKey) => {
+        const group = groups[groupKey];
+        this.sortByFieldPreservingOrder(group, currentField);
 
+        if (isFunction(currentProp?.sortMethod)) {
+          group.sort((a, b) => {
+            return currentProp?.sortMethod(a, b);
+          });
+        }
+        if (currentProp?.order) {
+          group.sort((a, b) =>
+            this.compareValue(a, b, currentField, currentProp)
+          );
+        }
         // 将排序后的组数据写回原数组
         group.forEach((item, i) => {
           data[currentIndex + i] = item;
@@ -121,33 +134,7 @@ export default {
         return groups;
       }, {});
     },
-
-    // 单字段排序 - 直接修改原数组
-    sortByField(field, propConfig, data) {
-      const sortOptions = this.getSortOptions(field, propConfig);
-      data.sort((a, b) => this.compareValue(a, b, field, sortOptions));
-    },
-
-    // 获取字段的排序选项
-    getSortOptions(field, propConfig) {
-      // 如果传入了配置对象，从中获取排序选项
-      if (typeof propConfig === "object" && propConfig !== null) {
-        return {
-          order: propConfig.order || "asc",
-          nullsPosition: propConfig.nullsPosition || "last",
-          ...propConfig,
-        };
-      }
-    },
-    // 通用比较函数
     compareValue(a, b, field, sortOptions = {}) {
-      // 检查是否有自定义排序
-      const sortMethod = sortOptions.sortMethod;
-      if (sortMethod) {
-        const result = sortMethod(a, b, sortOptions);
-        if (result !== undefined) return result;
-      }
-
       const { order = "asc", nullsPosition = "last" } = sortOptions;
       const aValue = a[field];
       const bValue = b[field];
@@ -168,9 +155,51 @@ export default {
       }
 
       // 字符串比较
-      return order === "asc"
-        ? String(aValue).localeCompare(String(bValue))
-        : String(bValue).localeCompare(String(aValue));
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        const compareResult = aValue.localeCompare(bValue);
+        return order === "asc" ? compareResult : -compareResult;
+      }
+
+      return 0;
+    },
+    // 相同字段排序
+    sortByFieldPreservingOrder(data, field) {
+      const processed = new Set();
+      let currentIndex = 0;
+
+      while (currentIndex < data.length) {
+        if (processed.has(currentIndex)) {
+          currentIndex++;
+          continue;
+        }
+
+        const currentValue = data[currentIndex][field];
+        processed.add(currentIndex);
+
+        let insertPosition = currentIndex + 1;
+        for (let i = insertPosition; i < data.length; i++) {
+          if (processed.has(i)) continue;
+
+          if (data[i][field] === currentValue) {
+            if (i !== insertPosition) {
+              // 保存要移动的元素
+              const itemToMove = data[i];
+              // 移动中间的元素
+              for (let j = i; j > insertPosition; j--) {
+                data[j] = data[j - 1];
+              }
+              // 放置到正确位置
+              data[insertPosition] = itemToMove;
+            }
+            processed.add(insertPosition);
+            insertPosition++;
+          }
+        }
+
+        currentIndex = insertPosition;
+      }
+
+      return data;
     },
     spanMethod(params) {
       const { row, column, rowIndex } = params;

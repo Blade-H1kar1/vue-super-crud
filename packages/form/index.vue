@@ -322,7 +322,7 @@ export default create({
           let form = { ...this.value };
 
           this.trueRenderColumns.forEach((col) => {
-            if (form[col.prop] === undefined) {
+            if (!col.prop.includes(".") && form[col.prop] === undefined) {
               if (col.initValue) {
                 form[col.prop] = col.initValue;
               } else {

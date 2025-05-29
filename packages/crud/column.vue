@@ -119,6 +119,7 @@ export default create({
       return {
         size: this.ctx.crudOptions.size,
         isTree: this.ctx.isTree,
+        childrenKey: this.ctx.childrenKey,
         valueKey: this.ctx.valueKey,
         extendsScopedSlots: this.ctx.extendsScopedSlots,
         defaultRender: this.ctx.crudOptions.defaultRender,

@@ -13,6 +13,7 @@ export default create({
   provide() {
     return {
       searchHeader: this,
+      controlCtx: null,
     };
   },
   data() {

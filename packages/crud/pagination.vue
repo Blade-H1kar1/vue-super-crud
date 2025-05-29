@@ -52,10 +52,10 @@ export default create({
       },
     },
     total() {
-      if (this.ctx.localFilteredData !== undefined) {
-        return this.ctx.localFilteredData?.length || 0;
-      }
       if (this.ctx.crudOptions.localPagination) {
+        if (this.ctx.localFilteredData !== undefined) {
+          return this.ctx.localFilteredData?.length || 0;
+        }
         return this.ctx.data.length;
       }
       return this.ctx.total;

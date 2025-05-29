@@ -287,10 +287,13 @@ export default create({
       if (this.crudOptions.rowKey) return this.crudOptions.rowKey;
       return this.crudOptions.valueKey;
     },
+    childrenKey() {
+      return this.crudOptions?.treeProps?.children || "children";
+    },
     isTree() {
       let flag = false;
       this.data.forEach((ele) => {
-        if (ele.children) {
+        if (ele[this.childrenKey]) {
           flag = true;
         }
       });
@@ -403,9 +406,10 @@ export default create({
           this.lazyTreeData,
           (item) => item[this.valueKey] === tree[this.valueKey]
         );
-        if (item && item.children && item.children.length) {
-          const list = cloneDeep(item.children);
+        if (item && item[this.childrenKey] && item[this.childrenKey].length) {
+          const list = cloneDeep(item[this.childrenKey]);
           this.handleLocalLazy(list);
+          tree.children = list;
           resolve(list);
         } else {
           // 更新空的懒加载节点
@@ -422,8 +426,8 @@ export default create({
     },
     handleLocalLazy(list) {
       list.forEach((i) => {
-        if (i.children && i.children.length) {
-          delete i.children;
+        if (i[this.childrenKey] && i[this.childrenKey].length) {
+          delete i[this.childrenKey];
           i.hasChildren = true;
         }
       });

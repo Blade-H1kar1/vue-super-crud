@@ -170,12 +170,15 @@ export default {
     },
 
     // 行添加事件
-    handleRowAdd(params, type) {
+    handleRowAdd(params, type, parentRow) {
       type = type || this.crudOptions.rowAddType || "last";
       let newRow = {
         $add: true,
         $edit: true,
       };
+      if (this.isTree) {
+        newRow[this.valueKey] = "new_" + uniqueId();
+      }
       this.trueRenderColumns.forEach((col) => {
         if (newRow[col.prop] === undefined) {
           newRow[col.prop] = col.initValue ?? "";
@@ -186,6 +189,27 @@ export default {
         ["add"],
         (data) => {
           newRow = Object.assign(newRow, data, params);
+          if (parentRow) {
+            newRow.$parentId = parentRow[this.valueKey];
+            newRow.$parent = parentRow;
+            newRow.$level = parentRow.level + 1;
+            if (!parentRow[this.childrenKey]) {
+              this.$set(parentRow, this.childrenKey, []);
+            }
+            newRow.$parent = parentRow;
+            if (type === "first") {
+              parentRow[this.childrenKey].unshift(newRow);
+            } else {
+              parentRow[this.childrenKey].push(newRow);
+            }
+          } else {
+            // 处理顶层数据的添加
+            if (type === "first") {
+              this.list.unshift(newRow);
+            } else {
+              this.list.push(newRow);
+            }
+          }
 
           // 设置添加状态
           this.editState.setRowEditStatus(
@@ -197,16 +221,11 @@ export default {
             }
           );
 
-          if (type === "first") {
-            this.list.unshift(newRow);
-          } else {
-            this.list.push(newRow);
-          }
           setTimeout(() => {
             this.$refs.tableFormRef.clearValidate();
           }, 0);
         },
-        { row: newRow }
+        { row: newRow, parentRow }
       );
     },
 
@@ -257,9 +276,25 @@ export default {
           ? this.selectionRow
           : rows || this.list;
 
-        list.forEach((row, index) => {
-          this.editState.setRowEditStatus(row, true, "edit");
-        });
+        if (this.isTree) {
+          const allNodes = [];
+          const processNodes = (nodes) => {
+            nodes.forEach((node) => {
+              allNodes.push(node);
+              if (node[this.childrenKey] && node[this.childrenKey].length > 0) {
+                processNodes(node[this.childrenKey]);
+              }
+            });
+          };
+          processNodes(list);
+          allNodes.forEach((node) => {
+            this.editState.setRowEditStatus(node, true, "edit");
+          });
+        } else {
+          list.forEach((row, index) => {
+            this.editState.setRowEditStatus(row, true, "edit");
+          });
+        }
       });
     },
 
@@ -288,9 +323,42 @@ export default {
           .map((item) => item.row);
         this.changeLoading(true);
         const callBack = (rows) => {
-          (topRows || rows || editRows).forEach((row) => {
-            this.editState.setRowEditStatus(row, false);
-          });
+          if (this.isTree) {
+            // 处理树形数据的保存
+            const processNodes = (nodes) => {
+              nodes.forEach((row) => {
+                if (this.editState.isRowEditing(row)) {
+                  if (row.$parent) {
+                    const index = this.getNodeIndex(row);
+                    if (index !== -1 && rows) {
+                      // 如果后端返回了更新后的数据，则使用后端数据更新
+                      const updatedRow = rows.find(
+                        (r) => r[this.valueKey] === row[this.valueKey]
+                      );
+                      if (updatedRow) {
+                        this.$set(
+                          row.$parent[this.childrenKey],
+                          index,
+                          updatedRow
+                        );
+                      }
+                    }
+                  }
+                  this.editState.setRowEditStatus(row, false);
+                }
+                // 递归处理子节点
+                if (row[this.childrenKey] && row[this.childrenKey].length > 0) {
+                  processNodes(row[this.childrenKey]);
+                }
+              });
+            };
+            processNodes(topRows || this.list);
+          } else {
+            (topRows || rows || editRows).forEach((row) => {
+              this.editState.setRowEditStatus(row, false);
+            });
+          }
+
           changeBatchButton();
           this.changeLoading();
 
@@ -310,12 +378,32 @@ export default {
           const editInfo = this.editState.getRowEditInfo(scope.row);
 
           if (editInfo?.type === "add") {
-            this.list.splice(scope.$index, 1);
+            if (scope.row.$parent) {
+              const index = this.getNodeIndex(scope.row);
+              if (index !== -1) {
+                scope.row.$parent[this.childrenKey].splice(index, 1);
+              }
+            } else {
+              const index = this.list.indexOf(scope.row);
+              index !== -1 && this.list.splice(index, 1);
+            }
           } else if (editInfo?.data) {
             // 恢复原始数据
-            Object.keys(editInfo.data).forEach((key) => {
-              this.$set(scope.row, key, editInfo.data[key]);
-            });
+            if (scope.row.$parent) {
+              const index = this.getNodeIndex(scope.row);
+              if (index !== -1) {
+                this.$set(
+                  scope.row.$parent[this.childrenKey],
+                  index,
+                  editInfo.data
+                );
+              }
+            } else {
+              Object.keys(editInfo.data).forEach((key) => {
+                key !== this.childrenKey &&
+                  this.$set(scope.row, key, editInfo.data[key]);
+              });
+            }
           }
           this.editState.setRowEditStatus(scope.row, false);
           this.clearErrorMsg(scope.row, scope.column?.property);
@@ -327,15 +415,31 @@ export default {
     // 批量行取消事件
     handleBatchRowCancel(topRows) {
       this.runBefore(["batchCancel"], (rows) => {
-        (topRows || rows || this.list).forEach((row, index) => {
-          if (this.editState.isRowEditing(row)) {
-            const editInfo = this.editState.getRowEditInfo(row);
-            if (editInfo?.data) {
-              this.$set(this.list, index, editInfo.data);
+        const processCancelNodes = (nodes) => {
+          nodes.forEach((row, index) => {
+            if (this.editState.isRowEditing(row)) {
+              const editInfo = this.editState.getRowEditInfo(row);
+              if (editInfo?.data) {
+                let children = [];
+                if (row[this.childrenKey]) {
+                  children = [...row[this.childrenKey]];
+                }
+                this.$set(nodes, index, editInfo.data);
+                if (children.length > 0) {
+                  this.$set(nodes[index], this.childrenKey, children);
+                }
+              }
+              this.editState.setRowEditStatus(row, false);
             }
-            this.editState.setRowEditStatus(row, false);
-          }
-        });
+            // 递归处理子节点
+            if (row[this.childrenKey] && row[this.childrenKey].length > 0) {
+              processCancelNodes(row[this.childrenKey]);
+            }
+          });
+        };
+
+        // 处理需要取消编辑的节点
+        processCancelNodes(topRows || rows || this.list);
 
         if (this.editConfig.batch?.isSelect) {
           this.clearSelection();
@@ -351,13 +455,21 @@ export default {
       const handleDelete = () => {
         this.changeLoading(true);
         const callBack = () => {
-          const deleteIndex = this.selectionRow.map((item) => item.$index);
-          deleteIndex
-            .sort((a, b) => b - a)
-            .forEach((index) => {
-              this.list.splice(index, 1);
+          this.selectionRow
+            .sort((a, b) => b.$index - a.$index)
+            .forEach((row) => {
+              if (row.$parent) {
+                const parent = row.$parent;
+                const children = parent[this.childrenKey] || [];
+                const index = children.indexOf(row);
+                if (index !== -1) {
+                  children.splice(index, 1);
+                }
+              } else {
+                const index = this.list.indexOf(row);
+                this.list.splice(index, 1);
+              }
             });
-
           this.changeLoading();
         };
         this.runBefore(
@@ -375,8 +487,18 @@ export default {
       const handleDelete = () => {
         this.changeLoading(true);
         const callBack = () => {
-          this.list.splice(scope.$index, 1);
+          console.log(scope.row, "scope.row");
+          if (scope.row.$parent) {
+            const index = this.getNodeIndex(scope.row);
 
+            console.log(scope.row.$parent, "scope.row.$parent", index);
+
+            if (index !== -1) {
+              scope.row.$parent[this.childrenKey].splice(index, 1);
+            }
+          } else {
+            this.list.splice(scope.$index, 1);
+          }
           this.changeLoading();
         };
         this.runBefore(["delete"], callBack, scope, this.changeLoading);
@@ -544,6 +666,13 @@ export default {
           (this.editConfig.lastAdd || {}).addType || "last"
         );
       }
+    },
+    getNodeIndex(row) {
+      if (!row.$parent) return null;
+      const parent = row.$parent;
+      const children = parent[this.childrenKey] || [];
+      const index = children.indexOf(row);
+      return index;
     },
   },
 };

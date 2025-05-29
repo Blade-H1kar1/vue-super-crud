@@ -54,7 +54,7 @@ export default {
     clearErrorMsg(row, prop) {
       const targetPath =
         "list." +
-        findTreeNodePath(this.list, (node) => node === row, "children") +
+        findTreeNodePath(this.list, (node) => node === row, this.childrenKey) +
         "." +
         prop;
       this.handleValidateError(targetPath, "", true);
@@ -142,13 +142,17 @@ export default {
             findTreeNodePath(
               this.list,
               (node) => node[this.valueKey] === id,
-              "children"
+              this.childrenKey
             );
         } else if (row) {
           // 通过对象引用查找路径
           targetPath =
             "list." +
-            findTreeNodePath(this.list, (node) => node === row, "children");
+            findTreeNodePath(
+              this.list,
+              (node) => node === row,
+              this.childrenKey
+            );
         }
 
         if (!targetPath) {
