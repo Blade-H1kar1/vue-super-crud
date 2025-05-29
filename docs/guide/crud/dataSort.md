@@ -4,7 +4,7 @@
 
 ## 基础用法
 
-通过配置 `sortProps` 数组来指定排序字段及其优先级。数组中的字段顺序决定了排序的优先级。
+通过配置 `sortProps` 数组会将值相同的数据集合在一起 ，后续可以指定参数`order`及`sortMethod`配置数据的具体排序。数组中的字段顺序决定了排序的优先级。
 
 <ClientOnly>
 <common-code-format>
@@ -14,7 +14,7 @@
 </common-code-format>
 </ClientOnly>
 
-## 高级排序配置
+## 排序配置
 
 对象数组：为每个字段指定详细的排序规则
 
@@ -55,7 +55,7 @@ options: {
 | 参数          | 说明           | 类型             | 默认值 |
 | ------------- | -------------- | ---------------- | ------ |
 | prop          | 排序字段名称   | string           | -      |
-| order         | 排序方向       | 'asc' / 'desc'   | 'asc'  |
+| order         | 排序方向       | 'asc' / 'desc'   |        |
 | nullsPosition | 空值位置       | 'first' / 'last' | 'last' |
 | sortMethod    | 自定义排序方法 | Function(a, b)   | -      |
 

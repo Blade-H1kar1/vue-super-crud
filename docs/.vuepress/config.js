@@ -33,7 +33,7 @@ module.exports = {
           path: "start/base",
         },
         {
-          title: "渲染配置",
+          title: "基础通用配置",
           collapsable: true,
           children: [
             "commonConfig/renderType",
@@ -65,7 +65,6 @@ module.exports = {
           title: "crud组件",
           collapsable: true,
           children: [
-            "crud/config",
             "crud/baseUse",
             "crud/search",
             "crud/tableEdit",
@@ -83,6 +82,11 @@ module.exports = {
           title: "form组件",
           collapsable: true,
           children: ["form/baseUse", "form/detail"],
+        },
+        {
+          title: "grid组件",
+          collapsable: true,
+          children: ["grid/baseUse"],
         },
         {
           title: "dialog组件",

@@ -140,6 +140,7 @@ export default {
             },
           },
         }),
+        addChild: buttonItem, // 子级新增按钮配置
         batchDelete: buttonItem, // 批量删除按钮配置
         delete: buttonItem, // 删除按钮配置
         view: buttonItem, // 查看按钮配置，仅限`dialog`模式
@@ -250,9 +251,6 @@ export default {
       default: () => ({
         pageNum: "pageNum",
         pageSize: "pageSize",
-        detailResult: "data",
-        listResult: "data",
-        total: "total",
       }),
     },
     // 是否本地生成唯一标识
@@ -405,6 +403,7 @@ export default {
         calcWidth: Number,
         defaultWidth: Number,
         sameRowSpan: [String, Boolean],
+        spanProp: [String, Boolean],
         fixed: [String, Boolean],
         handles: {
           type: Array,
@@ -465,6 +464,7 @@ export default {
           hiddenList: Boolean, // 是否只隐藏列表
           children: Array, // 嵌套列子列
           sameRowSpan: [String, Boolean], // 是否合并单元格
+          spanProp: [String, Boolean], // 是否合并单元格
           spanMethod: Function, // 合并单元格方法
           isEdit: [Boolean, Function], // 是否允许编辑
           summary: {

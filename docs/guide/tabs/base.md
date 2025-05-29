@@ -16,15 +16,16 @@
 
 ## API
 
-| 属性名        | 类型           | 默认值 | 说明                         |
-| ------------- | -------------- | ------ | ---------------------------- |
-| value/v-model | String/Number  | -      | 当前激活的标签页名称         |
-| tab-list      | Array          | []     | 标签页配置列表               |
-| cache         | Boolean        | true   | 是否缓存标签页内容           |
-| all           | Boolean/Object | false  | 是否显示"全部"标签页         |
-| border        | Boolean        | false  | 是否显示边框样式             |
-| cacheActive   | Boolean        | true   | 是否在路由中缓存激活的标签页 |
-| refresh       | Boolean        | false  | 是否显示刷新按钮             |
+| 属性名        | 类型           | 默认值 | 说明                                  |
+| ------------- | -------------- | ------ | ------------------------------------- |
+| value/v-model | String/Number  | -      | 当前激活的标签页名称                  |
+| tabList       | Array          | []     | 标签页配置列表                        |
+| cache         | Boolean        | true   | 是否缓存标签页内容                    |
+| all           | Boolean/Object | false  | 是否显示"全部"标签页                  |
+| border        | Boolean        | false  | 是否显示边框样式                      |
+| cacheActive   | Boolean        | true   | 是否在路由中缓存激活的标签页          |
+| refresh       | Boolean        | false  | 是否显示刷新按钮                      |
+| lazy          | Boolean        | true   | 默认不加载未激活页面，false则加载全部 |
 
 ## tabList 配置项
 

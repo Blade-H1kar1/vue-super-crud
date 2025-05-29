@@ -44,12 +44,16 @@ export default {
       },
       options: {
         // 按省份、城市、交易金额的顺序进行多层级排序
-        sortProps: ["province", "city", "amount"],
-        sortMethod: (field, a, b) => {
-          if (field === "amount") {
-            return b[field] - a[field];
-          }
-        },
+        sortProps: [
+          "province",
+          "city",
+          {
+            prop: "amount",
+            sortMethod: (a, b) => {
+              return b.amount - a.amount;
+            },
+          },
+        ],
         renderColumns: columns,
       },
       tableData: [],

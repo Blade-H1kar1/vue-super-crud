@@ -12,6 +12,8 @@ import tabs from "pak/tabs";
 import verifyInput from "pak/verifyInput";
 import button from "pak/button";
 import position from "pak/core/components/position";
+import grid from "pak/grid/index.vue";
+import cell from "pak/grid/cell.vue";
 
 import { mergeTemplate } from "./template";
 import directive from "pak/directive";
@@ -33,6 +35,8 @@ const components = [
   verifyInput,
   button,
   position,
+  grid,
+  cell,
 ];
 
 const install = function (Vue, opts = {}) {

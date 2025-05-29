@@ -227,6 +227,7 @@ editConfig: {
   lastAdd: {
     type: 'last', // first(第一行新增)、last(最后一行新增)
   },
+  addChild: {}, // 子级新增按钮配置
   // 新增行按钮配置
   rowAdd: {
     type: 'first', // first(第一行新增)、last(最后一行新增)
@@ -257,6 +258,15 @@ editConfig: {
 </common-code-format>
 </ClientOnly>
 
+## 树形数据编辑
+
+<ClientOnly>
+<common-code-format>
+  <crud-tableEdit-treeEdit slot="source"></crud-tableEdit-treeEdit>
+  
+<<< @/docs/.vuepress/components/crud/tableEdit/treeEdit.vue
+</common-code-format>
+</ClientOnly>
 
 ## 弹窗编辑
 
@@ -276,7 +286,10 @@ options: {
     view: {},
   },
   dialog: {}, // 自定义弹窗配置
-  formOptions: {}, // 自定义表单配置
+  addForm: {}, // 新增表单配置
+  editForm: {}, // 查看表单配置
+  viewForm: {}, // 通用表单配置
+  formOptions: {}, // 通用自定义表单配置
 }
 ```
 
@@ -308,6 +321,7 @@ options: {
 | batch       | 批量操作按钮配置，仅限`row`模式  | object                  | -                     |
 | add         | 新增按钮配置                     | object                  | -                     |
 | lastAdd     | 底部新增行按钮配置               | object                  | -                     |
+| addChild    | 子级新增按钮配置                 | object                  | -                     |
 | batchDelete | 批量删除按钮配置                 | object                  | -                     |
 | delete      | 删除按钮配置                     | object                  | -                     |
 | view        | 查看按钮配置，仅限`dialog`模式   | object                  | -                     |
@@ -356,22 +370,27 @@ options: {
 
 ### Methods
 
-| 方法名         | 说明                                     | 参数                                                        | 返回值 |
-| -------------- | ---------------------------------------- | ----------------------------------------------------------- | ------ |
-| setRowEdit     | 设置行编辑状态                           | (rows: object/array, options: {type: string, prop: string}) | -      |
-| setBatchEdit   | 批量设置行编辑状态，不传rows则设置所有行 | (type: string, rows: object/array)                          | -      |
-| setCellEdit    | 设置单元格编辑状态                       | (row: object, prop: string)                                 | -      |
-| addRow         | 新增表格行                               | (params: object, type: first/last)                          | -      |
-| clearAllEdit   | 清除所有编辑状态                         | -                                                           | -      |
-| getEditingRows | 获取所有编辑状态的行                     | -                                                           | array  |
+| 方法名         | 说明                                      | 参数                                                        | 返回值 |
+| -------------- | ----------------------------------------- | ----------------------------------------------------------- | ------ |
+| setRowEdit     | 设置行编辑状态                            | (rows: object/array, options: {type: string, prop: string}) | -      |
+| setBatchEdit   | 批量设置行编辑状态，不传rows则设置所有行  | (type: string, rows: object/array)                          | -      |
+| setCellEdit    | 设置单元格编辑状态                        | (row: object, prop: string)                                 | -      |
+| addRow         | 新增表格行, 传`parentRow`则新增当前行子级 | (params: object, type: first/last, parentRow: object)       | -      |
+| clearAllEdit   | 清除所有编辑状态                          | -                                                           | -      |
+| getEditingRows | 获取所有编辑状态的行                      | -                                                           | array  |
 
-### options 快捷配置
+### options 配置
 
-| 参数         | 说明                    | 类型                    | 默认值 |
-| ------------ | ----------------------- | ----------------------- | ------ |
-| freeEdit     | 启用自由编辑模式        | boolean                 | false  |
-| cellEdit     | 启用单元格编辑模式      | boolean                 | false  |
-| rowEdit      | 启用行编辑模式          | boolean                 | false  |
-| batchEdit    | 启用批量编辑模式        | boolean                 | false  |
-| batchRowEdit | 启用行编辑+批量编辑模式 | boolean                 | false  |
-| isRowEdit    | 控制行是否可编辑的函数  | function({row, $index}) | -      |
+| 参数         | 说明                    | 类型                    | 默认值             |
+| ------------ | ----------------------- | ----------------------- | ------------------ |
+| freeEdit     | 快捷自由编辑模式        | boolean                 | false              |
+| cellEdit     | 快捷单元格编辑模式      | boolean                 | false              |
+| rowEdit      | 快捷行编辑模式          | boolean                 | false              |
+| batchEdit    | 快捷批量编辑模式        | boolean                 | false              |
+| batchRowEdit | 快捷行编辑+批量编辑模式 | boolean                 | false              |
+| isRowEdit    | 控制行是否可编辑的函数  | function({row, $index}) | -                  |
+| addForm      | 新增表单配置            | Object                  | {}                 |
+| editForm     | 编辑表单配置            | Object                  | {}                 |
+| viewForm     | 查看表单配置            | Object                  | {viewType: "form"} |
+| formOptions  | 通用表单配置            | Object                  | {}                 |
+| dialog       | 弹窗配置                | Object                  | {}                 |

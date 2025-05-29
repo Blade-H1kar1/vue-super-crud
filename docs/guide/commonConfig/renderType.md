@@ -1,4 +1,4 @@
-# 渲染方式
+# 渲染配置
 
 ## 格式化渲染
 
@@ -27,7 +27,6 @@
 ## render函数渲染
 
 使用 render 函数或 JSX 语法进行渲染 </br>
-当 render 函数接收一个参数时，参数为`scope`；当 render 函数接收两个参数时，第一个参数为`h`，第二个参数为`scope`
 
 <ClientOnly>
 <common-code-format>
@@ -158,7 +157,40 @@ children 属性用于配置组件的子元素，支持多种配置方式，常�
 
 ```
 
-## comp 配置项
+## prop 深度数据绑定
+
+`prop` 支持`·`语法深度绑定对象
+
+```js
+ // 绑定的对象为 { deep1: { deep2: { name: '名称' } } }
+{
+  prop: "deep1.deep2.name",
+  label: "名称"
+}
+```
+
+## API
+
+### renderColumns 通用列配置
+
+| 属性名     | 说明                           | 类型                    | 可选值 | 默认值                                    |
+| :--------- | :----------------------------- | :---------------------- | :----- | :---------------------------------------- |
+| prop       | 字段名                         | String                  | -      | 必填，用于数据绑定                        |
+| label      | 列标题                         | String                  | -      | 显示在表头的文本                          |
+| show       | 是否显示                       | Boolean/Function        | true   | 支持函数形式，可动态控制显示              |
+| hidden     | 是否隐藏                       | Boolean/Function        | false  | 支持函数形式，可动态控制隐藏              |
+| required   | 是否必填                       | Boolean/Object/Function | false  | 支持函数形式，可动态控制必填状态          |
+| rules      | 验证规则配置                   | Array/Function          |        | 支持函数形式                              |
+| dict       | 字典配置，支持字符串或对象形式 | Object/String           |        | 支持函数形式                              |
+| formatData | 响应式数据格式化               | Object                  |        |                                           |
+| position   | 是否开启位置渲染               | Boolean                 | false  | 用于特殊的位置渲染场景                    |
+| formatter  | 格式化函数                     | Function                | -      | 用于格式化数据，返回处理后的文本内容      |
+| html       | 是否开启HTML渲染               | Boolean                 | false  | 配合 formatter 使用，可以渲染 HTML 字符串 |
+| render     | 渲染函数                       | Function                | -      | (h, scope) => {}                          |
+| comp       | 组件配置                       | Object/Function         | -      | 用于配置组件的各种行为和属性              |
+
+
+### comp 配置项
 
 | 配置项   | 类型                  | 说明                                               | 示例                                       |
 | -------- | --------------------- | -------------------------------------------------- | ------------------------------------------ |
@@ -171,7 +203,7 @@ children 属性用于配置组件的子元素，支持多种配置方式，常�
 | mounted  | Function(scope, ref)  | 组件挂载后调用                                     | (scope, ref) => {}                         |
 
 
-## scope 作用域对象
+### scope 作用域对象
 
 | 属性   | 说明                                                     |
 | ------ | -------------------------------------------------------- |

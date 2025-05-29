@@ -9,7 +9,7 @@ export const renderItem = {
   },
   dict: {
     strict: true,
-    type: [String, Object],
+    type: [String, Object, Function],
     properties: {
       request: Function,
       label: String, // 数据字典中label字段的属性名
@@ -54,6 +54,7 @@ export const renderItem = {
     },
   }, // 验证规则
   position: Boolean, // 是否开启位置渲染
+  formatData: [Object, String], // 响应式数据格式化
 };
 
 export const buttonItem = {

@@ -140,7 +140,15 @@ renderColumns: [
 | required | 是否必填 | boolean/object               | false  |
 | rules    | 校验规则 | string/array/function(scope) | -      |
 
-### 实例方法
+### rules 配置
+
+| 属性名    | 类型     | 说明           |
+| :-------- | :------- | :------------- |
+| validator | Function | 自定义验证函数 |
+| message   | String   | 错误提示信息   |
+| trigger   | String   | 触发方式       |
+
+### Methods
 
 | 方法名        | 说明         | 参数                          | 返回值  |
 | ------------- | ------------ | ----------------------------- | ------- |
@@ -148,7 +156,7 @@ renderColumns: [
 | validateField | 校验指定行   | options: {index/id/row, prop} | Promise |
 | clearValidate | 清除校验     | -                             | -       |
 
-### validateField Options
+### validateField 方法options参数
 
 | 参数  | 说明         | 类型          |
 | ----- | ------------ | ------------- |
