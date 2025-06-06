@@ -82,7 +82,7 @@
 <script>
 // TODO 详情模式：增加 detail 配置详情单独渲染的组件
 // TODO 提交清除hidden 字段
-import { create, init, event } from "core";
+import { create, init, event, getSet } from "core";
 import formItem from "./formItem.vue";
 import grid from "../grid/index.vue";
 import cell from "pak/grid/cell.vue";
@@ -162,7 +162,7 @@ export default create({
       controlCtx: this,
     };
   },
-  mixins: [init("formOptions"), event, contextMenu],
+  mixins: [init("formOptions"), event, contextMenu, getSet],
   data() {
     return {
       key: 1,
@@ -322,11 +322,11 @@ export default create({
           let form = { ...this.value };
 
           this.trueRenderColumns.forEach((col) => {
-            if (!col.prop.includes(".") && form[col.prop] === undefined) {
+            if (this.getByProp(form, col.prop) === undefined) {
               if (col.initValue) {
-                form[col.prop] = col.initValue;
+                this.setByProp(form, col.prop, col.initValue);
               } else {
-                form[col.prop] = "";
+                this.setByProp(form, col.prop, "");
               }
             }
           });
