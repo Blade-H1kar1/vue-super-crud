@@ -143,10 +143,7 @@ export default {
     },
     // 设置行数据
     setRow(prop, val) {
-      if (!prop) {
-        this.$set(this.scope, "row", val);
-        return;
-      }
+      if (!prop) return;
       // 处理数组路径 ['a', 'b'] 或字符串路径 'a.b'
       const path = Array.isArray(prop) ? prop : prop.split(".");
       if (path.length > 1) {

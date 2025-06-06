@@ -179,11 +179,8 @@ export default {
       if (this.isTree) {
         newRow[this.valueKey] = "new_" + uniqueId();
       }
-      this.trueRenderColumns.forEach((col) => {
-        if (newRow[col.prop] === undefined) {
-          newRow[col.prop] = col.initValue ?? "";
-        }
-      });
+
+      this.initRow(newRow);
 
       this.runBefore(
         ["add"],

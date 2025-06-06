@@ -1,6 +1,8 @@
 import { isFunction, cloneDeep, uniqueId, get } from "lodash-es";
+import getSet from "core/getSet";
 
 export default {
+  mixins: [getSet],
   data() {
     return {
       loadingStatus: false,
@@ -130,15 +132,7 @@ export default {
           }
 
           // 检查并添加缺失的列字段
-          this.trueRenderColumns.forEach((column) => {
-            if (
-              column.prop &&
-              !column.prop.includes(".") &&
-              get(item, column.prop) === undefined
-            ) {
-              this.$set(item, column.form?.prop || column.prop, "");
-            }
-          });
+          this.initRow(item);
 
           if (this.isTriggerEdit) {
             this.$set(item, "$edit", item.$edit || false);
@@ -236,6 +230,20 @@ export default {
     },
     getList() {
       this.$emit("getList");
+    },
+    initRow(row) {
+      this.trueRenderColumns.forEach((column) => {
+        if (
+          column.form?.prop &&
+          this.getByProp(row, column.form.prop) === undefined
+        ) {
+          this.setByProp(row, column.form.prop, column.form.initValue ?? "");
+          return;
+        }
+        if (this.getByProp(row, column.prop) === undefined) {
+          this.setByProp(row, column.prop, column.initValue ?? "");
+        }
+      });
     },
   },
 };

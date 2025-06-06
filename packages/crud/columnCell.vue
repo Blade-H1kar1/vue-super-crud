@@ -1,9 +1,9 @@
 <script>
 import create from "core/create";
-import { generateRules } from "core";
+import { generateRules, defaultRender } from "core";
 import Render from "core/components/render";
 import { bem } from "src/utils/bem";
-import { defaultRender } from "core";
+import { get } from "lodash-es";
 
 export default create({
   functional: true,
@@ -97,7 +97,7 @@ export default create({
         ...scope,
         item,
         $value: {
-          get: scope.row[item.prop],
+          get: get(scope.row, item.prop),
         },
       };
       return defaultRender.formatter(h, _scope);
