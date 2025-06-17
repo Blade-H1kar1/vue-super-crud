@@ -1,8 +1,7 @@
 <template>
   <el-switch
     ref="target"
-    :value="value"
-    @input="onElInput"
+    v-model="value"
     :active-color="_active[props.color]"
     :active-value="_active[props.value]"
     :active-text="showText ? _active[props.label] : ''"
@@ -16,14 +15,13 @@
 </template>
 
 <script>
-import inputBase from "./input-base";
 import { create } from "core";
 import { omit } from "lodash-es";
 import extendMethod from "./extendMethod";
 // 字典switch
 export default create({
   name: "switch",
-  mixins: [inputBase, extendMethod],
+  mixins: [extendMethod],
   props: {
     value: { require: false },
     scope: Object,
