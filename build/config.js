@@ -18,6 +18,7 @@ const externals = {
   axios: "axios",
   mockjs: "mockjs",
   vuedraggable: "vuedraggable",
+  "async-validator": "async-validator",
 };
 const resolve = (p) => {
   const base = p.split("/")[0];

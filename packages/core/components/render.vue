@@ -1,6 +1,6 @@
 <script>
 import { isComponent, isVNode } from "utils";
-import Comp from "./comp.vue";
+import { compRender } from "./comp";
 import {
   cloneDeep,
   isFunction,
@@ -43,6 +43,7 @@ export default {
     defaultComp: Object, // 默认组件
     rawRules: Array, // 未加工的rules
     strategies: Object, // 策略
+    isWatchFormatValue: Boolean, // 是否监听值变化精确变化格式化值
   },
   inject: {
     controlCtx: { default: undefined },
@@ -74,7 +75,14 @@ export default {
     },
   },
   created() {
-    if (this.item.formatData) {
+    if (this.compStrategy) {
+      this.matcher = this.createMatcher(this.compStrategy);
+    }
+    if (this.controlCtx) {
+      this.setupMockDataListener();
+      this.initFormatValue();
+    }
+    if (this.item.formatData && this.isWatchFormatValue) {
       setTimeout(() => {
         this.isSettingValue = false;
         this.$watch("value", (val) => {
@@ -84,12 +92,6 @@ export default {
         });
         this.setFormatValue(this.$value);
       }, 0);
-    }
-    if (this.compStrategy) {
-      this.matcher = this.createMatcher(this.compStrategy);
-    }
-    if (this.controlCtx) {
-      this.setupMockDataListener();
     }
   },
   mounted() {
@@ -104,6 +106,14 @@ export default {
     }
   },
   methods: {
+    initFormatValue() {
+      if (this.item.formatData) {
+        this.controlCtx.$on("dataChange", () => {
+          if (this.isSettingValue) return;
+          this.setFormatValue(this.$value);
+        });
+      }
+    },
     setupMockDataListener() {
       this.mockDataListener = () => {
         if (
@@ -287,13 +297,10 @@ export default {
             comp = merge(comp, this.commonCompStrategy, strategy);
           }
         }
-        return (
-          <Comp
-            props={{ ...comp, comp }}
-            prop={this.prop}
-            size={this.size}
-            scope={scope}
-          />
+        return compRender(
+          h,
+          { ...comp, comp, prop: this.prop, size: this.size, scope },
+          this
         );
       }
     },

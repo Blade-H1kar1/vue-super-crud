@@ -102,6 +102,19 @@ search组件使用插槽或者函数自定义时，需要指定`search.type`。
 }
 ```
 
+## 永久展示部分搜索条件
+
+有些搜索条件希望始终展示在搜索表单中，不随搜索框的收缩/展开而隐藏。可以通过在列搜索配置中添加 `alwaysShow` 实现。
+
+<ClientOnly>
+<common-code-format>
+  <crud-search-alwaysShow slot="source"></crud-search-alwaysShow>
+
+<<< @/docs/.vuepress/components/crud/search/alwaysShow.vue
+</common-code-format>
+</ClientOnly>
+
+
 ## API
 
 ### Column 配置
@@ -118,6 +131,7 @@ search组件使用插槽或者函数自定义时，需要指定`search.type`。
 | search.render          | 搜索组件渲染函数                                                                                              | function       | -                   |
 | search.type            | 本地搜索类型，支持input、select、date                                                                         | string         | input               |
 | search.filter          | 本地搜索过滤函数                                                                                              | function       | -                   |
+| search.alwaysShow      | 是否永久展示搜索条件                                                                                          | boolean        | false               |
 | searchHeader           | 是否启用表头搜索， [可配置el-popover组件属性](https://element.eleme.cn/2.15/#/zh-CN/component/popover#events) | boolean/object | 默认继承search      |
 | searchHeader.width     | 表头搜索宽度                                                                                                  | string         | 290px               |
 | searchHeader.searchBtn | 是否显示表头搜索按钮                                                                                          | boolean        | false               |

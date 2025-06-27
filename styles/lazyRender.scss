@@ -1,0 +1,26 @@
+.sc-lazy-loading-stripe {
+  background: repeating-linear-gradient(
+    135deg,
+    #f5f5f5 0px,
+    #f5f5f5 10px,
+    #e0e0e0 10px,
+    #e0e0e0 20px
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: stripe-move 1s linear infinite;
+}
+@keyframes stripe-move {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 0;
+  }
+}
+.sc-lazy-loading-text {
+  margin-left: 8px;
+  color: #888;
+  font-size: 14px;
+}

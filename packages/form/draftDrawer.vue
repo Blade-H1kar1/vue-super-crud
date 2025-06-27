@@ -206,13 +206,18 @@ export default create({
         }
       });
     },
+    getCacheKey() {
+      if (!this.$route) return "";
+      // 去掉结尾的 /数字 或 数字
+      return this.$route.path.replace(/\/?\d+$/, "");
+    },
 
     // 保存草稿列表到本地存储
     saveDraftsToStorage(drafts) {
       try {
         if (!this.$route) return;
         let draftsStr = cache.local.getJSON("SC_FORM_DRAFTS") || {};
-        draftsStr[this.$route.path] = drafts;
+        draftsStr[this.getCacheKey()] = drafts;
         cache.local.setJSON("SC_FORM_DRAFTS", draftsStr);
       } catch (error) {
         console.error("保存到本地存储失败:", error);
@@ -224,7 +229,7 @@ export default create({
     loadDraftsFromStorage() {
       try {
         const cacheData = cache.local.getJSON("SC_FORM_DRAFTS") || {};
-        this.draftList = cacheData[this.$route.path] || [];
+        this.draftList = cacheData[this.getCacheKey()] || [];
       } catch (error) {
         console.error("加载草稿列表失败:", error);
         this.draftList = [];

@@ -98,6 +98,19 @@ export default {
         return true;
       });
     },
+    showEditIcon(col) {
+      if (this.editConfig.mode === "cell" && col.isEdit !== false) {
+        return true;
+      }
+      if (
+        this.editConfig.mode === "row" &&
+        this.editConfig.trigger !== "manual" &&
+        col.isEdit !== false
+      ) {
+        return true;
+      }
+      return false;
+    },
     getDefaultColumnMinWidth(col) {
       if (this.labelMinWidthMap.has(col.label)) {
         return this.labelMinWidthMap.get(col.label);

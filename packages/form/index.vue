@@ -58,6 +58,7 @@
           <formAction />
         </template>
         <component
+          ref="gridRef"
           v-else
           :is="formOptions.layout"
           v-bind="formOptions"
@@ -70,9 +71,14 @@
             v-bind="item"
             :is-first-row="index <= firstRowLastCellIndex"
             :ref="item.prop"
-          ></formItem
-          ><formAction
-        /></component>
+          ></formItem>
+          <cell
+            v-for="n in emptyCount"
+            :key="'empty' + n"
+            style="visibility: hidden;"
+          />
+          <formAction />
+        </component>
       </el-form>
     </div>
     <draftDrawer ref="draftDrawer" />
@@ -155,6 +161,7 @@ export default create({
     loading: {
       type: Boolean,
     },
+    actionInLastCell: Boolean,
   },
   provide() {
     return {
@@ -169,6 +176,7 @@ export default create({
       loadingStatus: false,
       formBind: {},
       isInitializing: false, // 添加初始化状态标记
+      emptyCount: 0,
     };
   },
   created() {
@@ -176,6 +184,23 @@ export default create({
   },
   mounted() {
     this.extendMethod(this.$refs.formRef);
+    if (this.actionInLastCell) {
+      this.emptyCount = this.calcEmptyCount();
+      this.resizeObserver = new ResizeObserver(() => {
+        this.emptyCount = this.calcEmptyCount();
+      });
+      this.resizeObserver.observe(this.$el);
+    }
+  },
+  updated() {
+    if (this.actionInLastCell) {
+      this.$nextTick(() => {
+        this.emptyCount = this.calcEmptyCount();
+      });
+    }
+  },
+  beforeDestroy() {
+    this.resizeObserver && this.resizeObserver.disconnect();
   },
   computed: {
     formOptions() {
@@ -445,6 +470,20 @@ export default create({
         return widthSize === columnsNumber;
       });
       return lastIndex === -1 ? columns.length - 1 : lastIndex;
+    },
+    calcEmptyCount() {
+      const getGridColumnCount = () => {
+        const grid = this.$refs.gridRef.$el;
+        if (!grid) return 1;
+        const style = window.getComputedStyle(grid);
+        const columns = style.gridTemplateColumns;
+        return columns.split(" ").length;
+      };
+      const total = this.trueRenderColumns.length;
+      const col = getGridColumnCount();
+      const remain = total % col;
+      if (remain === col - 1 || col === 1) return 0;
+      return remain === 0 ? col - 1 : col - remain - 1;
     },
   },
 });

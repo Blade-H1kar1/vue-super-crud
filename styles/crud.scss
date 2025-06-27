@@ -423,3 +423,8 @@
 .contextmenu_menu {
   z-index: 9999 !important;
 }
+
+.sc-crud__validate-error-alert .el-message-box__title {
+  color: #f56c6c;
+  font-weight: 600;
+}

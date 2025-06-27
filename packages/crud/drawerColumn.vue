@@ -96,12 +96,6 @@ export default create({
     handleCheckedChange(value) {
       this.ctx.saveLocalCache();
     },
-    saveTableOptions() {
-      if (!this.$route) return;
-      let cacheData = cache.local.getJSON("tableOptions");
-      cacheData[this.$route.path] = this.ctx.setOptions;
-      cache.local.setJSON("tableOptions", cacheData);
-    },
     onEnd({ newIndex, oldIndex }) {
       const sort = this.ctx.setOptions.sort;
       const endProp = this.listColumns[newIndex].prop;

@@ -77,6 +77,15 @@ export default {
       type: String,
       default: "small",
     },
+    persistPageSize: Boolean, // 是否持久化拖动宽度
+    persistWidth: Boolean, // 是否持久化拖动宽度
+    delayRender: Boolean, // 是否启用延迟渲染
+    virtualized: Boolean, // 是否启用虚拟列表
+    itemSize: {
+      // 延迟渲染、虚拟列表的固定行高
+      type: Number,
+      default: 40,
+    },
     summaryData: Array, // 外部传入的统计数据
     // 是否禁用
     disabled: Boolean,
@@ -279,7 +288,6 @@ export default {
       type: [Boolean, Object],
       default: () => ({
         show: true,
-        width: 290,
         resetBtn: true,
       }),
       properties: {
@@ -335,6 +343,7 @@ export default {
         layout: "total, sizes, prev, pager, next, jumper",
         background: true,
         pagerCount: 5,
+        memorizeScroll: true, // 临时保存分页滚动位置
       }),
     },
     // 空状态配置

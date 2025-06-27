@@ -80,7 +80,12 @@ class EditState {
    * @param {String} addType 新增类型，'first'或'last'
    * @returns {Object} 更新后的行数据
    */
-  setRowEditStatus(row, isEditing, type = "edit", { addType, prop } = {}) {
+  setRowEditStatus(
+    row,
+    isEditing,
+    type = "edit",
+    { addType, prop, oldRow } = {}
+  ) {
     const rowKey = this.getRowKey(row);
     const editInfo = this.getRowEditInfo(row);
     if (this.isRowEdit) {
@@ -97,7 +102,7 @@ class EditState {
 
       this.editingRows.set(rowKey, {
         type,
-        data: cloneDeep(row),
+        data: oldRow || cloneDeep(row),
         row,
         addType,
       });

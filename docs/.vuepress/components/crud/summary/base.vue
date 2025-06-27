@@ -79,7 +79,7 @@ export default {
     async getList() {
       this.loading = true;
       try {
-        const { data, total } = await mockApi.getList(this.search);
+        const { data, total } = await mockApi.getList(40)(this.search);
         this.data = data.map((item) => ({
           ...item,
           amount: Math.floor(Math.random() * 100),

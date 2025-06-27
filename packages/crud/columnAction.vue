@@ -17,7 +17,6 @@
           :scope="scope"
           v-bind="btn"
           :key="index"
-          v-show="!(btn.innerHide && btn.innerHide(scope))"
         />
       </div>
     </template>

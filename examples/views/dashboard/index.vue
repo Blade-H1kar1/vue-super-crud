@@ -18,7 +18,7 @@
 export default {
   data() {
     return {
-      visible: false,
+      visible: true,
       searchForm: {
         pageSize: 1000,
       },
@@ -28,15 +28,16 @@ export default {
         // },
         editConfig: {
           mode: "row",
-          // trigger: "click",
+          trigger: "click",
           // edit: true,
         },
         height: "auto", // 设置为`auto`，会自适应窗口高度，配合calcHeight参数去调节范围
         renderColumns: [
-          { prop: "name", label: "输入框", required: true },
+          { prop: "name", label: "输入框", required: true, search: true },
           {
             prop: "select",
             label: "选择器",
+            search: true,
             // comp: {
             //   name: "el-select",
             //   options: [
@@ -57,6 +58,9 @@ export default {
           {
             prop: "cascader",
             label: "级联选择器",
+            search: {
+              alwaysShow: true,
+            },
             // comp: {
             //   name: "el-cascader",
             //   options: [

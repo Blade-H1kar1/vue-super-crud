@@ -4,6 +4,7 @@ export default {
     return {
       setOptions: {
         fixed: {},
+        fixedWidth: {},
         sort: {},
         hidden: [],
         pageSize: 10,
@@ -11,12 +12,17 @@ export default {
     };
   },
   methods: {
+    getCacheKey() {
+      if (!this.$route) return "";
+      // 去掉结尾的 /数字 或 数字
+      return this.$route.path.replace(/\/?\d+$/, "");
+    },
     getLocalCache() {
       if (!this.$route) return;
       const cacheData = cache.local.getJSON("tableOptions") || {};
       this.setOptions = Object.assign(
         this.setOptions,
-        cacheData[this.$route.path]
+        cacheData[this.getCacheKey()]
       );
     },
     resetLocalCache() {
@@ -28,7 +34,7 @@ export default {
     saveLocalCache(refresh = true) {
       if (!this.$route) return;
       let cacheData = cache.local.getJSON("tableOptions") || {};
-      cacheData[this.$route.path] = this.setOptions;
+      cacheData[this.getCacheKey()] = this.setOptions;
       cache.local.setJSON("tableOptions", cacheData);
       refresh && this.refreshTable();
     },

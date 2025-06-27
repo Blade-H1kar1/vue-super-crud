@@ -11,6 +11,7 @@ export const renderItem = {
     strict: true,
     type: [String, Object, Function],
     properties: {
+      key: String,
       request: Function,
       label: String, // 数据字典中label字段的属性名
       value: String, // 数据字典中value字段的属性名

@@ -1,11 +1,12 @@
 <script>
 import create from "core/create";
 import calcColumnWidth from "./mixins/calcColumnWidth";
-import columnCell from "./columnCell.vue";
+import { columnCell, delayColumnCell } from "./columnCell.js";
 import column from "./column.vue";
 import searchHeader from "./searchHeader.vue";
 import position from "core/components/position";
-import { set, merge, isFunction } from "lodash-es";
+import { get } from "lodash-es";
+import { bem } from "src/utils/bem";
 import { checkVisibility } from "utils";
 // 调试时element-ui导入地址需要改成引入项目下的node_modules地址
 import { TableColumn } from "element-ui";
@@ -37,7 +38,7 @@ export default create({
       isSearch: false,
     };
   },
-  components: { TableColumn, columnCell, column, searchHeader, position },
+  components: { TableColumn, column, searchHeader, position },
   watch: {
     col() {
       this.bindColumnConfig();
@@ -106,6 +107,19 @@ export default create({
       const show = checkVisibility(this.ctx.crudOptions.searchHeader);
       return (this.col.search && show) || (this.col.searchHeader && show);
     },
+    showEditIcon() {
+      if (this.ctx.editConfig.mode === "cell" && this.col.isEdit !== false) {
+        return true;
+      }
+      if (
+        this.ctx.editConfig.mode === "row" &&
+        this.ctx.editConfig.trigger !== "manual" &&
+        this.col.isEdit !== false
+      ) {
+        return true;
+      }
+      return false;
+    },
   },
   methods: {
     bindColumnConfig() {
@@ -124,6 +138,7 @@ export default create({
         extendsScopedSlots: this.ctx.extendsScopedSlots,
         defaultRender: this.ctx.crudOptions.defaultRender,
         isTriggerEdit: this.ctx.isTriggerEdit,
+        itemSize: this.ctx.itemSize,
       };
     },
   },
@@ -136,13 +151,13 @@ export default create({
       isShow,
       fixed,
     } = this;
-    const isDefaultColumn = this.ctx.isDefaultColumn(col);
+    const isDefaultColumn = ctx.isDefaultColumn(col);
     if (!isShow) return null;
+    // 优先使用本地存储的宽度
+    const fixedWidth = ctx.setOptions.fixedWidth[col.prop];
     const topProps = this.getTopProps();
     const cellRender = (scope) => {
-      return (
-        <columnCell col={col} scope={scope} ctx={ctx} topProps={topProps} />
-      );
+      return delayColumnCell(h, { col, scope, ctx, topProps });
     };
     const columnHeader = () => {
       return (
@@ -150,6 +165,12 @@ export default create({
           class={this.b(["header"])}
           style={{ color: this.isSearch ? "var(--color-primary)" : "" }}
         >
+          {this.showEditIcon && (
+            <i
+              class="el-icon-edit-outline"
+              style="margin-right:5px;color:var(--color-primary)"
+            ></i>
+          )}
           <position
             slotName={`${col.prop}-header`}
             render={col.labelRender || col.headerRender}
@@ -175,6 +196,11 @@ export default create({
         </div>
       );
     };
+
+    const minWidth = col.minWidth
+      ? Number(col.minWidth) + (this.showEditIcon ? 20 : 0)
+      : null;
+
     return (
       <TableColumn
         ref="column"
@@ -183,8 +209,8 @@ export default create({
         fixed={fixed}
         header-align={col.headerAlign || col.align || "center"}
         align={col.align || "center"}
-        width={col.width}
-        min-width={col.minWidth}
+        width={fixedWidth || col.width}
+        min-width={minWidth}
         show-overflow-tooltip={showOverflowTooltip}
         scopedSlots={{
           default: !isDefaultColumn ? (scope) => cellRender(scope) : null,

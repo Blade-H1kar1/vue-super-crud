@@ -1,19 +1,13 @@
 <template>
-  <div>
-    <div style="margin-bottom: 10px;">
-      搜索参数:
-      <div>{{ JSON.stringify(search) }}</div>
-    </div>
-    <sc-crud
-      :loading.sync="loading"
-      :search.sync="search"
-      :options="options"
-      :data="data"
-      :total="total"
-      @getList="getList"
-    >
-    </sc-crud>
-  </div>
+  <sc-crud
+    :loading.sync="loading"
+    :search.sync="search"
+    :options="options"
+    :data="data"
+    :total="total"
+    @getList="getList"
+  >
+  </sc-crud>
 </template>
 
 <script>
@@ -29,8 +23,6 @@ export default {
       options: {
         border: true,
         init: true,
-        expandSearch: true, // 初始展开搜索框
-        localSearch: true, // 启用本地搜索
         renderColumns: [
           {
             prop: "name",
@@ -41,6 +33,7 @@ export default {
             prop: "gender",
             label: "性别",
             search: {
+              alwaysShow: true,
               comp: {
                 name: "el-select", // 使用下拉选择
                 options: [
@@ -53,13 +46,6 @@ export default {
           {
             prop: "age",
             label: "年龄",
-            search: {
-              filter: (cellValue, searchValue, row) => {
-                console.log(cellValue, searchValue, row);
-                // 返回 true 表示匹配，false 表示不匹配
-                return cellValue > 30;
-              },
-            },
           },
           {
             prop: "is30",
@@ -102,6 +88,10 @@ export default {
             },
           },
         ],
+        searchForm: {
+          columnWidth: "220px",
+          labelWidth: "80px",
+        },
       },
       data: [],
       total: 0,

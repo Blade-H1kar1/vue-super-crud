@@ -20,6 +20,16 @@
         >
           <template #default="scope">
             <div>{{ scope.row[column.prop] }}</div>
+          </template> </el-table-column
+        ><el-table-column prop="name" label="LazyRender">
+          <template slot-scope="{ row }">
+            <sc-lazy-render
+              rootClass="el-table__body-wrapper"
+              loadingText="正在加载..."
+              loadingHeight="40px"
+            >
+              <span>{{ row.name }}</span>
+            </sc-lazy-render>
           </template>
         </el-table-column>
       </el-table>
@@ -201,6 +211,7 @@ export default {
         cascader: Math.random() > 0.5 ? ["1", "1-1"] : ["2", "2-1"],
         textarea: "这是第" + (index + 1) + "条随机生成的文本",
         number: Math.floor(Math.random() * 1000),
+        $delay: true,
       }));
     },
     randomDate(start, end) {

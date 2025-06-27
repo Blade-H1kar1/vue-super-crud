@@ -22,6 +22,11 @@ import { checkVisibility } from "utils";
 export default create({
   name: "crud-pagination",
   inject: ["ctx"],
+  data() {
+    return {
+      pageScrollMap: new Map(), // 存储每页滚动位置
+    };
+  },
   computed: {
     showPagination() {
       return checkVisibility(this.pagination, null, this.total > 0);
@@ -85,17 +90,58 @@ export default create({
         this.ctx.search[this.props.pageSize] || this.ctx.setOptions.pageSize
       );
     },
+    // 保存当前页滚动位置
+    saveScrollPosition(prePage) {
+      const bodyWrapper = this.ctx.$refs.tableRef.$refs.bodyWrapper;
+      if (bodyWrapper) {
+        this.pageScrollMap.set(prePage, {
+          scrollTop: bodyWrapper.scrollTop,
+          scrollLeft: bodyWrapper.scrollLeft,
+        });
+      }
+    },
+
+    // 设置页面滚动位置
+    setScrollPosition(pageNum) {
+      if (this.pagination.memorizeScroll) {
+        this.$nextTick(() => {
+          const bodyWrapper = this.ctx.$refs.tableRef.$refs.bodyWrapper;
+          if (!bodyWrapper) return;
+
+          const position = this.pageScrollMap.get(pageNum);
+          if (position) {
+            // 如果有历史记录,恢复到历史位置
+            bodyWrapper.scrollTop = position.scrollTop;
+            bodyWrapper.scrollLeft = position.scrollLeft;
+          } else {
+            // 如果没有历史记录,滚动到顶部
+            bodyWrapper.scrollTop = 0;
+            bodyWrapper.scrollLeft = 0;
+          }
+        });
+      }
+    },
+
     handleSizeChange(val) {
+      // 保存当前页滚动位置
+      this.saveScrollPosition(this.pageNum);
+
       if (this.pageNum * val > this.total) {
         this.pageNum = 1;
       }
       this.ctx.setOptions.pageSize = val;
       this.ctx.saveLocalCache(false);
       this.handleDataChange();
+      // 设置新页面的滚动位置
+      this.setScrollPosition(this.pageNum);
     },
+
     handleCurrentChange(val) {
+      // 保存当前页滚动位置
+      this.saveScrollPosition(val - 1);
       this.handleDataChange();
     },
+
     handleDataChange() {
       this.ctx._isPaging = true;
       if (this.ctx.crudOptions.localPagination) {
@@ -104,7 +150,10 @@ export default create({
         });
       } else {
         this.$nextTick(() => {
-          this.ctx.getList();
+          this.ctx.getList().then(() => {
+            // 设置新页面的滚动位置
+            this.setScrollPosition(this.pageNum);
+          });
         });
       }
     },

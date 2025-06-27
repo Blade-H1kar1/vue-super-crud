@@ -5,8 +5,10 @@ export default {
   mixins: [getSet],
   data() {
     return {
+      isTree: false,
       loadingStatus: false,
       localFilteredData: undefined, // 存储过滤后的数据
+      getListResolve: () => {},
     };
   },
 
@@ -22,7 +24,10 @@ export default {
         const isUpdated = newVal !== oldVal;
         if (isUpdated) {
           this.transformData(this.list);
+          this.getListResolve();
         }
+        // 通知底层渲染组件进行格式化数据处理
+        this.$emit("dataChange");
       },
       immediate: true,
     },
@@ -54,6 +59,9 @@ export default {
     transformData(list) {
       // 检查数据唯一性
       this.validateUniqueValues(list);
+
+      // 检查是否为树形数据
+      this.isTree = list.some((item) => Array.isArray(item[this.childrenKey]));
 
       // 处理行数据
       this.processRowData(list);
@@ -104,11 +112,14 @@ export default {
     // 处理行数据
     processRowData(list) {
       const isGenUniqueId = this.crudOptions.uniqueId;
+      const isDelayRender = this.crudOptions.delayRender;
 
       const processNode = (nodes, parent = null, level = 0) => {
         if (!Array.isArray(nodes)) return;
 
         nodes.forEach((item, index) => {
+          // 设置延迟渲染
+          isDelayRender && this.$set(item, "$delay", []);
           // 生成唯一ID
           if (isGenUniqueId && !item.$uniqueId) {
             item.$uniqueId = uniqueId();
@@ -230,6 +241,9 @@ export default {
     },
     getList() {
       this.$emit("getList");
+      return new Promise((resolve, reject) => {
+        this.getListResolve = resolve;
+      });
     },
     initRow(row) {
       this.trueRenderColumns.forEach((column) => {

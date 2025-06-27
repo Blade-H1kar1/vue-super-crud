@@ -131,6 +131,21 @@ renderColumns: [
 </common-code-format>
 </ClientOnly>
 
+## 全量校验
+
+`validateAll`：对表格所有数据（本地分页、虚拟滚动等场景）进行全量校验</br>
+参数：</br>
+`mode`：校验模式，all（默认，收集所有错误并弹窗）或 first（遇到第一个错误即中断，且提示报错）</br>
+`maxShow`：弹窗中最多显示的错误条数，超出后用“……”省略</br>
+
+<ClientOnly>
+<common-code-format>
+  <crud-validate-validateAll slot="source"></crud-validate-validateAll>
+  
+<<< @/docs/.vuepress/components/crud/validate/validateAll.vue
+</common-code-format>
+</ClientOnly>
+
 ## API
 
 ### Column 配置
@@ -150,11 +165,12 @@ renderColumns: [
 
 ### Methods
 
-| 方法名        | 说明         | 参数                          | 返回值  |
-| ------------- | ------------ | ----------------------------- | ------- |
-| validate      | 校验整个表格 | callback(可选)                | Promise |
-| validateField | 校验指定行   | options: {index/id/row, prop} | Promise |
-| clearValidate | 清除校验     | -                             | -       |
+| 方法名        | 说明                   | 参数                          | 返回值  |
+| ------------- | ---------------------- | ----------------------------- | ------- |
+| validate      | 校验整个表格           | callback(可选)                | Promise |
+| validateField | 校验指定行             | options: {index/id/row, prop} | Promise |
+| clearValidate | 清除校验               | -                             | -       |
+| validateAll   | 校验所有数据（含树级） | options: {mode, maxShow}      | Promise |
 
 ### validateField 方法options参数
 

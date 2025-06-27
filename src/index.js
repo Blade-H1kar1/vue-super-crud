@@ -14,6 +14,7 @@ import button from "pak/button";
 import position from "pak/core/components/position";
 import grid from "pak/grid/index.vue";
 import cell from "pak/grid/cell.vue";
+import lazyRender from "pak/lazyRender/index.vue";
 
 import { mergeTemplate } from "./template";
 import directive from "pak/directive";
@@ -37,28 +38,28 @@ const components = [
   position,
   grid,
   cell,
+  lazyRender,
 ];
 
 const install = function (Vue, opts = {}) {
   // 判断是否安装
   if (install.installed) return;
   install.installed = true;
-  if (opts.template) {
-    mergeTemplate(opts.template);
-  }
-  window.Vue = Vue;
+
+  // 合并外部代码模板
+  opts.template && mergeTemplate(opts.template);
+
+  // 初始化配置管理器
+  configManager.create(config, opts);
+
+  // 遍历注册全局组件
+  components.forEach((component) => Vue.component(component.name, component));
 
   Vue.prototype.$scOpt = opts;
   Vue.prototype.$scDialog = dialog;
   Vue.prototype.$scDict = globalDict(Vue, opts.dict || {});
-
-  configManager.create(config, opts);
-  // Vue.use(Contextmenu);
-  // 遍历注册全局组件
-  components.forEach((component) => {
-    Vue.component(component.name, component);
-  });
   directive(Vue);
+  window.Vue = Vue;
 };
 
 // 判断是否是直接引入文件

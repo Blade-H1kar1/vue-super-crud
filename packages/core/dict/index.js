@@ -78,7 +78,7 @@ export class DictManager {
       otherPath: Array.isArray(config.otherPath)
         ? config.otherPath
         : [config.otherPath],
-      isCustom: true,
+      isCustom: config.request && config.request !== this.defaultMeta.request,
     };
 
     // 将本地数据转换为字典管理

@@ -25,6 +25,7 @@ export default {
   },
   destroyed() {
     window.removeEventListener("resize", this.handleResize);
+    this.observer.disconnect();
   },
   computed: {
     defaultHeight() {

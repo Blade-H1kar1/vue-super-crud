@@ -76,6 +76,8 @@ module.exports = {
             "crud/span",
             "crud/dataSort",
             "crud/summary",
+            "crud/optimize",
+            "crud/expandFunction",
           ],
         },
         {

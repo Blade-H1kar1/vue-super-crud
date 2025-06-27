@@ -1,5 +1,7 @@
 import { debounce, get, omit } from "lodash-es";
 import { findTreeNodePath } from "../utils";
+import { generateRules } from "core";
+import AsyncValidator from "async-validator";
 export default {
   data() {
     return {
@@ -14,25 +16,20 @@ export default {
     );
   },
   methods: {
-    handleValidateError(fullProp, msg, isValid = true) {
+    handleValidateError(key, fullProp, msg, isValid = true, showTip = true) {
       const cell = this.$el
         .querySelector(".el-table__body")
-        .querySelector(`[data-full-prop="${fullProp}"]`);
+        .querySelector(
+          key
+            ? `[data-full-prop="${fullProp}"][data-row-key="${key}"]`
+            : `[data-full-prop="${fullProp}"]`
+        );
       if (!cell) return;
 
       // 向上查找父元素直到找到 el-table__cell
-      let targetCell = cell;
+      let targetCell = cell.closest(".el-table__cell");
       let loopCount = 0;
       const maxLoops = 5;
-
-      while (
-        targetCell &&
-        !targetCell.classList.contains("el-table__cell") &&
-        loopCount < maxLoops
-      ) {
-        targetCell = targetCell.parentElement;
-        loopCount++;
-      }
 
       if (!targetCell || loopCount >= maxLoops) return;
 
@@ -40,16 +37,16 @@ export default {
         // 添加错误状态
         targetCell.classList.add("error-badge");
         this.errorMap.set(fullProp, msg);
-        this.showErrorTooltip(cell);
+        showTip && this.showErrorTooltip(cell);
       } else {
         // 移除错误状态
         targetCell.classList.remove("error-badge");
         this.errorMap.delete(fullProp);
-        this.cellMouseLeave();
+        showTip && this.cellMouseLeave();
       }
     },
     createListError(prop, valid, msg) {
-      this.handleValidateError(prop, msg, valid);
+      this.handleValidateError(null, prop, msg, valid);
     },
     clearErrorMsg(row, prop) {
       const targetPath =
@@ -57,7 +54,7 @@ export default {
         findTreeNodePath(this.list, (node) => node === row, this.childrenKey) +
         "." +
         prop;
-      this.handleValidateError(targetPath, "", true);
+      this.handleValidateError(null, targetPath, "", true);
     },
     cellMouseEnter(row, column, cell, event) {
       const el = cell.querySelector("[data-full-prop]");
@@ -227,6 +224,151 @@ export default {
       cells.forEach((c) => {
         c.classList.remove("error-badge");
       });
+    },
+    // 校验所有数据，可用于本地分页等数据过滤情况
+    async validateAll({ mode = "all", maxShow = 20 } = {}) {
+      this.crudOptions.localSearch && this.handleReset();
+      const errors = [];
+      const childrenKey = this.childrenKey || "children";
+      let firstErrorFullProp = null; // 记录第一个错误的fullProp
+
+      // 递归遍历树形数据
+      const traverse = async (nodes, parentPath = []) => {
+        for (let i = 0; i < nodes.length; i++) {
+          const row = nodes[i];
+          const currentPath = [...parentPath, i]; // 用于 fullProp 路径
+          for (const column of this.trueRenderColumns) {
+            const col = column.form || column;
+            const { rules } = generateRules(col, { row });
+            if ((!rules || rules.length === 0) && col.required === undefined) {
+              continue;
+            }
+            if (rules && rules.length > 0) {
+              rules.forEach((rule) => delete rule.trigger);
+            }
+            const descriptor = { [col.prop]: rules };
+            const validator = new AsyncValidator(descriptor);
+            const model = { [col.prop]: get(row, col.prop) };
+            await validator.validate(model, { firstFields: true }, (err) => {
+              if (!err) return Promise.resolve();
+              // 生成 fullProp 路径
+              const pathStr = currentPath.join(".");
+              const fullProp = `list.${pathStr}.${col.prop}`;
+              // 触发高亮
+              this.handleValidateError(
+                row[this.valueKey],
+                fullProp,
+                err[0].message,
+                false,
+                false
+              );
+
+              const msg = `第${currentPath.map((i) => i + 1).join("-")}行【${
+                col.label || col.prop
+              }】：${err[0].message}`;
+              // 记录第一个错误的fullProp
+              if (!firstErrorFullProp) {
+                firstErrorFullProp = fullProp;
+              }
+              if (mode === "first") {
+                this.$message.error(msg);
+                throw {
+                  path: pathStr,
+                  prop: col.prop,
+                  message: msg,
+                };
+              } else {
+                errors.push({
+                  path: pathStr,
+                  prop: col.prop,
+                  fullProp,
+                  message: msg,
+                });
+              }
+            });
+          }
+          // 递归子节点
+          if (Array.isArray(row[childrenKey]) && row[childrenKey].length > 0) {
+            await traverse(row[childrenKey], [...currentPath, childrenKey]);
+          }
+        }
+      };
+
+      try {
+        await traverse(this.data);
+      } catch (e) {
+        // 只跳转到第一个错误
+        if (firstErrorFullProp) {
+          const cell = this.$el
+            .querySelector(".el-table__body")
+            .querySelector(`[data-full-prop="${firstErrorFullProp}"]`);
+          if (cell) {
+            cell.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }
+        }
+        // 弹窗内容
+        if (errors.length) {
+          const showErrors = errors
+            .slice(0, maxShow)
+            .map((e) => e.message)
+            .join("<br/>");
+          const moreTip =
+            errors.length > maxShow
+              ? `<div style="color:#f56c6c;margin-top:8px;">共${errors.length}条错误</div>`
+              : "";
+          this.$alert(
+            `<div style="max-height:300px;overflow:auto;">${showErrors}</div>${moreTip}`,
+            (this.crudOptions.validateTitle ||
+              this.crudOptions.title ||
+              "表格") + "校验错误",
+            {
+              dangerouslyUseHTMLString: true,
+            }
+          );
+        }
+        return Promise.reject(errors.length ? errors : e);
+      }
+
+      // 只跳转到第一个错误
+      if (firstErrorFullProp) {
+        const cell = this.$el
+          .querySelector(".el-table__body")
+          .querySelector(`[data-full-prop="${firstErrorFullProp}"]`);
+        if (cell) {
+          cell.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }
+
+      if (errors.length) {
+        // 弹窗内容
+        let showErrorsArr = errors.slice(0, maxShow).map((e) => e.message);
+        if (errors.length > maxShow) {
+          showErrorsArr.push("……");
+        }
+        const showErrors = showErrorsArr.join("<br/>");
+        const moreTip =
+          errors.length > maxShow
+            ? `<div style="color:#f56c6c;margin-top:8px;">共${errors.length}条错误</div>`
+            : "";
+        this.$alert(
+          `<div style="max-height:300px;overflow:auto;">${showErrors}</div>${moreTip}`,
+          (this.crudOptions.validateTitle || this.crudOptions.title || "表格") +
+            "校验错误",
+          {
+            dangerouslyUseHTMLString: true,
+            customClass: "sc-crud__validate-error-alert",
+            showConfirmButton: false,
+          }
+        );
+        return Promise.reject(errors);
+      }
+      return Promise.resolve();
     },
   },
 };

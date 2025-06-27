@@ -220,9 +220,8 @@ export const mockApi = {
     });
   },
 
-  getList: (() => {
+  getList: (total = 40) => {
     let cachedData = null;
-    const total = 33;
 
     const generateAllData = () => {
       const mockData = [];
@@ -263,7 +262,7 @@ export const mockApi = {
         }, 300);
       });
     };
-  })(),
+  },
   // 生成更多测试数据
 
   // 模拟API请求函数

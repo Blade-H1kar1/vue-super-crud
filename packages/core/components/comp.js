@@ -1,7 +1,5 @@
-<script>
 import { set, omit, isArray, isFunction, isPlainObject } from "lodash-es";
 import { isVNode } from "utils";
-import Comp from "./comp.vue";
 
 // 获取组件名称
 function getCompName(name, isChildren, children, comp) {
@@ -13,10 +11,10 @@ function getCompName(name, isChildren, children, comp) {
     "el-switch": "sc-switch",
     "el-cascader": "sc-cascader",
   };
-  if (comp.options && name === "el-input") {
+  if (comp.options && !name) {
     return "sc-select";
   }
-  return nameMap[name] || name;
+  return nameMap[name] || name || "el-input";
 }
 
 // 获取事件处理函数
@@ -110,9 +108,16 @@ function renderChildren(children, h, scope) {
   if (isArray(children)) {
     return children.map((child) => {
       if (isPlainObject(child)) {
-        return h(Comp, {
-          props: { ...child, comp: child, scope, isChildren: true },
-        });
+        return compRender(
+          h,
+          {
+            ...child,
+            comp: child,
+            scope,
+            isChildren: true,
+          },
+          parent
+        );
       }
       return child;
     });
@@ -126,98 +131,47 @@ function fakeSlot(h, scopedSlots, slots) {
   const allSlots = { ...scopedSlots, ...slots };
   return Object.keys(allSlots).map((slot) => h("i", { slot }));
 }
+export function compRender(h, props, parent) {
+  const { name, comp, scope, isChildren, children, bind } = props;
 
-export default {
-  name: "comp",
-  functional: true,
-  props: {
-    value: {},
-    prop: {},
-    name: {
-      default: "el-input",
-    },
-    comp: Object,
-    bind: [Object, Function],
-    on: Object,
-    scopedSlots: Object,
-    slots: Object,
-    children: {},
-    scope: Object,
-    size: {},
-    isChildren: Boolean,
-    nativeOn: Object,
-    directives: {
-      type: Object,
-      default: () => ({}),
-    },
-    created: Function,
-    mounted: Function,
-  },
-  render(h, context) {
-    const { props, data, parent } = context;
-    const { name, comp, scope, isChildren, children, bind } = props;
+  // 处理bind属性
+  let processedComp = comp;
+  if (isFunction(bind)) {
+    processedComp = { ...comp, ...bind(scope) };
+  } else if (bind) {
+    processedComp = { ...comp, ...bind };
+  }
 
-    // 获取组件props
-    const getComponentProps = (compName) => {
-      const component = parent.$options.components[compName];
-      return component?.options?.props || {};
-    };
+  // 获取组件名称
+  const compName = getCompName(name, isChildren, children, processedComp);
 
-    // 处理bind属性
-    let processedComp = comp;
-    if (isFunction(bind)) {
-      processedComp = { ...comp, ...bind(scope) };
-    } else if (bind) {
-      processedComp = { ...comp, ...bind };
-    }
+  // 生命周期钩子
+  if (props.created) {
+    props.created(scope);
+  }
 
-    // 获取组件名称
-    const compName = getCompName(name, isChildren, children, processedComp);
-
-    // 获取组件声明的props
-    const componentProps = getComponentProps(compName);
-
-    // 分离props和attrs
-    const propsToPass = {};
-    const attrsToPass = {};
-
-    Object.entries(processedComp).forEach(([key, value]) => {
-      if (componentProps[key]) {
-        propsToPass[key] = value;
-      } else if (!(key in props)) {
-        attrsToPass[key] = value;
-      }
-    });
-
-    // 生命周期钩子
-    if (props.created) {
-      props.created(scope);
-    }
-    return h(
-      compName,
-      {
-        props: {
-          ...propsToPass,
-          value: props.value || parent.$value,
-          scope,
-        },
-        attrs: {
-          ...attrsToPass,
-          size: getCompSize(processedComp, props.size, parent.$ELEMENT),
-          placeholder: getPlaceholder(processedComp, compName, scope),
-          clearable: getClearable(processedComp),
-          disabled: processedComp.disabled ? true : false,
-        },
-        on: getOn(props.on, processedComp, scope, parent, props),
-        nativeOn: props.nativeOn,
-        scopedSlots: getScopedSlots(props.scopedSlots, props.slots, h, scope),
-        directives: props.directives,
+  return h(
+    compName,
+    {
+      props: {
+        value: props.value || parent.$value,
+        scope,
       },
-      [
-        renderChildren(children, h, scope),
-        ...fakeSlot(h, props.scopedSlots, props.slots),
-      ]
-    );
-  },
-};
-</script>
+      attrs: {
+        ...omit(processedComp, ["name", "prop", "on", "bind"]),
+        size: getCompSize(processedComp, props.size, parent.$ELEMENT),
+        placeholder: getPlaceholder(processedComp, compName, scope),
+        clearable: getClearable(processedComp),
+        disabled: processedComp.disabled ? true : false,
+      },
+      on: getOn(props.on, processedComp, scope, parent, props),
+      nativeOn: props.nativeOn,
+      scopedSlots: getScopedSlots(props.scopedSlots, props.slots, h, scope),
+      directives: props.directives,
+    },
+    [
+      renderChildren(children, h, scope),
+      ...fakeSlot(h, props.scopedSlots, props.slots),
+    ]
+  );
+}

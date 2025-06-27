@@ -45,11 +45,7 @@ export default create({
       return this.ctx.crudOptions.searchHeader;
     },
     mergeConfig() {
-      let mergeConfig = merge({}, this.searchHeader, this.item);
-      if (mergeConfig && typeof mergeConfig.width === "string") {
-        mergeConfig.width = parseInt(mergeConfig.width);
-      }
-      return mergeConfig;
+      return merge({}, this.searchHeader, this.item);
     },
     componentStrategy() {
       return [

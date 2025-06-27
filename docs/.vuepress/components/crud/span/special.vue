@@ -64,7 +64,7 @@ export default {
     async getList() {
       this.loading = true;
       try {
-        const { data } = await mockApi.getList(this.search);
+        const { data } = await mockApi.getList(40)(this.search);
         this.data = data;
       } finally {
         this.loading = false;

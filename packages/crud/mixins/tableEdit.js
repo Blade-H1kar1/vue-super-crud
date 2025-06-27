@@ -13,10 +13,11 @@ export default {
   created() {},
   watch: {
     editConfig: {
-      handler() {
+      handler(v, ov) {
         this.initEditState();
         this.updateEditState();
         this.bindTriggerEvent();
+        v && ov && this.transformData(this.list);
       },
       immediate: true,
     },
@@ -44,7 +45,6 @@ export default {
   methods: {
     // 初始化编辑状态
     initEditState() {
-      if (this.editState) return;
       const { mode, isRowEdit, exclusive, trigger } = this.editConfig;
       // 初始化编辑状态管理器
       this.editState = new EditState({
@@ -228,14 +228,16 @@ export default {
 
     // 行编辑事件
     handleRowEdit(scope, prop) {
+      const oldRow = cloneDeep(scope.row);
       this.runBefore(
         ["edit"],
         (data) => {
           if (data) {
-            this.$set(this.list, scope.$index, data);
+            this.$set(this.list, scope.$index, { ...data, $edit: true });
           }
           this.editState.setRowEditStatus(scope.row, true, "edit", {
             prop,
+            oldRow,
           });
         },
         scope
@@ -285,11 +287,15 @@ export default {
           };
           processNodes(list);
           allNodes.forEach((node) => {
-            this.editState.setRowEditStatus(node, true, "edit");
+            this.editState.setRowEditStatus(node, true, "edit", {
+              oldRow: cloneDeep(node),
+            });
           });
         } else {
           list.forEach((row, index) => {
-            this.editState.setRowEditStatus(row, true, "edit");
+            this.editState.setRowEditStatus(row, true, "edit", {
+              oldRow: cloneDeep(node),
+            });
           });
         }
       });
@@ -484,12 +490,8 @@ export default {
       const handleDelete = () => {
         this.changeLoading(true);
         const callBack = () => {
-          console.log(scope.row, "scope.row");
           if (scope.row.$parent) {
             const index = this.getNodeIndex(scope.row);
-
-            console.log(scope.row.$parent, "scope.row.$parent", index);
-
             if (index !== -1) {
               scope.row.$parent[this.childrenKey].splice(index, 1);
             }

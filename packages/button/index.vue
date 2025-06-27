@@ -1,6 +1,7 @@
 <template>
   <el-button
-    v-if="getIsShow() && !attrs.children"
+    v-if="!attrs.children"
+    v-show="getIsShow(attrs)"
     :disabled="isDebounce || attrs.disabled"
     v-bind="attrs"
     :size="size"
@@ -11,7 +12,8 @@
     <slot v-if="$slots.default"></slot>
   </el-button>
   <el-dropdown
-    v-else-if="getIsShow()"
+    v-else
+    v-show="getIsShow(attrs)"
     v-bind="attrs"
     trigger="click"
     :size="size"
@@ -32,6 +34,7 @@
         @click.native="handleClick(child)"
         :key="idx"
         v-bind="child"
+        v-show="getIsShow(child)"
         >{{ child.label }}</el-dropdown-item
       >
     </el-dropdown-menu>
@@ -83,10 +86,31 @@ export default create({
       });
       return attrs;
     },
-    getIsShow() {
-      const bindAttrs = this.attrs;
-      if (bindAttrs.hidden) return false;
-      if (bindAttrs.show === false) return false;
+    getIsShow(attrs) {
+      if (attrs.hidden !== undefined) {
+        return typeof attrs.hidden === "function"
+          ? !attrs.hidden(this.scope)
+          : !attrs.hidden;
+      }
+      if (attrs.innerHide !== undefined) {
+        return typeof attrs.innerHide === "function"
+          ? !attrs.innerHide(this.scope)
+          : !attrs.innerHide;
+      }
+      if (attrs.show !== undefined) {
+        return typeof attrs.show === "function"
+          ? attrs.show(this.scope)
+          : attrs.show;
+      }
+      // 检查权限
+      const permission = attrs.hasPermi;
+      if (
+        permission &&
+        this.$scOpt.checkPermission &&
+        !this.$scOpt.checkPermission(permission)
+      ) {
+        return false;
+      }
       return true;
     },
     handleClick(item = this) {

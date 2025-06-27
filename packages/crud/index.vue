@@ -66,6 +66,7 @@
           @row-dblclick="rowDblclick"
           @cell-click="cellClick"
           @cell-dblclick="cellDblclick"
+          @header-dragend="headerDragend"
           :row-key="rowKey_"
           :row-style="defineRowIndex"
           :cell-class-name="cellClassName_"
@@ -257,6 +258,7 @@ export default create({
       _showSummary: false,
       treeNodeMap: new Map(),
       labelMinWidthMap: new Map(),
+      oldVNodeMap: new Map(),
     };
   },
   created() {
@@ -289,15 +291,6 @@ export default create({
     },
     childrenKey() {
       return this.crudOptions?.treeProps?.children || "children";
-    },
-    isTree() {
-      let flag = false;
-      this.data.forEach((ele) => {
-        if (ele[this.childrenKey]) {
-          flag = true;
-        }
-      });
-      return flag;
     },
     crudOptions() {
       return this.resultOptions;
@@ -567,6 +560,13 @@ export default create({
       if (!column) return;
       if (column.col?.type === "action") return;
       this.handleCellClick({ row, $index: row.$index }, column.col);
+    },
+    // 保存拖动后的宽度
+    headerDragend(newWidth, oldWidth, column, event) {
+      if (this.crudOptions.persistWidth && column && column.property) {
+        this.setOptions.fixedWidth[column.property] = newWidth;
+        this.saveLocalCache(false); // 不刷新表格，避免死循环
+      }
     },
   },
 });

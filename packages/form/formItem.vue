@@ -169,6 +169,7 @@ export default create({
             scope={this.formCtx.formScope}
             size={this.formOptions.size}
             rawRules={this.rawRules}
+            isWatchFormatValue={true}
             defaultRender={this.formOptions.defaultRender}
             controlDefault={(defaultRender, scope) => {
               if (

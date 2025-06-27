@@ -56,7 +56,7 @@ export default {
     async getList() {
       this.loading = true;
       try {
-        const { data, total } = await mockApi.getList(this.search);
+        const { data, total } = await mockApi.getList(40)(this.search);
         // 根据当前排序字段对数据进行排序
         this.data = [...data];
         this.total = total;
