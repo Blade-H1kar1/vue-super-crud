@@ -245,12 +245,32 @@ export default {
     },
     select(selection, row) {
       if (!this.selected) return;
+
+      // 基础验证
       if (row[this.operateKey] === undefined) {
         console.error(
           `[CRUD Error] row.${this.operateKey}不存在，没有唯一值无法进行选中数据绑定，请设置正确的valueKey`
         );
         return;
       }
+
+      // 安全性检查
+      const rowIndex = this.list.findIndex((item) => item === row);
+      if (rowIndex !== -1 && this.getRowErrorType) {
+        const errorType = this.getRowErrorType(rowIndex);
+        if (errorType) {
+          const errorMessages = {
+            MISSING_ID: "[CRUD Error] 该行缺失ID字段，无法选中",
+            DUPLICATE_ID: "[CRUD Error] 该行ID与其他行重复，无法选中",
+          };
+          console.error(
+            errorMessages[errorType] || "[CRUD Error] 该行数据异常，无法选中"
+          );
+          return;
+        }
+      }
+
+      // 执行选中操作
       if (selection.indexOf(row) > -1) {
         this.addSelection(row);
       } else {
@@ -259,20 +279,51 @@ export default {
     },
     selectAll(selection) {
       if (!this.selected) return;
+
+      // 检查是否有问题行
+      if (this.invalidRows && this.invalidRows.size > 0) {
+        const missingCount = Array.from(this.invalidRows.values()).filter(
+          (type) => type === "MISSING_ID"
+        ).length;
+        const duplicateCount = Array.from(this.invalidRows.values()).filter(
+          (type) => type === "DUPLICATE_ID"
+        ).length;
+
+        let message = "当前页面存在异常数据，将跳过问题行";
+        if (missingCount > 0 && duplicateCount > 0) {
+          message += `（缺失ID ${missingCount}行，重复ID ${duplicateCount}行）`;
+        } else if (missingCount > 0) {
+          message += `（缺失ID ${missingCount}行）`;
+        } else if (duplicateCount > 0) {
+          message += `（重复ID ${duplicateCount}行）`;
+        }
+
+        console.error(`[CRUD Error] ${message}`);
+      }
+
       const isAllSelected = this.$refs.tableRef.store.states.isAllSelected;
       const currentPageKeys = new Set(
         this.list.map((item) => item[this.operateKey])
       );
+
       if (isAllSelected) {
         selection.forEach((row) => {
+          // 跳过有问题的行
+          const rowIndex = this.list.findIndex((item) => item === row);
+          if (
+            this.getRowErrorType &&
+            rowIndex !== -1 &&
+            this.getRowErrorType(rowIndex)
+          ) {
+            return;
+          }
+
           if (this.selected.indexOf(row) === -1) {
             this.selected.push(row);
           }
         });
-      }
-      // 取消全选当前页
-      else {
-        // 只移除当前页的数据
+      } else {
+        // 取消全选当前页
         for (let i = this.selected.length - 1; i >= 0; i--) {
           if (currentPageKeys.has(this.selected[i][this.operateKey])) {
             if (

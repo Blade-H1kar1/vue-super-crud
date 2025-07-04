@@ -153,41 +153,21 @@ export function columnCell(h, { col, scope, ctx, topProps }) {
   );
 }
 
-let globalPlaceholderVNode = null;
-
-function getPlaceholderVNode(h, attrs = {}, style = {}, directives = []) {
-  if (!globalPlaceholderVNode) {
-    globalPlaceholderVNode = h("div", {
-      class: "sc-crud-cell_delay",
-      attrs,
-      style,
-      directives,
-    });
-  }
-  return h("div", {
-    class: "sc-crud-cell_delay",
-    attrs,
-    style,
-    directives,
-  });
-}
-
 // 延迟渲染函数
 export function delayColumnCell(h, { col, scope, ctx, topProps }) {
   if (scope.row.$delay && !scope.row.$delay.includes(col.prop)) {
     const formProp = getFormProp(col, topProps, ctx, scope);
     // 返回简单渲染的占位内容
-    return getPlaceholderVNode(
-      h,
-      {
+    return h("div", {
+      attrs: {
         "data-row-key": scope.row[topProps.valueKey],
         "data-full-prop": formProp,
         "data-prop": col.prop,
       },
-      {
+      style: {
         height: (topProps.itemSize || 40) + "px",
       },
-      [
+      directives: [
         {
           name: "scObserveVisibility",
           value: {
@@ -195,10 +175,12 @@ export function delayColumnCell(h, { col, scope, ctx, topProps }) {
               scope.row.$delay.push(col.prop);
             },
             rootClass: "el-table__body-wrapper",
+            // 分批渲染配置
+            batchConfig: topProps.delayRenderConfig,
           },
         },
-      ]
-    );
+      ],
+    });
   }
   return columnCell(h, { col, scope, ctx, topProps });
 }

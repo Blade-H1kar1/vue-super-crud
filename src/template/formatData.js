@@ -315,6 +315,11 @@ export default {
 
     return {
       input: (value) => {
+        // 处理空值情况
+        if (value === undefined || value === null || value === "") {
+          return "";
+        }
+
         try {
           let rawStr = "";
           if (typeof value === "string") {
@@ -323,7 +328,11 @@ export default {
             rawStr = String(value);
           }
 
-          const num = Number(rawStr) || 0;
+          const num = Number(rawStr);
+          // 如果转换后是 NaN，返回空字符串
+          if (isNaN(num)) {
+            return "";
+          }
 
           // 传入原始字符串，用于处理特殊情况
           let formatted = formatPrecision(num, rawStr);
@@ -336,7 +345,7 @@ export default {
           return `${config.prefix}${formatted}${config.suffix}`;
         } catch (error) {
           console.warn("数字格式化失败:", error);
-          return value;
+          return "";
         }
       },
       // 输出时去除格式化（还原为原始数字字符串）

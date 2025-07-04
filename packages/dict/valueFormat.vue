@@ -2,7 +2,7 @@
   <span>
     <template v-for="(item, index) in options">
       <el-tag
-        v-if="item[props.color]"
+        v-if="item[props.color] && COLOR_LIST.includes(item[props.color])"
         :key="item[props.value]"
         size="small"
         :type="item[props.color]"
@@ -13,9 +13,15 @@
       >
         {{ item[props.label] }}
       </el-tag>
-      <span v-else :key="item[props.value]">{{
-        item[props.label] + (index === options.length - 1 ? "" : "、")
-      }}</span>
+      <span
+        v-else
+        :key="item[props.value]"
+        :style="{ color: item[props.color] }"
+        @click="onClick(item)"
+        >{{
+          item[props.label] + (index === options.length - 1 ? "" : "、")
+        }}</span
+      >
     </template>
   </span>
 </template>
@@ -72,6 +78,9 @@ export default create({
     return {};
   },
   computed: {
+    COLOR_LIST() {
+      return COLOR_LIST;
+    },
     options() {
       if (this.value == null || this.value === "") {
         return [];

@@ -73,6 +73,13 @@ export default create({
         this.pageNum = this.pageNum - 1;
       }
     },
+    pageNum(val, oldVal) {
+      // 在切换页面前收集当前页可见行
+      this.pagination.memorizeScroll && this.ctx.collectVisibleRows(oldVal);
+
+      // 保存当前页滚动位置
+      this.saveScrollPosition(oldVal);
+    },
   },
   created() {
     this.initPage();
@@ -137,8 +144,6 @@ export default create({
     },
 
     handleCurrentChange(val) {
-      // 保存当前页滚动位置
-      this.saveScrollPosition(val - 1);
       this.handleDataChange();
     },
 

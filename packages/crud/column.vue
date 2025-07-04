@@ -130,15 +130,17 @@ export default create({
       }
     },
     getTopProps() {
+      const options = this.ctx.crudOptions;
       return {
-        size: this.ctx.crudOptions.size,
         isTree: this.ctx.isTree,
         childrenKey: this.ctx.childrenKey,
         valueKey: this.ctx.valueKey,
         extendsScopedSlots: this.ctx.extendsScopedSlots,
-        defaultRender: this.ctx.crudOptions.defaultRender,
         isTriggerEdit: this.ctx.isTriggerEdit,
-        itemSize: this.ctx.itemSize,
+        size: options.size,
+        itemSize: options.itemSize,
+        delayRenderConfig: options.delayRenderConfig,
+        defaultRender: options.defaultRender,
       };
     },
   },

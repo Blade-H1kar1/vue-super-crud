@@ -17,7 +17,9 @@ export default {
         this.initEditState();
         this.updateEditState();
         this.bindTriggerEvent();
-        v && ov && this.transformData(this.list);
+        if (v && ov && !isEqual(v, ov)) {
+          this.transformData();
+        }
       },
       immediate: true,
     },
@@ -233,7 +235,9 @@ export default {
         ["edit"],
         (data) => {
           if (data) {
-            this.$set(this.list, scope.$index, { ...data, $edit: true });
+            for (const key in data) {
+              scope.row[key] = data[key];
+            }
           }
           this.editState.setRowEditStatus(scope.row, true, "edit", {
             prop,
@@ -294,7 +298,7 @@ export default {
         } else {
           list.forEach((row, index) => {
             this.editState.setRowEditStatus(row, true, "edit", {
-              oldRow: cloneDeep(node),
+              oldRow: cloneDeep(row),
             });
           });
         }
@@ -305,9 +309,11 @@ export default {
     handleRowSave(scope, callback) {
       this.validateField({ row: scope.row }).then(() => {
         this.changeLoading(true);
-        const callBack = (row) => {
-          if (row) {
-            this.$set(this.list, scope.$index, row);
+        const callBack = (data) => {
+          if (data) {
+            for (const key in data) {
+              scope.row[key] = data[key];
+            }
           }
           this.editState.setRowEditStatus(scope.row, false);
           this.changeLoading();

@@ -9,6 +9,10 @@ export default {
       loadingStatus: false,
       localFilteredData: undefined, // 存储过滤后的数据
       getListResolve: () => {},
+      // 记录每页的可见状态范围
+      pageVisibilityMap: new Map(), // 存储每页的可见状态范围
+      // 数据验证结果缓存
+      invalidRows: new Map(), // 存储有问题的行：index -> errorType
     };
   },
 
@@ -16,20 +20,36 @@ export default {
     list() {
       return this.filterData();
     },
+    // 判断是否为树形数据
+    isTreeStructure() {
+      return (
+        Array.isArray(this.data) &&
+        this.data.some((item) => Array.isArray(item[this.childrenKey]))
+      );
+    },
   },
   watch: {
     data: {
       handler(newVal, oldVal) {
         // 是否完全更新数据
         const isUpdated = newVal !== oldVal;
+        // 更新树形状态
+        this.updateTreeStatus();
         if (isUpdated) {
-          this.transformData(this.list);
+          this.transformData();
           this.getListResolve();
         }
         // 通知底层渲染组件进行格式化数据处理
         this.$emit("dataChange");
       },
       immediate: true,
+    },
+    // 行key变化时，即表更为树级数据，需要重新处理数据和渲染
+    rowKey_(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.transformData();
+        this.refreshTable();
+      }
     },
     loading: {
       handler(val) {
@@ -41,8 +61,14 @@ export default {
       this.$emit("update:loading", val);
     },
   },
-
   methods: {
+    // 更新树形状态
+    updateTreeStatus() {
+      this.isTree =
+        this.crudOptions.rowKey ||
+        this.crudOptions.autoLazy ||
+        this.isTreeStructure;
+    },
     // 过滤数据
     filterData() {
       let data = this.data;
@@ -56,12 +82,10 @@ export default {
       return data;
     },
     // 完全更新时数据转换
-    transformData(list) {
+    transformData() {
+      const list = this.list;
       // 检查数据唯一性
       this.validateUniqueValues(list);
-
-      // 检查是否为树形数据
-      this.isTree = list.some((item) => Array.isArray(item[this.childrenKey]));
 
       // 处理行数据
       this.processRowData(list);
@@ -81,45 +105,72 @@ export default {
       // 更新表格状态
       this.updateTableState();
     },
-    // 检查数据唯一性
+    // 简化的数据唯一性验证
     validateUniqueValues(list) {
-      if (this._hasCheckedUnique) return;
+      this.invalidRows.clear();
+      const keyMap = new Map();
 
-      const valueMap = new Map();
-      list.some((row) => {
+      list.forEach((row, index) => {
         const key = row[this.valueKey];
-        if (!key) {
-          console.error(
-            `[CRUD Error] 数据中存在缺失的 ${this.valueKey} 值`,
-            row
-          );
-          this._hasCheckedUnique = true;
-          return true;
+
+        // 检查缺失key
+        if (!key && key !== 0) {
+          this.invalidRows.set(index, "MISSING_ID");
+          return;
         }
-        if (valueMap.has(key)) {
-          console.error(
-            `[CRUD Error] 数据中存在重复的 ${this.valueKey} 值`,
-            row
-          );
-          this._hasCheckedUnique = true;
-          return true;
+
+        // 检查重复key
+        if (keyMap.has(key)) {
+          // 标记当前行和之前的重复行都为重复ID
+          this.invalidRows.set(index, "DUPLICATE_ID");
+          this.invalidRows.set(keyMap.get(key), "DUPLICATE_ID");
+        } else {
+          keyMap.set(key, index);
         }
-        valueMap.set(key, true);
-        return false;
       });
+
+      if (this.invalidRows.size > 0) {
+        const missingCount = Array.from(this.invalidRows.values()).filter(
+          (type) => type === "MISSING_ID"
+        ).length;
+        const duplicateCount = Array.from(this.invalidRows.values()).filter(
+          (type) => type === "DUPLICATE_ID"
+        ).length;
+        console.warn(
+          `[CRUD Warning] 发现数据问题：缺失ID ${missingCount}行，重复ID ${duplicateCount}行`
+        );
+      }
     },
 
-    // 处理行数据
+    // 检查行的错误类型
+    getRowErrorType(index) {
+      return this.invalidRows.get(index) || null;
+    },
+
+    // 检查行是否可安全选中
+    isRowSafeForSelection(row, index) {
+      return !this.invalidRows.has(index);
+    },
+
+    // 优化后的处理行数据方法
     processRowData(list) {
       const isGenUniqueId = this.crudOptions.uniqueId;
       const isDelayRender = this.crudOptions.delayRender;
+      const delayRenderIndex = this.crudOptions.delayRenderIndex || 30;
+
+      const shouldDelayRender = this.shouldDelayRenderForIndex(
+        delayRenderIndex
+      );
 
       const processNode = (nodes, parent = null, level = 0) => {
         if (!Array.isArray(nodes)) return;
 
         nodes.forEach((item, index) => {
           // 设置延迟渲染
-          isDelayRender && this.$set(item, "$delay", []);
+          if (isDelayRender && shouldDelayRender(index)) {
+            this.$set(item, "$delay", []);
+          }
+
           // 生成唯一ID
           if (isGenUniqueId && !item.$uniqueId) {
             item.$uniqueId = uniqueId();
@@ -161,6 +212,77 @@ export default {
       };
 
       processNode(list);
+    },
+
+    // 判断指定索引是否需要延迟渲染
+    shouldDelayRenderForIndex(delayRenderIndex) {
+      const currentPage = this.query[this.crudOptions.props.pageNum] || 1;
+      const pageVisibility = this.pageVisibilityMap.get(currentPage);
+
+      // 如果没有记录的可见状态，使用默认逻辑
+      if (!pageVisibility) {
+        return (index) => index >= delayRenderIndex;
+      }
+      const { maxVisibleIndex } = pageVisibility;
+      if (maxVisibleIndex < delayRenderIndex) {
+        return (index) => index >= delayRenderIndex;
+      }
+
+      const skipRangeStart = Math.max(
+        delayRenderIndex,
+        maxVisibleIndex - delayRenderIndex
+      );
+      const skipRangeEnd = maxVisibleIndex;
+
+      return function (index) {
+        if (index >= skipRangeStart && index <= skipRangeEnd) {
+          return false;
+        } else {
+          return true;
+        }
+      };
+    },
+
+    // 记录单元格可见状态
+    recordCellVisibility(rowIndex, colProp) {
+      const currentPage = this.query[this.crudOptions.props.pageNum] || 1;
+
+      if (!this.pageVisibilityMap.has(currentPage)) {
+        this.pageVisibilityMap.set(currentPage, {
+          maxVisibleIndex: rowIndex,
+          visibleIndexes: new Set([rowIndex]),
+        });
+      } else {
+        const pageVisibility = this.pageVisibilityMap.get(currentPage);
+        pageVisibility.visibleIndexes.add(rowIndex);
+        pageVisibility.maxVisibleIndex = Math.max(
+          pageVisibility.maxVisibleIndex,
+          rowIndex
+        );
+      }
+    },
+
+    // 收集当前页的可见行索引范围
+    collectVisibleRows(currentPage) {
+      const visibleIndexes = new Set();
+      let maxVisibleIndex = -1;
+
+      // 遍历当前页的数据，收集已渲染的行索引
+      this.list.forEach((row, index) => {
+        // 如果行没有 $delay 属性，说明不是延迟渲染的行
+        // 或者 $delay 数组不为空，说明已经有单元格被渲染了
+        if (!row.$delay || row.$delay.length > 0) {
+          visibleIndexes.add(index);
+          maxVisibleIndex = Math.max(maxVisibleIndex, index);
+        }
+      });
+
+      if (visibleIndexes.size > 0) {
+        this.pageVisibilityMap.set(currentPage, {
+          maxVisibleIndex,
+          visibleIndexes,
+        });
+      }
     },
 
     // 恢复新增状态

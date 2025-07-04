@@ -61,11 +61,12 @@ export default create({
               // alwaysShow 为 true 的排前面
               return (b.alwaysShow === true) - (a.alwaysShow === true);
             })
-            .filter((i) => {
-              if (this.delayShowSearch) {
-                return true;
-              }
-              return i.alwaysShow;
+            .map((item) => {
+              return {
+                ...item,
+                hidden:
+                  item.hidden || (!this.delayShowSearch && !item.alwaysShow),
+              };
             }),
         };
       }
@@ -165,7 +166,7 @@ export default create({
       this.$refs.searchForm.resetField(prop);
     },
     resetFields() {
-      this.$refs.searchForm.resetFields();
+      this.$refs.searchForm.reset();
     },
     initShowSearch() {
       this.$watch(

@@ -80,6 +80,21 @@ export default {
     persistPageSize: Boolean, // 是否持久化拖动宽度
     persistWidth: Boolean, // 是否持久化拖动宽度
     delayRender: Boolean, // 是否启用延迟渲染
+    delayRenderConfig: {
+      // 延迟渲染配置
+      type: [Boolean, Object],
+      default: () => ({
+        batchSize: 16,
+        maxProcessTime: 16,
+        frameDelay: 2,
+        strategy: "cell",
+      }),
+      properties: {
+        batchSize: Number, // 每批处理的元素数量，数值越大渲染越快，但可能导致卡顿
+        maxProcessTime: Number, // 每帧最大处理时间（ms），防止单帧处理时间过长
+        frameDelay: Number, // 批次间的帧间隔，数值越大越平滑，但渲染完成时间越长
+      },
+    }, // 是否启用延迟渲染
     virtualized: Boolean, // 是否启用虚拟列表
     itemSize: {
       // 延迟渲染、虚拟列表的固定行高
