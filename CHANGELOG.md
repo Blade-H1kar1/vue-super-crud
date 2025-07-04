@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.7.4...v1.8.0) (2025-07-04)
+
+
+### 🚀 构建/工具
+
+* **release:** 1.7.5 ([8c0c0ab](https://github.com/Blade-H1kar1/vue-super-crud/commit/8c0c0abfa64ad87585143d91b6d860b2e848ce96))
+
+
+### 🐛 问题修复
+
+* **crud:** bug修复 ([691c940](https://github.com/Blade-H1kar1/vue-super-crud/commit/691c9401e7ec6bff310ec4e58e4a0dc0edf52dca))
+* **switch:** bug修复 ([d00e5dc](https://github.com/Blade-H1kar1/vue-super-crud/commit/d00e5dce3a285e9f432175e19ab66d8d3c3a86a5))
+
+
+### ✨ 新功能
+
+* **crud:** 新增延迟渲染、持久化设置及全量校验等多项功能优化 ([e8585a7](https://github.com/Blade-H1kar1/vue-super-crud/commit/e8585a7e45609e78eaf0b74f1980319e3a8be106))
+
+
+### ♻️ 代码重构
+
+* **crud/form:** 组件重构与优化性能 ([61b9cca](https://github.com/Blade-H1kar1/vue-super-crud/commit/61b9cca3777a709e2d0c4ce27d3c89edd263c28e))
+
 ### [1.7.5](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.7.4...v1.7.5) (2025-06-17)
 
 
