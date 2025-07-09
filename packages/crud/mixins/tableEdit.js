@@ -48,7 +48,8 @@ export default {
     // 初始化编辑状态
     initEditState() {
       const { mode, isRowEdit, exclusive, trigger } = this.editConfig;
-      // 初始化编辑状态管理器
+      if (this.editState) return;
+      // 初始化编辑状态管理器 - 单例模式
       this.editState = new EditState({
         valueKey: this.valueKey,
         columns: this.trueRenderColumns,
@@ -88,6 +89,7 @@ export default {
       this.editState.exclusive =
         exclusive || trigger === "click" || trigger === "dblclick";
       this.editState.isRowEdit = isRowEdit;
+      this.editState.trigger = trigger;
     },
 
     // 处理编辑配置

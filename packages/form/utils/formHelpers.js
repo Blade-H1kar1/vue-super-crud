@@ -160,9 +160,3 @@ export function scrollToFirstError(errorObj, refs) {
     });
   }
 }
-
-// 属性路径操作工具
-export const propUtils = {
-  get: (obj, prop) => get(obj, prop),
-  set: (obj, prop, value) => set(obj, prop, value),
-};

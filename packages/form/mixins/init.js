@@ -1,5 +1,5 @@
 import { set, get } from "lodash-es";
-import { formInitQueue, getInitValue, propUtils } from "../utils/formHelpers";
+import { formInitQueue, getInitValue } from "../utils/formHelpers";
 
 export default {
   data() {
@@ -31,9 +31,9 @@ export default {
           let form = { ...this.value };
 
           this.trueRenderColumns.forEach((col) => {
-            if (propUtils.get(form, col.prop) === undefined) {
+            if (this.getByProp(form, col.prop) === undefined) {
               const initValue = getInitValue(col);
-              propUtils.set(form, col.prop, initValue);
+              this.setByProp(form, col.prop, initValue);
             }
           });
 

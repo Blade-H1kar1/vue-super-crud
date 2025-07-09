@@ -28,9 +28,9 @@ npm install vue-super-crud
 
 ```html
 <!-- 引入样式 -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vue-super-crud@1.7.1/lib/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vue-super-crud@latest/lib/index.css">
 <!-- 引入组件库 -->
-<script src="https://cdn.jsdelivr.net/npm/vue-super-crud@1.7.1/lib/super-crud.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-super-crud@latest/lib/super-crud.min.js"></script>
 ```
 
 ## 快速开始

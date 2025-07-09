@@ -1,4 +1,4 @@
-import { getResetValueByType, propUtils } from "../utils/formHelpers";
+import { getResetValueByType } from "../utils/formHelpers";
 
 export default {
   methods: {
@@ -22,12 +22,12 @@ export default {
         }
         // 优先使用列配置的初始值
         if (col.initValue !== undefined) {
-          propUtils.set(newFormValue, prop, col.initValue);
+          this.setByProp(newFormValue, prop, col.initValue);
           return;
         }
-        const currentValue = propUtils.get(this.value, prop);
+        const currentValue = this.getByProp(this.value, prop);
         const resetValue = getResetValueByType(currentValue, col);
-        propUtils.set(newFormValue, prop, resetValue);
+        this.setByProp(newFormValue, prop, resetValue);
       });
       this.$nextTick(() => {
         this.clearValidate();
@@ -41,9 +41,9 @@ export default {
       propsArray.forEach((prop) => {
         if (empty) {
           const column = this.columnsMap[prop];
-          const currentValue = propUtils.get(this.value, prop);
+          const currentValue = this.getByProp(this.value, prop);
           const resetValue = getResetValueByType(currentValue, column);
-          propUtils.set(this.value, prop, resetValue);
+          this.setByProp(this.value, prop, resetValue);
         } else {
           // 通知子组件执行重置
           this.$emit("handleChild", "resetField", prop);
