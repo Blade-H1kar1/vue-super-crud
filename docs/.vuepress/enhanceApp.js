@@ -1,15 +1,22 @@
-// // enhanceApp.js
-import VueHighlightJS from "vue-highlight.js";
+// enhanceApp.js
 import "highlight.js/styles/atom-one-dark.css";
-import ElementUI from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
-import "../../lib/index.css";
-import Package from "../../src/index";
-import Contextmenu from "vue-contextmenujs";
 import "../../styles/index.scss";
 
 export default async ({ Vue }) => {
   if (typeof window !== "undefined") {
+    // 动态导入插件
+    const [
+      { default: VueHighlightJS },
+      { default: ElementUI },
+      { default: Package },
+      { default: Contextmenu },
+    ] = await Promise.all([
+      import("vue-highlight.js"),
+      import("element-ui"),
+      import("../../src/index"),
+      import("vue-contextmenujs"),
+    ]);
     Vue.use(VueHighlightJS);
     Vue.use(ElementUI, {
       size: "small",
