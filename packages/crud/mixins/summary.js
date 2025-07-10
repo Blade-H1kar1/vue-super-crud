@@ -160,7 +160,6 @@ export default {
         predicate,
       });
     },
-
     // 格式化统计结果
     formatSummaryResult(result, config) {
       const { prefix = "", suffix = "", decimals = 0 } = config;
@@ -168,7 +167,7 @@ export default {
       if (result === null || result === undefined) return "";
 
       const formattedValue = Number.isFinite(result)
-        ? Number(result).toFixed(decimals)
+        ? Number(Number(result).toFixed(decimals)).toString()
         : result;
 
       return `${prefix}${formattedValue}${suffix}`;

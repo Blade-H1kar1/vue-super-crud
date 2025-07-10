@@ -34,7 +34,6 @@ export default {
               prefix: "¥",
               suffix: "元",
               decimals: 2,
-              ignoreZero: true, // 忽略0值
             },
           },
           {
