@@ -3,7 +3,7 @@
     <h3>表单</h3>
     <sc-form v-model="form" :options="options"> </sc-form>
     <h3 style="margin-top: 20px;">表格</h3>
-    <sc-crud :data="data" :options="crudOptions"> </sc-crud>
+    <sc-crud :data.sync="data" :options="crudOptions"> </sc-crud>
   </div>
 </template>
 
@@ -251,12 +251,12 @@ export default {
         renderColumns: [
           {
             prop: "id",
-            label: "ID",
+            label: "用户id",
             isEdit: false,
           },
           {
             prop: "input",
-            label: "普通输入框",
+            label: "名称",
             isEdit: true,
             form: {
               comp: {
@@ -268,7 +268,7 @@ export default {
           },
           {
             prop: "select",
-            label: "下拉选择",
+            label: "选择1",
             isEdit: true,
             form: {
               comp: {

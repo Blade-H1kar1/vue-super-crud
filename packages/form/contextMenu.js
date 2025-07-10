@@ -4,11 +4,18 @@ export default {
   methods: {
     contextMenuTemps() {
       return {
-        mock: {
+        quickMock: {
           label: "生成测试数据",
           icon: "el-icon-magic-stick",
           onClick: () => {
-            this.$emit("mockData");
+            this.$refs.batchMockData.quickGenerateData();
+          },
+        },
+        mock: {
+          label: "自定义生成测试数据",
+          icon: "el-icon-magic-stick",
+          onClick: () => {
+            this.openMockDialog();
           },
         },
         reset: {

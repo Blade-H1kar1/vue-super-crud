@@ -1,0 +1,215 @@
+.sc-batch-mock-dialog {
+  border-radius: 8px;
+
+  .form-tip {
+    margin-left: 10px;
+    color: var(--color-text-secondary);
+    font-size: 12px;
+  }
+
+  .help-icon {
+    margin-left: 8px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+
+  .fields-container {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--border-color-base);
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background-color: var(--background-color-light);
+    }
+  }
+
+  .field-item {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color-lighter);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .gen-type-select {
+    width: 100%;
+  }
+
+  .preview-container {
+    border-radius: 4px;
+    border: 1px solid var(--border-color-light);
+    overflow: hidden;
+    display: flex;
+  }
+
+  .preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0 8px;
+    background-color: var(--background-color-light);
+    border-right: 1px solid var(--border-color-light);
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+
+  .preview-value {
+    padding: 0 10px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    background-color: var(--color-white);
+    color: var(--color-text-regular);
+    font-size: 13px;
+    line-height: 1.5;
+    word-break: break-all;
+    font-family: monospace;
+  }
+
+  .preview {
+    &-object,
+    &-array {
+      color: var(--color-warning);
+      font-family: monospace;
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+  }
+
+  .el-radio-group {
+    margin-right: 8px;
+  }
+
+  .el-tooltip {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .el-input-number {
+    &.is-disabled {
+      opacity: 0.7;
+    }
+
+    &.full-width {
+      width: 100%;
+    }
+  }
+
+  .el-date-picker.full-width {
+    width: 100%;
+  }
+
+  // 工具类
+  .mt-8 {
+    margin-top: 8px;
+  }
+
+  .mb-8 {
+    margin-bottom: 8px;
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  // 数组和对象编辑相关
+  .array-item,
+  .object-item {
+    margin-bottom: 8px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .array-input {
+    width: 100%;
+  }
+
+  .object {
+    &-key {
+      width: 120px;
+    }
+
+    &-value {
+      flex: 1;
+    }
+  }
+
+  .manual-text-input {
+    display: flex;
+    flex-direction: column;
+
+    .el-checkbox {
+      margin-top: 8px;
+      font-size: 13px;
+    }
+  }
+
+  /* 添加删除按钮样式 */
+  .preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .delete-btn {
+    color: #f56c6c;
+    margin-left: 5px;
+  }
+
+  .delete-btn:hover {
+    color: #f78989;
+  }
+}
+
+.el-tooltip__popper {
+  p {
+    margin: 5px 0;
+    line-height: 1.4;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+}
+.sc-batch-mock-dialog__rule {
+  &-icon {
+    margin-right: 5px;
+  }
+
+  &-desc {
+    float: right;
+    color: var(--color-text-secondary);
+    font-size: 12px;
+  }
+
+  &-config {
+    background-color: var(--background-color-light);
+    padding: 10px;
+    border-radius: 4px;
+
+    &-item {
+      margin-bottom: 10px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}

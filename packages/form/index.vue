@@ -82,6 +82,15 @@
       </el-form>
     </div>
     <draftDrawer ref="draftDrawer" />
+    <batchMockData
+      ref="batchMockData"
+      :visible.sync="mockDialogVisible"
+      :columns="trueRenderColumns"
+      instance-type="form"
+      :instance-ref="$refs.formRef"
+      :formInitialValue="value"
+      @generate="handleGenerateFormData"
+    />
   </div>
 </template>
 
@@ -95,6 +104,7 @@ import formAction from "./formAction.vue";
 import draftDrawer from "./draftDrawer.vue";
 import contextMenu from "./contextMenu";
 import position from "core/components/position";
+import batchMockData from "core/components/batchMockData.vue";
 
 // 导入功能mixins
 import formInit from "./mixins/init";
@@ -115,6 +125,7 @@ export default create({
     formAction,
     position,
     draftDrawer,
+    batchMockData,
   },
   props: {
     value: {
@@ -151,6 +162,7 @@ export default create({
       key: 1,
       loadingStatus: false,
       emptyCount: 0,
+      mockDialogVisible: false,
     };
   },
   created() {
@@ -277,6 +289,20 @@ export default create({
     },
     loadingStatus(val) {
       this.$emit("update:loading", val);
+    },
+  },
+  methods: {
+    // 打开模拟数据生成器
+    openMockDialog() {
+      this.mockDialogVisible = true;
+    },
+    // 处理生成的数据
+    handleGenerateFormData(data) {
+      // 直接更新表单数据
+      for (const key in data) {
+        this.$set(this.value, key, data[key]);
+      }
+      this.$message.success("已生成测试数据");
     },
   },
 });

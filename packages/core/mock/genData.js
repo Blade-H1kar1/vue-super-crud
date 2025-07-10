@@ -1,4 +1,6 @@
 import Mock from "mockjs";
+import mockConfig from "src/config/mock";
+import { findComponentInstance } from "utils";
 const Random = Mock.Random;
 
 /**
@@ -82,7 +84,7 @@ const typeGenerators = {
 export function generateMockData(config, options = {}) {
   if (!config) return null;
 
-  const { yearRange = 1, pattern } = options;
+  const { yearRange = 1, pattern, vnode, componentName } = options;
 
   if (config.disabled) {
     return undefined;
@@ -92,12 +94,59 @@ export function generateMockData(config, options = {}) {
     return Mock.mock(pattern);
   }
 
+  // 处理自定义组件模拟数据
+  if (vnode && componentName) {
+    const customValue = generateCustomComponentMockData(vnode, componentName);
+    if (customValue !== undefined) {
+      return customValue;
+    }
+  }
+
   const generator = typeGenerators[config.type];
   if (generator) {
     return generator(config, { yearRange });
   }
 
   return undefined;
+}
+
+/**
+ * 根据组件名称生成自定义模拟数据
+ * @param {Object} vnode 组件VNode
+ * @param {String} componentName 组件名称
+ * @returns {any} 模拟数据
+ */
+export function generateCustomComponentMockData(vnode, componentName) {
+  // 获取组件实例
+  let instance;
+  if (componentName) {
+    instance = findComponentInstance(vnode?.componentInstance, componentName);
+  } else {
+    for (const key in mockConfig) {
+      const instance = findComponentInstance(vnode?.componentInstance, key);
+      if (instance) {
+        componentName = key;
+        break;
+      }
+    }
+  }
+  if (!instance) return undefined;
+
+  // 查找对应的自定义模拟函数
+  const mockFn = mockConfig[componentName];
+  if (typeof mockFn !== "function") return undefined;
+
+  try {
+    // 执行自定义模拟函数
+    return mockFn(instance, {
+      Random,
+      Mock,
+      Preset: PRESET_RULES,
+    });
+  } catch (error) {
+    console.warn(`自定义组件 ${componentName} 的模拟数据生成失败:`, error);
+    return undefined;
+  }
 }
 
 function generateInputValue(config) {

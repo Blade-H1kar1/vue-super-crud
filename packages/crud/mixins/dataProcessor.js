@@ -381,5 +381,11 @@ export default {
         }
       });
     },
+    updatedData(data) {
+      // 清空原数组
+      this.data.splice(0, this.data.length);
+      // 添加新数据
+      this.data.push(...data);
+    },
   },
 };

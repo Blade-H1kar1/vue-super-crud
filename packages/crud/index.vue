@@ -59,6 +59,7 @@
           @cell-mouse-enter="cellMouseEnter"
           @cell-mouse-leave="cellMouseLeave"
           @row-contextmenu="openContextMenu"
+          @header-contextmenu="openContextHerderMenu"
           @selection-change="selectionChange"
           @select="select"
           @select-all="selectAll"
@@ -111,6 +112,16 @@
       >
       </el-tooltip>
     </el-form>
+    <batchMockData
+      :visible.sync="showMockDialog"
+      :columns="columns"
+      :data="list"
+      :value-key="valueKey"
+      instance-type="table"
+      :instance-ref="$refs.tableRef"
+      @generate="handleGenerateMockData"
+      @close="handleCloseMockDialog"
+    />
     <div
       v-if="editConfig.lastAdd"
       :class="b('add-button')"
@@ -136,6 +147,8 @@ import {
   merge,
   isPlainObject,
 } from "lodash-es";
+
+// 混入
 import tableEdit from "./mixins/tableEdit.js";
 import validate from "./mixins/validate.js";
 import contextMenu from "./mixins/contextMenu";
@@ -150,6 +163,8 @@ import summary from "./mixins/summary";
 import columnHandler from "./mixins/columnHandler";
 import cacheHandler from "./mixins/cacheHandler";
 import searchHandler from "./mixins/searchHandler";
+import mockData from "./mixins/mockData";
+// 组件
 import search from "./search.vue";
 import menuBar from "./menuBar.vue";
 import columnAction from "./columnAction.vue";
@@ -159,6 +174,7 @@ import pagination from "./pagination.vue";
 import group from "../group/index.vue";
 import selectBanner from "./selectBanner.vue";
 import virtualScroll from "el-table-virtual-scroll";
+import batchMockData from "core/components/batchMockData.vue";
 import {
   toCamelCase,
   toTreeArray,
@@ -184,6 +200,7 @@ export default create({
     position,
     selectBanner,
     virtualScroll,
+    batchMockData,
   },
   mixins: [
     init("crudOptions"),
@@ -202,6 +219,7 @@ export default create({
     columnHandler,
     cacheHandler,
     searchHandler,
+    mockData,
   ],
   props: {
     // 防止scope中携带实例时，拷贝合并报错
@@ -259,6 +277,7 @@ export default create({
       treeNodeMap: new Map(),
       labelMinWidthMap: new Map(),
       oldVNodeMap: new Map(),
+      showMockDialog: false,
     };
   },
   created() {

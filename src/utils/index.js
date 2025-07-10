@@ -210,3 +210,49 @@ export function filterButtons(
     })
     .filter(Boolean);
 }
+
+// 获取组件实例
+export function findComponentInstance(instance, componentName, maxDepth = 3) {
+  if (!instance) return;
+  let currentDepth = 0;
+
+  // 向下查找
+  const findDown = (instance, depth = 0) => {
+    if (!instance || depth >= maxDepth) return;
+
+    const name = instance.$options.name;
+    if (name === componentName) return instance;
+
+    const children = instance.$children || [];
+    for (const child of children) {
+      const result = findDown(child, depth + 1);
+      if (result) return result;
+    }
+  };
+
+  // 向上查找
+  const findUp = (instance, depth = 0) => {
+    if (!instance || depth >= maxDepth) return;
+
+    const name = instance.$options.name;
+    if (name === componentName) return instance;
+
+    const parent = instance.$parent;
+    if (parent) {
+      return findUp(parent, depth + 1);
+    }
+  };
+
+  // 先检查当前实例
+  if (instance.$options.name === componentName) {
+    return instance;
+  }
+
+  // 向下查找
+  const downResult = findDown(instance, currentDepth);
+  if (downResult) return downResult;
+
+  // 向上查找
+  const upResult = findUp(instance, currentDepth);
+  if (upResult) return upResult;
+}

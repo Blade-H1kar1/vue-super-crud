@@ -104,6 +104,7 @@ export default {
       properties: {
         show: Boolean,
         hidden: Boolean,
+        quickMock: presetButtonType,
         mock: presetButtonType,
         copy: presetButtonType,
         reset: presetButtonType,
@@ -119,6 +120,7 @@ export default {
       },
       default: () => ({
         copy: true,
+        quickMock: true,
         mock: true,
         reset: true,
         paste: true,

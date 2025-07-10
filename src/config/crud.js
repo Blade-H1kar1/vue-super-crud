@@ -461,6 +461,7 @@ export default {
         actionBtn: Boolean,
         copy: presetButtonType,
         mock: presetButtonType,
+        clearMock: presetButtonType,
         reset: presetButtonType,
         handles: {
           type: Array,
@@ -471,6 +472,7 @@ export default {
       default: () => ({
         copy: true,
         mock: true,
+        clearMock: true,
         reset: true,
         actionBtn: true,
         handles: [],
@@ -552,7 +554,6 @@ export default {
         "selection",
         "index",
         "expand",
-        "pagination",
         "empty",
         "handleRow",
         "toolbar",

@@ -14,11 +14,6 @@ import { defaultRender as _defaultRender } from "core";
 import DictMixin from "../dict/mixin";
 import position from "./position.vue";
 import { isEmptyData, resolveRender } from "utils";
-import {
-  getComponentConfig,
-  generateMockData,
-  generateCustomMockData,
-} from "../mock/index";
 export default {
   name: "render",
   props: {
@@ -79,7 +74,6 @@ export default {
       this.matcher = this.createMatcher(this.compStrategy);
     }
     if (this.controlCtx) {
-      this.setupMockDataListener();
       this.initFormatValue();
     }
     if (this.item.formatData && this.isWatchFormatValue) {
@@ -99,12 +93,6 @@ export default {
       this.item.ref(this.$vnode.componentInstance);
     }
   },
-  destroyed() {
-    if (this.controlCtx && this.mockDataListener) {
-      this.controlCtx.$off("mockData", this.mockDataListener);
-      this.mockDataListener = null;
-    }
-  },
   methods: {
     initFormatValue() {
       if (this.item.formatData) {
@@ -112,39 +100,6 @@ export default {
           if (this.isSettingValue) return;
           this.setFormatValue(this.$value);
         });
-      }
-    },
-    setupMockDataListener() {
-      this.mockDataListener = () => {
-        if (
-          (this.elForm || {}).disabled ||
-          (!isEmptyData(this.$value) && this.$value !== 0)
-        )
-          return;
-        const config = this.getComponentConfig();
-        if (config && config.disabled) return;
-        if (this.item.mock) {
-          const mockValue = generateCustomMockData(this.item.mock, this.scope);
-          mockValue && this.setFormatValue(mockValue);
-          return;
-        }
-
-        const mockValue = generateMockData(config, {
-          pattern: this.getPattern(),
-        });
-        !isEmptyData(mockValue) && this.setFormatValue(mockValue);
-      };
-
-      this.controlCtx.$on("mockData", this.mockDataListener);
-    },
-    getComponentConfig() {
-      return getComponentConfig(this.$vnode);
-    },
-    getPattern() {
-      const rules = this.rawRules;
-      if (rules) {
-        const pattern = rules.find((rule) => rule.regular);
-        if (pattern) return pattern.regular;
       }
     },
     getRow() {
@@ -182,7 +137,7 @@ export default {
         this.$set(this.scope.row, prop, val);
       }
     },
-    setFormatValue(value) {
+    setFormatValue(value, getValue) {
       const output = this.item.formatData?.output;
       if (output) {
         this.isSettingValue = true; // 设置标志
@@ -194,12 +149,14 @@ export default {
           this.setRow("$" + this.prop, value);
         }
         if (outputValue !== undefined) {
+          if (getValue) return outputValue;
           this.setRow(this.prop, outputValue);
         }
         this.$nextTick(() => {
           this.isSettingValue = false; // 重置标志
         });
       } else {
+        if (getValue) return value;
         this.setRow(this.prop, value);
       }
     },

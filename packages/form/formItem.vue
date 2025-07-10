@@ -181,6 +181,7 @@ export default create({
               }
               return defaultRender.input;
             }}
+            data-prop={this.item.prop}
           ></Render>
         </tooltip>
       );
