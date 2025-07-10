@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.1](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.8.0...v1.8.1) (2025-07-10)
+
+
+### 🐛 问题修复
+
+* **crud、form:** bug修复 ([0b5c5a9](https://github.com/Blade-H1kar1/vue-super-crud/commit/0b5c5a934f4c1765a817d82636ed01dc1db530a4))
+* **crud:** 统计结果小数去除末尾0 ([0e71e1e](https://github.com/Blade-H1kar1/vue-super-crud/commit/0e71e1ebaa3c89caf64d04e725e2e28ffb3583f3))
+* **docs:** enhanceApp.js ([0967d79](https://github.com/Blade-H1kar1/vue-super-crud/commit/0967d793af45388fae5962ca005aae7ce4dba258))
+
 ## [1.8.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.7.4...v1.8.0) (2025-07-04)
 
 
