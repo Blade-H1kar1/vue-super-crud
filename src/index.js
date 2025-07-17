@@ -15,6 +15,7 @@ import position from "pak/core/components/position";
 import grid from "pak/grid/index.vue";
 import cell from "pak/grid/cell.vue";
 import lazyRender from "pak/lazyRender/index.vue";
+import stepForm from "pak/stepForm/index.vue";
 
 import { mergeTemplate } from "./template";
 import directive from "pak/directive";
@@ -39,6 +40,7 @@ const components = [
   grid,
   cell,
   lazyRender,
+  stepForm,
 ];
 
 const install = function (Vue, opts = {}) {

@@ -40,11 +40,7 @@ export default create({
     });
   },
   methods: {
-    resetField(isCondition) {
-      const config = this.getComponentConfig();
-      if (isCondition && (config?.disabled || this.disabled)) {
-        return;
-      }
+    resetField() {
       this.$refs.formItem?.resetField();
     },
     getComponentConfig(callBack) {

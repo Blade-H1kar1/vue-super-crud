@@ -1,0 +1,138 @@
+.sc-step-form {
+  &__indicator {
+    display: flex;
+    margin-bottom: 32px;
+    padding: 0 20px;
+
+    &-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      cursor: pointer;
+
+      &:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        top: 16px;
+        left: 50%;
+        right: -50%;
+        height: 2px;
+        background: #e4e7ed;
+        z-index: 1;
+      }
+
+      // 修改这里，使用正确的 BEM 修饰符选择器
+      &--completed::after {
+        background: #67c23a;
+      }
+
+      &--active::after {
+        background: linear-gradient(to right, #67c23a 50%, #e4e7ed 50%);
+      }
+
+      &--disabled {
+        cursor: not-allowed;
+      }
+    }
+
+    &-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e4e7ed;
+      color: #909399;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 2;
+      font-weight: bold;
+
+      // 修改这里，使用正确的父选择器
+      .sc-step-form__indicator-item--completed & {
+        background: #67c23a;
+        color: white;
+      }
+
+      .sc-step-form__indicator-item--active & {
+        background: #409eff;
+        color: white;
+      }
+    }
+
+    &-title {
+      font-size: 14px;
+      color: #606266;
+      text-align: center;
+
+      // 修改这里，使用正确的父选择器
+      .sc-step-form__indicator-item--active & {
+        color: #409eff;
+        font-weight: bold;
+      }
+
+      .sc-step-form__indicator-item--completed & {
+        color: #67c23a;
+      }
+    }
+  }
+
+  &__content {
+    position: relative;
+    overflow: hidden;
+  }
+
+  &__step {
+    &-title {
+      margin-bottom: 24px;
+
+      h3 {
+        margin: 0 0 8px 0;
+        font-size: 18px;
+        color: #303133;
+      }
+
+      p {
+        margin: 0;
+        color: #909399;
+        font-size: 14px;
+      }
+    }
+  }
+
+  &__footer {
+    margin-top: 32px;
+    text-align: center;
+
+    .el-button {
+      margin: 0 8px;
+    }
+  }
+}
+
+// 过渡动画
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-left-enter {
+  transform: translateX(100%);
+}
+
+.slide-left-leave-to {
+  transform: translateX(-100%);
+}
+
+.slide-right-enter {
+  transform: translateX(-100%);
+}
+
+.slide-right-leave-to {
+  transform: translateX(100%);
+}

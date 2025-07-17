@@ -86,6 +86,11 @@ module.exports = {
           children: ["form/baseUse", "form/detail"],
         },
         {
+          title: "stepForm组件",
+          collapsable: true,
+          children: ["stepForm/base"],
+        },
+        {
           title: "grid组件",
           collapsable: true,
           children: ["grid/baseUse"],
