@@ -12,15 +12,3 @@
 <<< @/docs/.vuepress/components/mockData/example.vue
 </common-code-format>
 </ClientOnly>
-
-## 自定义mock数据
-
-通过`mock`属性，可以自定义mock数据，`mock`属性可以是一个函数，也可以是一个值。
-
-<ClientOnly>
-<common-code-format>
-  <mockData-custom slot="source"></mockData-custom>
-  
-<<< @/docs/.vuepress/components/mockData/custom.vue
-</common-code-format>
-</ClientOnly>

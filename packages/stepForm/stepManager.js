@@ -9,17 +9,17 @@ export class StepManager {
 
   // 跳转到指定步骤
   goToStep(stepIndex) {
-    // 检查步骤索引是否有效
+    // 检查索引有效性
     if (stepIndex < 0 || stepIndex >= this.steps.length) {
       return false;
     }
 
-    // 检查是否可以导航到该步骤
+    // 检查是否可导航
     if (!this.canNavigateToStep(stepIndex)) {
       return false;
     }
 
-    // 更新当前步骤
+    // 更新步骤
     const prevStep = this.currentStep;
     this.currentStep = stepIndex;
     this.emit("step-change", {
@@ -34,7 +34,7 @@ export class StepManager {
   next() {
     let nextStep = this.currentStep + 1;
 
-    // 跳过不可见的步骤
+    // 跳过不可见步骤
     while (nextStep < this.steps.length && !this.isStepVisible(nextStep)) {
       nextStep++;
     }
@@ -51,7 +51,7 @@ export class StepManager {
   prev() {
     let prevStep = this.currentStep - 1;
 
-    // 跳过不可见的步骤
+    // 跳过不可见步骤
     while (prevStep >= 0 && !this.isStepVisible(prevStep)) {
       prevStep--;
     }
@@ -64,9 +64,9 @@ export class StepManager {
     return false;
   }
 
-  // 检查是否可以导航到指定步骤
+  // 检查是否可导航到指定步骤
   canNavigateToStep(stepIndex, data = this.stepData) {
-    // 检查步骤是否存在且可见
+    // 检查步骤可见性
     if (!this.isStepVisible(stepIndex, data)) {
       return false;
     }
@@ -74,42 +74,39 @@ export class StepManager {
     // 允许向后导航
     if (stepIndex < this.currentStep) return true;
 
-    // 不再检查stepValidation
     return true;
   }
 
-  // 获取当前步骤信息
+  // 获取当前步骤
   getCurrentStep() {
     return this.steps[this.currentStep];
   }
 
   // 设置步骤数据
   setStepData(stepIndex, data) {
-    // 检查步骤索引是否有效
+    // 检查索引有效性
     if (stepIndex < 0 || stepIndex >= this.steps.length) {
       return false;
     }
 
-    // 更新步骤数据
+    // 更新数据
     if (typeof data === "object") {
       this.stepData = { ...this.stepData, ...data };
     } else {
       this.stepData = data;
     }
 
-    // 触发数据变更事件
+    // 触发事件
     this.emit("data-change", { stepIndex, data: this.stepData });
     return true;
   }
-
-  // 这里移除了setStepValidation和isAllStepsValid方法
 
   // 判断步骤是否可见
   isStepVisible(stepIndex, data = this.stepData) {
     const step = this.steps[stepIndex];
     if (!step) return false;
 
-    // 如果有condition函数，则根据函数结果决定是否显示
+    // 根据条件函数判断
     if (typeof step.condition === "function") {
       return step.condition(data);
     }
@@ -117,7 +114,7 @@ export class StepManager {
     return true;
   }
 
-  // 事件系统
+  // 注册事件
   on(event, callback) {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, []);
@@ -125,6 +122,7 @@ export class StepManager {
     this.listeners.get(event).push(callback);
   }
 
+  // 触发事件
   emit(event, data) {
     const callbacks = this.listeners.get(event) || [];
     callbacks.forEach((cb) => cb(data));

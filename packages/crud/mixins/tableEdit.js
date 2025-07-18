@@ -516,6 +516,15 @@ export default {
     // 单元格编辑事件
     handleCellEdit(scope, column) {
       if (this.editConfig.mode !== "cell") return;
+      // 评估列的编辑条件
+      const canEdit =
+        typeof column.isEdit === "function"
+          ? column.isEdit(scope)
+          : column.isEdit;
+      if (column.isEdit !== undefined && !canEdit) {
+        this.$message.warning("当前单元格不允许编辑");
+        return;
+      }
       this.runBefore(
         ["edit"],
         (data) => {

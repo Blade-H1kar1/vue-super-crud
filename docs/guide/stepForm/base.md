@@ -154,7 +154,7 @@
 | step-title-[index]-[position]   | 在步骤标题周围添加内容     | { currentStep, stepConfig, formData, updateFormData, validate }                        |
 | step-content-[index]            | 自定义步骤表单内容         | { currentStep, stepConfig, formData, updateFormData, validate }                        |
 | step-content-[index]-[position] | 在步骤表单周围添加内容     | { currentStep, stepConfig, formData, updateFormData, validate }                        |
-| form-[index]-[slotName]         | 自定义表单字段插槽         | { row, $index, ... } + { currentStep, stepConfig, formData, updateFormData, validate } |
+| form-[index]-[prop]         | 自定义表单字段插槽         | { row, $index, ... } + { currentStep, stepConfig, formData, updateFormData, validate } |
 | step-footer-[index]             | 自定义步骤导航按钮         | { currentStep, totalSteps, prev, next, submit, loading }                               |
 | step-footer-[index]-[position]  | 在步骤导航按钮周围添加内容 | { currentStep, totalSteps, prev, next, submit, loading }                               |
 

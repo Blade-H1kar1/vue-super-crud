@@ -30,7 +30,7 @@
     <div :class="b('content')">
       <transition :name="transitionName" mode="out-in">
         <div :key="currentStep" :class="b('step')">
-          <!-- 步骤标题 - 使用position组件 -->
+          <!-- 步骤标题 -->
           <sc-position
             :class="b('step-title')"
             :slot-name="'step-title'"
@@ -39,7 +39,7 @@
             :scope="contentScope"
             :inline="false"
           >
-            <!-- 默认标题内容 -->
+            <!-- 默认标题 -->
             <template v-slot:default>
               <div v-if="currentStepConfig.title">
                 <h3>{{ currentStepConfig.title }}</h3>
@@ -64,7 +64,7 @@
               v-model="currentStepData"
               :options="currentStepFormOptions"
             >
-              <!-- 将当前步骤的插槽传递给sc-form，合并原有参数和步骤表单参数 -->
+              <!-- 传递插槽 -->
               <template
                 v-for="(_, slotName) in formScopedSlots"
                 v-slot:[slotName]="slotScope"
@@ -76,15 +76,6 @@
               </template>
             </sc-form>
           </sc-position>
-
-          <!-- 用于自定义步骤插槽全量校验时使用 -->
-          <div
-            v-for="(step, index) in visibleSteps"
-            :key="'hidden-slot' + index"
-            v-show="false"
-          >
-            <slot :name="'step-content-' + index"></slot>
-          </div>
         </div>
       </transition>
     </div>
@@ -97,7 +88,7 @@
         :slots="$scopedSlots"
         :scope="footerScope"
       >
-        <!-- 默认导航按钮 -->
+        <!-- 导航按钮 -->
         <template v-slot:default>
           <el-button v-if="currentStep > 0" @click="prev" :disabled="loading">
             {{ prevButtonText }}
@@ -163,8 +154,7 @@ export default create({
       type: Boolean,
       default: false,
     },
-    // 自定义校验函数，可以对整个步骤的数据进行校验
-    // 函数签名: (stepData, stepIndex, stepConfig) => Promise<boolean|Error>
+    // 自定义校验函数 (callback, stepIndex)
     customValidator: {
       type: Function,
       default: null,
@@ -232,7 +222,7 @@ export default create({
       return this.currentStepConfig.submitText || "提交";
     },
 
-    // 内容区域的作用域数据
+    // 内容区域作用域
     contentScope() {
       return {
         currentStep: this.currentStep,
@@ -242,7 +232,7 @@ export default create({
       };
     },
 
-    // 导航按钮的作用域数据
+    // 导航按钮作用域
     footerScope() {
       return {
         currentStep: this.currentStep,
@@ -254,15 +244,13 @@ export default create({
       };
     },
 
-    // 获取当前步骤表单可能的插槽
+    // 当前步骤表单插槽
     formScopedSlots() {
-      // 获取sc-form组件的所有可用插槽
       const formSlots = {};
 
-      // 遍历所有插槽
       Object.keys(this.$scopedSlots || {}).forEach((slotName) => {
         if (slotName.startsWith(`form-${this.currentStep}-`)) {
-          // 提取出实际的表单插槽名称（去掉前缀）
+          // 提取实际插槽名称
           const actualSlotName = slotName.substring(
             `form-${this.currentStep}-`.length
           );
@@ -275,7 +263,7 @@ export default create({
       return formSlots;
     },
 
-    // 获取可见的步骤
+    // 可见步骤
     visibleSteps() {
       return this.steps.filter((step, index) => this.isStepVisible(index));
     },
@@ -309,7 +297,7 @@ export default create({
       this.stepManager.on("data-change", ({ stepIndex, data }) => {});
     },
 
-    // 获取步骤对应的prop
+    // 获取步骤prop
     getStepProp(stepIndex) {
       const step = this.steps[stepIndex];
       return step && step.prop !== undefined ? step.prop : stepIndex;
@@ -322,25 +310,22 @@ export default create({
       }
     },
 
-    // 检查是否可以导航到指定步骤
+    // 检查是否可导航到指定步骤
     canNavigateToStep(stepIndex) {
-      // 首先检查步骤是否可见
+      // 检查步骤是否可见
       if (!this.isStepVisible(stepIndex)) {
         return false;
       }
 
-      // 使用stepManager的导航检查逻辑，传递当前表单值
       return this.stepManager.canNavigateToStep(stepIndex, this.value);
     },
 
     // 跳转到指定步骤
     goToStep(stepIndex) {
-      // 检查是否可以导航到该步骤
       if (!this.isStepVisible(stepIndex)) {
         return false;
       }
 
-      // 使用stepManager进行导航
       return this.stepManager.goToStep(stepIndex);
     },
 
@@ -357,7 +342,7 @@ export default create({
 
     // 处理步骤数据变化
     handleStepDataChange(data) {
-      // 在扁平模式下，只传递当前步骤相关的字段
+      // 扁平模式下只传递当前步骤相关字段
       if (this.flattenMode && this.currentStepConfig.fields) {
         const stepFields = this.currentStepConfig.fields;
         const stepData = {};
@@ -376,7 +361,7 @@ export default create({
     async submit() {
       this.loading = true;
       try {
-        // 使用validate方法进行全量校验，发现错误会自动跳转到对应步骤
+        // 全量校验
         await this.validate();
 
         await this.$emit("submit", this.value);
@@ -388,7 +373,6 @@ export default create({
 
     // 合并插槽作用域
     mergeSlotScope(originalScope, additionalScope) {
-      // 创建一个新对象，合并原始插槽作用域和额外作用域
       return { ...originalScope, ...additionalScope };
     },
 
@@ -397,7 +381,7 @@ export default create({
       return this.stepManager.isStepVisible(stepIndex, this.value);
     },
 
-    // 获取可见步骤的索引
+    // 获取可见步骤索引
     getVisibleStepIndex(actualIndex) {
       let visibleIndex = 0;
       for (let i = 0; i < actualIndex; i++) {
@@ -408,7 +392,7 @@ export default create({
       return visibleIndex;
     },
 
-    // 获取可见步骤索引对应的实际步骤索引
+    // 获取实际步骤索引
     getActualStepIndex(visibleIndex) {
       let actualIndex = 0;
       let currentVisibleIndex = 0;
@@ -423,7 +407,7 @@ export default create({
         actualIndex++;
       }
 
-      // 确保找到可见的步骤
+      // 确保找到可见步骤
       while (
         actualIndex < this.steps.length &&
         !this.stepManager.isStepVisible(actualIndex, this.value)

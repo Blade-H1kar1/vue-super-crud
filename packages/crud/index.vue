@@ -54,7 +54,7 @@
           highlight-current-row
           highlight-selection-row
           v-bind="tableProps"
-          v-on="{ ...$listeners, ...crudOptions }"
+          v-on="tableListeners"
           :data="virtualized ? virtualList : list"
           @cell-mouse-enter="cellMouseEnter"
           @cell-mouse-leave="cellMouseLeave"
@@ -146,6 +146,7 @@ import {
   cloneDeep,
   merge,
   isPlainObject,
+  omit,
 } from "lodash-es";
 
 // 混入
@@ -327,6 +328,15 @@ export default create({
         delete props.height;
       }
       return props;
+    },
+    tableListeners() {
+      const handlers = { ...omit(this.$listeners, "input") };
+      Object.keys(this.crudOptions).forEach((key) => {
+        if (typeof this.crudOptions[key] === "function") {
+          handlers[key] = this.crudOptions[key];
+        }
+      });
+      return handlers;
     },
     defaultColumns() {
       const columns = [];

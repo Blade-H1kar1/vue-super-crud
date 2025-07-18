@@ -1,7 +1,6 @@
 .sc-form {
   .el-form-item {
     width: 100%;
-    // display: inline-block;
     .el-form-item__content {
       .el-select,
       .el-date-editor,
@@ -20,6 +19,21 @@
         .el-input__inner {
           text-align: left;
         }
+      }
+    }
+    .is-required {
+      .el-form-item__label:before {
+        display: none;
+      }
+      .form-label {
+        position: relative;
+      }
+      .form-label:before {
+        position: absolute;
+        content: "*";
+        color: #9933ff;
+        left: -8px;
+        top: 0;
       }
     }
   }
