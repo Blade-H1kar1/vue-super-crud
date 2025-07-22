@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.8.1...v1.9.0) (2025-07-22)
+
+
+### ✨ 新功能
+
+* **form、crud:** 自定义批量模拟数据功能 ([02b2e39](https://github.com/Blade-H1kar1/vue-super-crud/commit/02b2e3972f09e2d60a03f79523dc4578f6cd7fdb))
+* **sc-step-form:** 新增步骤表单组件及文档示例 ([ecc1d1b](https://github.com/Blade-H1kar1/vue-super-crud/commit/ecc1d1b45685c80b3e15aad97ec5bfb7b0960d25))
+
+
+### 🐛 问题修复
+
+* **crud、form:**  单元格禁用优化、表单必填样式优化 ([77ad3d2](https://github.com/Blade-H1kar1/vue-super-crud/commit/77ad3d2a2cea987f80627a41d5b173413d76fb88))
+
 ### [1.8.1](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.8.0...v1.8.1) (2025-07-10)
 
 

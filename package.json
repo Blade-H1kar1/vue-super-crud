@@ -1,6 +1,6 @@
 {
   "name": "vue-super-crud",
-  "version": "1.8.1",
+  "version": "1.9.0",
   "main": "lib/super-crud.min.js",
   "files": [
     "lib",
