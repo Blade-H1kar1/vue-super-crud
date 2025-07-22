@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.9.1](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.9.0...v1.9.1) (2025-07-22)
+
+
+### 🐛 问题修复
+
+* **crud:**  编辑模式禁用配置、优化必填编辑样式 ([85ec0b0](https://github.com/Blade-H1kar1/vue-super-crud/commit/85ec0b0d301a073a0e1701809e2c59a66e71609b))
+
 ## [1.9.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.8.1...v1.9.0) (2025-07-22)
 
 
