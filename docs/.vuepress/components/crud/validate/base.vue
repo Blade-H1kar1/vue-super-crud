@@ -82,7 +82,9 @@ export default {
             prop: "name",
             label: "昵称",
             isEdit: true,
-            required: true,
+            required: ({ $index }) => {
+              return $index === 1;
+            },
           },
           {
             prop: "username",

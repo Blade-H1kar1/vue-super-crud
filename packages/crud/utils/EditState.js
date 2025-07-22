@@ -53,7 +53,7 @@ class EditState {
     }
 
     // 自由编辑模式或列允许编辑
-    if (this.mode === "free" || canEdit) {
+    if (this.mode === "free") {
       return editMode;
     }
 

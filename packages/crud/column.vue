@@ -108,17 +108,20 @@ export default create({
       return (this.col.search && show) || (this.col.searchHeader && show);
     },
     showEditIcon() {
-      if (this.ctx.editConfig.mode === "cell" && this.col.isEdit !== false) {
-        return true;
-      }
       if (
-        this.ctx.editConfig.mode === "row" &&
-        this.ctx.editConfig.trigger !== "manual" &&
-        this.col.isEdit !== false
+        this.ctx.validateEditMode("cell") &&
+        this.col.isEdit !== false &&
+        typeof this.col.isEdit !== "function"
       ) {
         return true;
       }
+      if (this.ctx.validateEditMode("row") && this.col.isEdit !== false) {
+        return true;
+      }
       return false;
+    },
+    showRequired() {
+      return this.col.required === true;
     },
   },
   methods: {
@@ -145,14 +148,8 @@ export default create({
     },
   },
   render(h) {
-    const {
-      col,
-      ctx,
-      showSearchHeader,
-      showOverflowTooltip,
-      isShow,
-      fixed,
-    } = this;
+    const { col, ctx, showSearchHeader, showOverflowTooltip, isShow, fixed } =
+      this;
     const isDefaultColumn = ctx.isDefaultColumn(col);
     if (!isShow) return null;
     // 优先使用本地存储的宽度
@@ -164,7 +161,7 @@ export default create({
     const columnHeader = () => {
       return (
         <div
-          class={this.b(["header"])}
+          class={[this.b(["header"]), { "is-required": this.showRequired }]}
           style={{ color: this.isSearch ? "var(--color-primary)" : "" }}
         >
           {this.showEditIcon && (

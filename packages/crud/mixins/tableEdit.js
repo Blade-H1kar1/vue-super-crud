@@ -17,7 +17,7 @@ export default {
         this.initEditState();
         this.updateEditState();
         this.bindTriggerEvent();
-        if (v && ov && !isEqual(v, ov)) {
+        if (!isEqual(v, ov)) {
           this.transformData();
         }
       },
@@ -85,6 +85,7 @@ export default {
     updateEditState() {
       if (!this.editState) return;
       const { mode, isRowEdit, exclusive, trigger } = this.editConfig;
+      this.editState.clearAllEditStatus();
       this.editState.mode = mode;
       this.editState.exclusive =
         exclusive || trigger === "click" || trigger === "dblclick";
@@ -161,16 +162,26 @@ export default {
         isRowEdit(scope) === false
       );
     },
-
+    // 校验编辑模式
+    validateEditMode(mode) {
+      if (this.editConfig.disabled) return false;
+      return mode ? this.editConfig.mode === mode : this.editConfig.mode;
+    },
     // 校验单元格编辑状态
     validateEdit(col = {}, scope = {}) {
+      if (!col.isEdit && !this.editConfig.mode) return false;
       // 评估列的编辑条件
       const canEdit =
         typeof col.isEdit === "function" ? col.isEdit(scope) : col.isEdit;
       if (canEdit === false) return false;
-      return this._runWithoutDeps(() => {
-        return this.editState.validateEdit(col, scope, canEdit);
-      });
+      if (this.editConfig.mode) {
+        if (this.editConfig.disabled) return;
+        return this._runWithoutDeps(() => {
+          return this.editState.validateEdit(col, scope, canEdit);
+        });
+      } else {
+        return canEdit ? "edit" : false;
+      }
     },
 
     // 行添加事件

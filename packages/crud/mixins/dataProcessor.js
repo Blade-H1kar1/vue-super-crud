@@ -158,9 +158,8 @@ export default {
       const isDelayRender = this.crudOptions.delayRender;
       const delayRenderIndex = this.crudOptions.delayRenderIndex || 30;
 
-      const shouldDelayRender = this.shouldDelayRenderForIndex(
-        delayRenderIndex
-      );
+      const shouldDelayRender =
+        this.shouldDelayRenderForIndex(delayRenderIndex);
 
       const processNode = (nodes, parent = null, level = 0) => {
         if (!Array.isArray(nodes)) return;
@@ -352,6 +351,7 @@ export default {
 
     // 数据加载相关
     changeLoading(bool = false) {
+      if (!this.crudOptions.remote) return;
       if (this.crudOptions.disableLoading) return;
       this.loadingStatus = bool;
     },

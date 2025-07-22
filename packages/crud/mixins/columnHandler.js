@@ -92,18 +92,18 @@ export default {
         ) {
           return false;
         }
-        if (this.editConfig.mode && col.isEdit !== false) {
+        if (this.validateEditMode() && col.isEdit !== false) {
           return false;
         }
         return true;
       });
     },
     showEditIcon(col) {
-      if (this.editConfig.mode === "cell" && col.isEdit !== false) {
+      if (this.validateEditMode("cell") && col.isEdit !== false) {
         return true;
       }
       if (
-        this.editConfig.mode === "row" &&
+        this.validateEditMode("row") &&
         this.editConfig.trigger !== "manual" &&
         col.isEdit !== false
       ) {
