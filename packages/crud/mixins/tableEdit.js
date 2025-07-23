@@ -262,10 +262,7 @@ export default {
 
     // 行点击事件
     handleRowClick(scope, prop) {
-      if (
-        this.editConfig.mode === "row" &&
-        this.editConfig.trigger === "click"
-      ) {
+      if (this.validateEditMode("row") && this.editConfig.trigger === "click") {
         if (this.editState.isRowEditing(scope.row)) return;
         const editRow = this.editState.getEditingRows()[0]?.row;
 
@@ -525,7 +522,7 @@ export default {
 
     // 单元格编辑事件
     handleCellEdit(scope, column) {
-      if (this.editConfig.mode !== "cell") return;
+      if (!this.validateEditMode("cell")) return;
       // 评估列的编辑条件
       const canEdit =
         typeof column.isEdit === "function"
@@ -551,7 +548,7 @@ export default {
     // 单元格点击事件
     handleCellClick(scope, col) {
       if (
-        this.editConfig.mode === "cell" &&
+        this.validateEditMode("cell") &&
         this.editConfig.trigger === "click"
       ) {
         if (this.editState.isCellEditing(scope.row, col.prop)) return;

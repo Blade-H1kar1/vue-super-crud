@@ -83,9 +83,11 @@ export default {
       this.selectedRows = [
         {
           id: 1,
+          name: "用户1",
         },
         {
           id: 3,
+          name: "用户3",
         },
       ];
     },

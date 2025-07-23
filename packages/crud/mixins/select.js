@@ -1,8 +1,17 @@
 import { checkVisibility } from "utils";
-import { isFunction, merge } from "lodash-es";
+import { isFunction, merge, isEqual } from "lodash-es";
 
+/**
+ * 表格选择功能混入
+ * 提供单选和多选功能，支持键盘操作和行点击选择
+ * 支持分页情况下的选中状态保持
+ */
 export default {
   props: {
+    /**
+     * 选中的数据，可以是对象（单选）或数组（多选）
+     * 通过 .sync 修饰符双向绑定
+     */
     selected: {
       type: [Object, Array],
     },
@@ -13,12 +22,13 @@ export default {
       selectionRow: [],
       shiftOrAltDown: false,
       CtrlDown: false,
+      EscDown: false,
     };
   },
   mounted() {
     if (this.selection) {
-      window.addEventListener("keydown", this.keyDown, false);
-      window.addEventListener("keyup", this.keyUp, false);
+      window.addEventListener("keydown", this.keyDown, { passive: true });
+      window.addEventListener("keyup", this.keyUp, { passive: true });
     }
   },
   beforeDestroy() {
@@ -29,29 +39,54 @@ export default {
     // 监听外部传入的选中值变化
     selected: {
       handler(newVal, oldVal) {
-        // 是否完全更新数据
-        const isUpdated = newVal !== oldVal;
-        if (isUpdated && this.showSelection) {
+        if (this.showSelection) {
           this.$nextTick(() => {
             this.updateSelection();
           });
-        } else if (newVal && this.showSingleSelection) {
-          this.singleSelect = newVal[this.operateKey];
+        } else if (this.showSingleSelection) {
+          if (newVal) {
+            this.singleSelect = newVal[this.operateKey];
+          } else {
+            this.singleSelect = null;
+          }
         }
       },
       immediate: true,
+      deep: true, // 添加深度监听，确保对象内部属性变化也能被捕获
     },
   },
   computed: {
+    /**
+     * 是否显示多选功能
+     * @returns {Boolean}
+     */
     showSelection() {
       return checkVisibility(this.crudOptions.selection);
     },
+
+    /**
+     * 是否显示单选功能
+     * @returns {Boolean}
+     */
     showSingleSelection() {
       return checkVisibility(this.crudOptions.singleSelection);
     },
+
+    /**
+     * 多选配置
+     * @returns {Object}
+     */
     selection() {
-      return this.crudOptions.selection;
+      return {
+        dataSyncSelected: this.crudOptions.dataSyncSelected,
+        ...this.crudOptions.selection,
+      };
     },
+
+    /**
+     * 单选配置
+     * @returns {Object}
+     */
     singleSelection() {
       return this.crudOptions.singleSelection;
     },
@@ -71,19 +106,21 @@ export default {
       return this.selection.spanProp || this.valueKey;
     },
     selectedOperateKeys() {
-      return this.selected.map((item) => item[this.operateKey]);
+      return this.selected && this.selected.length > 0
+        ? this.selected.map((item) => item[this.operateKey])
+        : [];
     },
   },
   methods: {
     keyDown(event) {
-      let key = event.keyCode;
+      const key = event.keyCode;
       switch (key) {
-        case 17:
+        case 17: // Ctrl键
           this.CtrlDown = true;
           // 改变鼠标样式为指针
           document.body.style.cursor = "pointer";
           break;
-        case 16 || 18:
+        case 16: // Shift键
           this.shiftOrAltDown = true;
           // 改变鼠标样式为多选
           document.body.style.cursor = "cell";
@@ -91,21 +128,29 @@ export default {
           document.onselectstart = () => false;
           document.body.style.userSelect = "none";
           break;
-        case 27:
+        case 18: // Alt键
+          this.shiftOrAltDown = true;
+          // 改变鼠标样式为多选
+          document.body.style.cursor = "cell";
+          // 禁止文本选中
+          document.onselectstart = () => false;
+          document.body.style.userSelect = "none";
+          break;
+        case 27: // Esc键
           this.EscDown = true;
           break;
       }
     },
 
     keyUp(event) {
-      let key = event.keyCode;
+      const key = event.keyCode;
       switch (key) {
-        case 17:
+        case 17: // Ctrl键
           this.CtrlDown = false;
           // 恢复默认鼠标样式
           document.body.style.cursor = "";
           break;
-        case 16 || 18:
+        case 16: // Shift键
           this.shiftOrAltDown = false;
           // 恢复默认鼠标样式
           document.body.style.cursor = "";
@@ -113,7 +158,15 @@ export default {
           document.onselectstart = null;
           document.body.style.userSelect = "";
           break;
-        case 27:
+        case 18: // Alt键
+          this.shiftOrAltDown = false;
+          // 恢复默认鼠标样式
+          document.body.style.cursor = "";
+          // 恢复文本选中
+          document.onselectstart = null;
+          document.body.style.userSelect = "";
+          break;
+        case 27: // Esc键
           this.EscDown = false;
           break;
       }
@@ -127,10 +180,6 @@ export default {
             columnIndex,
           })
         : "";
-      // var findRow = this.selectionRow.find((c) => c.$index == row.$index);
-      // if (findRow) {
-      //   rowName = "current-row " + rowName;
-      // }
       return rowName;
     },
     selectRowClick(row, column, event) {
@@ -203,41 +252,56 @@ export default {
         };
       }
     },
-    // 更新选中状态
+    /**
+     * 更新表格选中状态
+     * 根据 selected 属性更新表格的选中状态
+     * 处理分页情况下的选中状态保持
+     */
     updateSelection() {
       if (!this.$refs.tableRef) return;
+      if (this._isInternalUpdateSelection) return;
       if (!this._isPaging) {
         this.$refs.tableRef.clearSelection();
       }
       if (!this.selected?.length) return;
 
+      // 创建操作键的映射，提高查找效率
+      const selectedKeyMap = new Map();
+      this.selected.forEach((item, index) => {
+        const key = item[this.operateKey];
+        if (key !== undefined) {
+          selectedKeyMap.set(key, { item, index });
+        }
+      });
+
       const updatedSelected = [];
-      this.list.forEach((row, index) => {
-        const selectedIndex = this.selectedOperateKeys.indexOf(
-          row[this.operateKey]
-        );
-        if (selectedIndex > -1) {
-          if (this.crudOptions.dataSyncSelected) {
-            merge(row, this.selected[selectedIndex]);
+      // 处理当前页数据
+      this.list.forEach((row) => {
+        const key = row[this.operateKey];
+        if (key !== undefined && selectedKeyMap.has(key)) {
+          const { item } = selectedKeyMap.get(key);
+          if (this.selection.dataSyncSelected) {
+            merge(row, item);
           }
           updatedSelected.push(row);
           // 同步选中状态
           this.$refs.tableRef.toggleRowSelection(row, true);
+          // 标记已处理
+          selectedKeyMap.delete(key);
         }
       });
 
-      // 保留不在当前页的选中项
-      this.selected.forEach((item) => {
-        const inCurrentPage = this.list.some(
-          (row) => row[this.operateKey] === item[this.operateKey]
-        );
-        if (!inCurrentPage) {
-          updatedSelected.push(item);
-        }
+      // 添加不在当前页的选中项
+      selectedKeyMap.forEach(({ item }) => {
+        updatedSelected.push(item);
       });
 
       // 更新选中数组
-      this.selected.splice(0, this.selected.length, ...updatedSelected);
+      if (updatedSelected.length > 0 || this.selected.length > 0) {
+        this.selected.splice(0, this.selected.length, ...updatedSelected);
+        this.updateSelected();
+      }
+
       this._isPaging = false;
     },
     selectionChange(arr) {
@@ -268,6 +332,11 @@ export default {
           );
           return;
         }
+      }
+
+      // 检查是否可选
+      if (!this.selectionSelectable(row, row.$index)) {
+        return;
       }
 
       // 执行选中操作
@@ -306,7 +375,10 @@ export default {
         this.list.map((item) => item[this.operateKey])
       );
 
+      // 批量处理以提高性能
       if (isAllSelected) {
+        // 收集需要添加的行
+        const rowsToAdd = [];
         selection.forEach((row) => {
           // 跳过有问题的行
           const rowIndex = this.list.findIndex((item) => item === row);
@@ -318,40 +390,92 @@ export default {
             return;
           }
 
-          if (this.selected.indexOf(row) === -1) {
-            this.selected.push(row);
+          // 检查是否已存在
+          const existingIndex = this.selected.findIndex(
+            (item) => item[this.operateKey] === row[this.operateKey]
+          );
+          if (
+            existingIndex === -1 &&
+            this.selectionSelectable(row, row.$index)
+          ) {
+            rowsToAdd.push(row);
           }
         });
+
+        // 批量添加行
+        if (rowsToAdd.length > 0) {
+          this.selected.push(...rowsToAdd);
+          this.updateSelected();
+        }
       } else {
-        // 取消全选当前页
-        for (let i = this.selected.length - 1; i >= 0; i--) {
-          if (currentPageKeys.has(this.selected[i][this.operateKey])) {
-            if (
-              this.selectionSelectable(
-                this.selected[i],
-                this.selected[i].$index
-              )
-            ) {
-              this.selected.splice(i, 1);
-            }
+        // 取消全选当前页 - 收集需要保留的行
+        const rowsToKeep = this.selected.filter((item) => {
+          // 如果不在当前页或不可选，则保留
+          if (
+            !currentPageKeys.has(item[this.operateKey]) ||
+            !this.selectionSelectable(item, item.$index)
+          ) {
+            return true;
           }
+          return false;
+        });
+
+        // 只有当数量变化时才更新
+        if (rowsToKeep.length !== this.selected.length) {
+          this.selected.splice(0, this.selected.length, ...rowsToKeep);
+          this.updateSelected();
         }
       }
     },
     addSelection(row) {
       if (!this.selected) return;
+
+      // 检查操作键是否存在
+      const operateKeyValue = row[this.operateKey];
+      if (operateKeyValue === undefined) {
+        console.error(`[CRUD Error] 无法添加选中项：${this.operateKey} 不存在`);
+        return;
+      }
+
       if (this.selection.spanProp) {
+        // 先移除相同 operateKey 的行
         this.removeSelection(row);
+
+        // 收集需要添加的行
+        const itemsToAdd = [];
+        const itemsToSelect = [];
+
         this.list.forEach((item) => {
-          if (item[this.operateKey] === row[this.operateKey]) {
-            this.selected.push(item);
-            this.$refs.tableRef.toggleRowSelection(item, true);
+          if (item[this.operateKey] === operateKeyValue) {
+            itemsToAdd.push(item);
+            itemsToSelect.push(item);
           }
         });
+
+        // 批量添加和选中
+        if (itemsToAdd.length > 0) {
+          this.selected.push(...itemsToAdd);
+          this.updateSelected();
+
+          this.$nextTick(() => {
+            if (this.$refs.tableRef) {
+              itemsToSelect.forEach((item) => {
+                this.$refs.tableRef.toggleRowSelection(item, true);
+              });
+            }
+          });
+        }
       } else {
-        if (this.selectedOperateKeys.indexOf(row[this.operateKey]) === -1) {
+        // 检查是否已存在
+        if (this.selectedOperateKeys.indexOf(operateKeyValue) === -1) {
           this.selected.push(row);
-          this.$refs.tableRef.toggleRowSelection(row, true);
+          this.updateSelected();
+
+          this.$nextTick(() => {
+            if (this.$refs.tableRef) {
+              this.$refs.tableRef.toggleRowSelection(row, true);
+            }
+          });
         }
       }
     },
@@ -360,19 +484,63 @@ export default {
         return;
       }
       if (!this.selected) return;
+
+      // 检查操作键是否存在
+      const operateKeyValue = row[this.operateKey];
+      if (operateKeyValue === undefined) {
+        console.error(`[CRUD Error] 无法移除选中项：${this.operateKey} 不存在`);
+        return;
+      }
+
       if (this.selection.spanProp) {
-        for (let i = this.selected.length - 1; i >= 0; i--) {
-          const item = this.selected[i];
-          if (item[this.operateKey] === row[this.operateKey]) {
-            this.selected.splice(i, 1);
-            this.$refs.tableRef.toggleRowSelection(item, false);
+        // 收集需要移除的项和取消选中的项
+        const itemsToDeselect = [];
+        const indicesToRemove = [];
+
+        // 找出所有需要移除的项
+        this.selected.forEach((item, index) => {
+          if (item[this.operateKey] === operateKeyValue) {
+            indicesToRemove.push(index);
+            itemsToDeselect.push(item);
           }
+        });
+
+        // 从后向前移除，避免索引变化
+        if (indicesToRemove.length > 0) {
+          // 按索引从大到小排序
+          indicesToRemove.sort((a, b) => b - a);
+
+          // 移除选中项
+          indicesToRemove.forEach((index) => {
+            this.selected.splice(index, 1);
+          });
+
+          this.updateSelected();
+
+          // 取消表格选中状态
+          this.$nextTick(() => {
+            if (this.$refs.tableRef) {
+              itemsToDeselect.forEach((item) => {
+                this.$refs.tableRef.toggleRowSelection(item, false);
+              });
+            }
+          });
         }
       } else {
-        const index = this.selectedOperateKeys.indexOf(row[this.operateKey]);
+        const index = this.selectedOperateKeys.indexOf(operateKeyValue);
         if (index > -1) {
+          const itemToDeselect = this.selected[index];
           this.selected.splice(index, 1);
-          this.$refs.tableRef.toggleRowSelection(row, false);
+          this.updateSelected();
+
+          this.$nextTick(() => {
+            if (this.$refs.tableRef) {
+              this.$refs.tableRef.toggleRowSelection(
+                itemToDeselect || row,
+                false
+              );
+            }
+          });
         }
       }
     },
@@ -384,19 +552,27 @@ export default {
       this.$refs.tableRef.clearSelection();
       this.selectionRow = [];
       if (!this.selected) return;
-      // 获取禁用的选中数据
-      const disabledSelection = this.selected.filter((item) => {
-        if (!this.selectionSelectable(item, item.$index)) {
-          return true;
-        }
-      });
-      this.selected.splice(0, this.selected.length, ...disabledSelection);
 
-      // 恢复禁用的选中数据
-      if (disabledSelection.length) {
-        disabledSelection.forEach((item) => {
-          this.$refs.tableRef.toggleRowSelection(item, true);
-        });
+      // 获取禁用的选中数据
+      const disabledSelection = this.selected.filter(
+        (item) => !this.selectionSelectable(item, item.$index)
+      );
+
+      // 只有当数量变化时才更新
+      if (disabledSelection.length !== this.selected.length) {
+        this.selected.splice(0, this.selected.length, ...disabledSelection);
+        this.updateSelected();
+
+        // 恢复禁用的选中数据
+        if (disabledSelection.length) {
+          this.$nextTick(() => {
+            disabledSelection.forEach((item) => {
+              if (this.$refs.tableRef) {
+                this.$refs.tableRef.toggleRowSelection(item, true);
+              }
+            });
+          });
+        }
       }
     },
     selectionSelectable(row, index) {
@@ -407,6 +583,39 @@ export default {
         }
       }
       return true;
+    },
+    updateSelected() {
+      // 设置标志位，防止循环更新
+      this._isInternalUpdateSelection = true;
+      // 使用防抖处理，避免频繁触发更新
+      this._debounceUpdateSelected =
+        this._debounceUpdateSelected ||
+        this.debounceMethod(() => {
+          this.$emit("update:selected", this.selected);
+          this.$nextTick(() => {
+            this._isInternalUpdateSelection = false;
+          });
+        }, 50);
+      this._debounceUpdateSelected();
+    },
+
+    /**
+     * 防抖函数
+     * 在指定时间内多次调用只执行最后一次
+     * @param {Function} fn 需要防抖的函数
+     * @param {Number} delay 延迟时间（毫秒）
+     * @returns {Function} 防抖后的函数
+     */
+    debounceMethod(fn, delay) {
+      let timer = null;
+      return function () {
+        const context = this;
+        const args = arguments;
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          fn.apply(context, args);
+        }, delay);
+      };
     },
   },
 };

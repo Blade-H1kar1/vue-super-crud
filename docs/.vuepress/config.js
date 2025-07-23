@@ -81,6 +81,11 @@ module.exports = {
           ],
         },
         {
+          title: "tableSelect组件",
+          collapsable: true,
+          children: ["tableSelect/base"],
+        },
+        {
           title: "form组件",
           collapsable: true,
           children: ["form/baseUse", "form/detail"],
