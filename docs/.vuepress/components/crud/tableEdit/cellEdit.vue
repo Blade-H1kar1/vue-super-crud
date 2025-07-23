@@ -99,6 +99,9 @@ export default {
           {
             prop: "select",
             label: "选择器",
+            isEdit: (scope) => {
+              return scope.row.id === 1;
+            },
             form: {
               comp: {
                 name: "el-select",

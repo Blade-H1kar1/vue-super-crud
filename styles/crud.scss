@@ -76,6 +76,10 @@
     }
   }
   .el-table {
+    // 表头必填样式
+    .sc-crud-column--header.is-required::before {
+      left: -8px;
+    }
     // 必填-单元格样式
     .is-required {
       position: relative;
@@ -87,6 +91,14 @@
       content: "*";
       color: var(--color-danger);
       margin-right: 4px;
+    }
+    .is-disabled__edit::before {
+      position: absolute;
+      font-family: element-icons !important;
+      content: "\e764";
+      color: var(--color-primary);
+      left: 4px;
+      top: 0;
     }
   }
   // 编辑框透明-单元格样式

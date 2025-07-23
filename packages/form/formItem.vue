@@ -49,12 +49,6 @@ export default create({
       return config;
     },
   },
-  watch: {
-    isDetail() {
-      // 改变模式时，重置form，刷新item组件的provide
-      this.formCtx.refreshForm();
-    },
-  },
   computed: {
     provide() {
       // 控制子组件单个禁用

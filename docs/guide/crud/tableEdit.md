@@ -328,6 +328,7 @@ options: {
 | isRowEdit   | 控制行是否可编辑                 | function({row, $index}) | -                     |
 | autofocus   | 是否自动聚焦，支持字符串(prop)   | boolean/string          | true                  |
 | exclusive   | 行编辑是否互斥(同时只能编辑一行) | boolean                 | false                 |
+| disabled    | 禁用编辑                         | boolean                 | false                 |
 
 ### Column 配置
 

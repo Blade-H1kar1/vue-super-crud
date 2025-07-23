@@ -152,7 +152,7 @@ export default create({
     },
     allowDirect: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     // 自定义校验函数 (callback, stepIndex)
     customValidator: {

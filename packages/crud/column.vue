@@ -45,18 +45,6 @@ export default create({
     },
   },
   computed: {
-    defaultMinWidth() {
-      // 计算头部默认宽度
-      const labelSpan = document.createElement("span");
-      labelSpan.innerText = this.col.label;
-      document.body.appendChild(labelSpan);
-      let labelMinWidth = labelSpan.getBoundingClientRect().width + 20;
-      this.col.search && (labelMinWidth += 20);
-      this.col.sortable && (labelMinWidth += 25);
-      document.body.removeChild(labelSpan);
-      labelMinWidth = Math.round(labelMinWidth);
-      return Math.max(labelMinWidth, 80);
-    },
     showOverflowTooltip() {
       const col = this.col;
       if (col.showOverflowTooltip !== undefined) return col.showOverflowTooltip;
@@ -64,29 +52,6 @@ export default create({
     },
     calcOpts() {
       return { ...this.ctx.crudOptions.calcColumnWidth, ...this.col };
-    },
-    colWidth() {
-      return this.getColumnWidth(
-        this.col.width,
-        this.col.prop,
-        this.ctx.data,
-        this.calcOpts.widthType,
-        this.calcOpts.widthFont,
-        this.calcOpts.calcWidth
-      );
-    },
-    colMinWidth() {
-      if (!this.col.width) {
-        return this.defaultMinWidth;
-      }
-      return this.getColumnWidth(
-        this.col.minWidth,
-        this.col.prop,
-        this.ctx.data,
-        this.calcOpts.widthType,
-        this.calcOpts.widthFont,
-        this.calcOpts.calcWidth
-      );
     },
     isShow() {
       // hiddenList 只隐藏列表
@@ -108,17 +73,20 @@ export default create({
       return (this.col.search && show) || (this.col.searchHeader && show);
     },
     showEditIcon() {
-      if (this.ctx.editConfig.mode === "cell" && this.col.isEdit !== false) {
-        return true;
-      }
       if (
-        this.ctx.editConfig.mode === "row" &&
-        this.ctx.editConfig.trigger !== "manual" &&
-        this.col.isEdit !== false
+        this.ctx.validateEditMode("cell") &&
+        this.col.isEdit !== false &&
+        typeof this.col.isEdit !== "function"
       ) {
         return true;
       }
+      if (this.ctx.validateEditMode("row") && this.col.isEdit !== false) {
+        return true;
+      }
       return false;
+    },
+    showRequired() {
+      return this.col.required === true;
     },
   },
   methods: {
@@ -145,14 +113,8 @@ export default create({
     },
   },
   render(h) {
-    const {
-      col,
-      ctx,
-      showSearchHeader,
-      showOverflowTooltip,
-      isShow,
-      fixed,
-    } = this;
+    const { col, ctx, showSearchHeader, showOverflowTooltip, isShow, fixed } =
+      this;
     const isDefaultColumn = ctx.isDefaultColumn(col);
     if (!isShow) return null;
     // 优先使用本地存储的宽度
@@ -164,7 +126,7 @@ export default create({
     const columnHeader = () => {
       return (
         <div
-          class={this.b(["header"])}
+          class={[this.b(["header"]), { "is-required": this.showRequired }]}
           style={{ color: this.isSearch ? "var(--color-primary)" : "" }}
         >
           {this.showEditIcon && (
@@ -199,10 +161,6 @@ export default create({
       );
     };
 
-    const minWidth = col.minWidth
-      ? Number(col.minWidth) + (this.showEditIcon ? 20 : 0)
-      : null;
-
     return (
       <TableColumn
         ref="column"
@@ -212,7 +170,7 @@ export default create({
         header-align={col.headerAlign || col.align || "center"}
         align={col.align || "center"}
         width={fixedWidth || col.width}
-        min-width={minWidth}
+        min-width={col.minWidth}
         show-overflow-tooltip={showOverflowTooltip}
         scopedSlots={{
           default: !isDefaultColumn ? (scope) => cellRender(scope) : null,

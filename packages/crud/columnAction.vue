@@ -106,7 +106,8 @@ export default create({
               $index: scope.$index,
             });
           },
-          innerHide: (scope) => this.isRowEditing(scope),
+          innerHide: (scope) =>
+            !this.ctx.validateEditMode("row") || this.isRowEditing(scope),
           onClick: (scope) => {
             this.ctx.handleRowEdit(scope);
           },
@@ -115,7 +116,8 @@ export default create({
           icon: "el-icon-circle-check",
           label: "保存",
           order: 10,
-          innerHide: (scope) => !this.isRowEditing(scope),
+          innerHide: (scope) =>
+            !this.ctx.validateEditMode("row") || !this.isRowEditing(scope),
           onClick: (scope) => {
             this.ctx.handleRowSave(scope);
           },
@@ -124,7 +126,8 @@ export default create({
           icon: "el-icon-circle-close",
           label: "取消",
           order: 11,
-          innerHide: (scope) => !this.isRowEditing(scope),
+          innerHide: (scope) =>
+            !this.ctx.validateEditMode("row") || !this.isRowEditing(scope),
           onClick: (scope) => {
             this.ctx.handleRowCancel(scope);
           },
@@ -150,7 +153,7 @@ export default create({
           label: "删除",
           order: 12,
           innerHide: (scope) =>
-            this.ctx.editConfig.mode === "row" && this.isRowEditing(scope),
+            this.ctx.validateEditMode("row") && this.isRowEditing(scope),
           onClick: (scope) => {
             this.ctx.handleDelete(scope);
           },
@@ -184,9 +187,8 @@ export default create({
     },
     handleActionButtons(scope, actionButtons) {
       let buttons = actionButtons;
-      this.ctx.buttonList[scope.$index] = this.buttonList[
-        scope.$index
-      ] = buttons;
+      this.ctx.buttonList[scope.$index] = this.buttonList[scope.$index] =
+        buttons;
 
       this.$nextTick(() => {
         this.calcAutoWidth();

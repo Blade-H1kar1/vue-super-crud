@@ -92,18 +92,18 @@ export default {
         ) {
           return false;
         }
-        if (this.editConfig.mode && col.isEdit !== false) {
+        if (this.validateEditMode() && col.isEdit !== false) {
           return false;
         }
         return true;
       });
     },
     showEditIcon(col) {
-      if (this.editConfig.mode === "cell" && col.isEdit !== false) {
+      if (this.validateEditMode("cell") && col.isEdit !== false) {
         return true;
       }
       if (
-        this.editConfig.mode === "row" &&
+        this.validateEditMode("row") &&
         this.editConfig.trigger !== "manual" &&
         col.isEdit !== false
       ) {
@@ -121,6 +121,8 @@ export default {
       let labelMinWidth = labelSpan.getBoundingClientRect().width + 20;
       col.search && (labelMinWidth += 20);
       col.sortable && (labelMinWidth += 25);
+      this.showRequired(col) && (labelMinWidth += 10);
+      this.showEditIcon(col) && (labelMinWidth += 20);
       document.body.removeChild(labelSpan);
       labelMinWidth = Math.max(Math.round(labelMinWidth), 80);
       this.labelMinWidthMap.set(col.label, labelMinWidth);
@@ -136,6 +138,22 @@ export default {
           }
         }
       });
+    },
+    showEditIcon(col) {
+      if (
+        this.validateEditMode("cell") &&
+        col.isEdit !== false &&
+        typeof col.isEdit !== "function"
+      ) {
+        return true;
+      }
+      if (this.validateEditMode("row") && col.isEdit !== false) {
+        return true;
+      }
+      return false;
+    },
+    showRequired(col) {
+      return col.required === true;
     },
   },
 };
