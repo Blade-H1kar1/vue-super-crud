@@ -16,6 +16,7 @@ import grid from "pak/grid/index.vue";
 import cell from "pak/grid/cell.vue";
 import lazyRender from "pak/lazyRender/index.vue";
 import stepForm from "pak/stepForm/index.vue";
+import tableSelect from "pak/tableSelect/index.vue";
 
 import { mergeTemplate } from "./template";
 import directive from "pak/directive";
@@ -41,6 +42,7 @@ const components = [
   cell,
   lazyRender,
   stepForm,
+  tableSelect,
 ];
 
 const install = function (Vue, opts = {}) {
