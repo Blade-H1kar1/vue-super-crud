@@ -12,15 +12,15 @@ export const provinceData = [
 
 // cityData.js - 城市数据（按省份代码分组）
 export const cityData = {
-  "11": [
+  11: [
     // 北京市
     { value: "1101", label: "北京市" },
   ],
-  "12": [
+  12: [
     // 天津市
     { value: "1201", label: "天津市" },
   ],
-  "13": [
+  13: [
     // 河北省
     { value: "1301", label: "石家庄市" },
     { value: "1302", label: "唐山市" },
@@ -34,11 +34,11 @@ export const cityData = {
     { value: "1310", label: "廊坊市" },
     { value: "1311", label: "衡水市" },
   ],
-  "31": [
+  31: [
     // 上海市
     { value: "3101", label: "上海市" },
   ],
-  "32": [
+  32: [
     // 江苏省
     { value: "3201", label: "南京市" },
     { value: "3202", label: "无锡市" },
@@ -54,7 +54,7 @@ export const cityData = {
     { value: "3212", label: "泰州市" },
     { value: "3213", label: "宿迁市" },
   ],
-  "33": [
+  33: [
     // 浙江省
     { value: "3301", label: "杭州市" },
     { value: "3302", label: "宁波市" },
@@ -68,7 +68,7 @@ export const cityData = {
     { value: "3310", label: "台州市" },
     { value: "3311", label: "丽水市" },
   ],
-  "44": [
+  44: [
     // 广东省
     { value: "4401", label: "广州市" },
     { value: "4402", label: "韶关市" },
@@ -92,11 +92,11 @@ export const cityData = {
     { value: "4452", label: "揭阳市" },
     { value: "4453", label: "云浮市" },
   ],
-  "50": [
+  50: [
     // 重庆市
     { value: "5001", label: "重庆市" },
   ],
-  "51": [
+  51: [
     // 四川省
     { value: "5101", label: "成都市" },
     { value: "5103", label: "自贡市" },
@@ -245,7 +245,7 @@ export const mockApi = {
       return mockData;
     };
 
-    return ({ pageNum, pageSize }) => {
+    return ({ pageNum = 1, pageSize = 10 }) => {
       return new Promise((resolve) => {
         if (!cachedData) {
           cachedData = generateAllData();
