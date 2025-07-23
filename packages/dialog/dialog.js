@@ -13,7 +13,6 @@ export default (options = {}) => {
     mixins: [init("dialogOptions", options)],
     data() {
       return {
-        fullscreen: false,
         visible: false,
         loading: false,
         value: {},
@@ -80,7 +79,12 @@ export default (options = {}) => {
         );
       },
       omitProps() {
-        return omit(this.dialogOptions, ["size", "beforeClose", "title"]);
+        return omit(this.dialogOptions, [
+          "size",
+          "beforeClose",
+          "title",
+          "fullscreen",
+        ]);
       },
     },
     methods: {
@@ -148,16 +152,12 @@ export default (options = {}) => {
             <span>{this.dialogOptions.title}</span>
             {this.dialogOptions.drawer ? null : (
               <span>
-                <i
-                  title="最大化"
-                  onClick={() => (this.fullscreen = !this.fullscreen)}
-                  class={[
-                    this.fullscreen ? "el-icon-news" : "el-icon-full-screen",
-                  ]}
-                ></i>
-                {this.dialogOptions.drag ? (
+                {this.dialogOptions.fullscreen && (
+                  <i title="最大化" class="el-icon-full-screen"></i>
+                )}
+                {this.dialogOptions.drag && (
                   <i title="拖拽" class="el-icon-rank dialog-drag"></i>
-                ) : null}
+                )}
               </span>
             )}
           </div>
@@ -209,10 +209,10 @@ export default (options = {}) => {
         <this.dialogType
           v-scDialogDrag={this.dialogOptions.drag}
           v-scDialogDragHeight={this.dialogOptions.dragSize}
+          v-scDialogFullscreen={this.dialogOptions.fullscreen}
           class={[this.b(), this.dialogOptions.class]}
           size={setPx(this.dialogOptions.width || "600px")}
           width={setPx(this.dialogOptions.width || "600px")}
-          fullscreen={this.fullscreen}
           visible={this.visible}
           beforeClose={this.cancel}
           close-on-click-modal={false}

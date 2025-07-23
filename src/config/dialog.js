@@ -20,6 +20,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    fullscreen: {
+      type: Boolean,
+      default: true,
+    },
     // 挂载后回调
     mounted: {
       type: Function,
