@@ -122,11 +122,6 @@ export function columnCell(h, { col, scope, ctx, topProps }) {
   const { rules, rawRules } = generateRules(item, scope);
   const isValidate = editMode && rules.length;
   const CompName = editMode && isValidate ? "el-form-item" : "div";
-  const canCellEdit =
-    ctx.validateEditMode("cell") &&
-    !editMode &&
-    typeof col.isEdit === "function" &&
-    col.isEdit(scope);
   let VNode;
 
   if (isDefaultRender(item, ctx) && !editMode) {
@@ -138,10 +133,7 @@ export function columnCell(h, { col, scope, ctx, topProps }) {
   return (
     <CompName
       class={[
-        typeof col.required === "function" && rules.required && editMode
-          ? "is-required"
-          : "",
-        canCellEdit ? "is-disabled__edit" : "",
+        rules.required && editMode ? "is-required" : "",
         b([col.align || "center"]),
         col.showOverflowTooltip && "sc-over-ellipsis",
       ]}

@@ -73,20 +73,13 @@ export default create({
       return (this.col.search && show) || (this.col.searchHeader && show);
     },
     showEditIcon() {
-      if (
-        this.ctx.validateEditMode("cell") &&
-        this.col.isEdit !== false &&
-        typeof this.col.isEdit !== "function"
-      ) {
-        return true;
-      }
-      if (this.ctx.validateEditMode("row") && this.col.isEdit !== false) {
+      if (this.ctx.validateEditMode("cell") && this.col.isEdit !== false) {
         return true;
       }
       return false;
     },
     showRequired() {
-      return this.col.required === true;
+      return this.ctx.validateEditMode("cell") && this.col.required === true;
     },
   },
   methods: {

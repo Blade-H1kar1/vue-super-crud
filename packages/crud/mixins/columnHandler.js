@@ -99,13 +99,10 @@ export default {
       });
     },
     showEditIcon(col) {
-      if (this.validateEditMode("cell") && col.isEdit !== false) {
-        return true;
-      }
       if (
-        this.validateEditMode("row") &&
-        this.editConfig.trigger !== "manual" &&
-        col.isEdit !== false
+        this.ctx.validateEditMode("cell") &&
+        col.isEdit !== false &&
+        typeof col.isEdit !== "function"
       ) {
         return true;
       }
@@ -140,20 +137,13 @@ export default {
       });
     },
     showEditIcon(col) {
-      if (
-        this.validateEditMode("cell") &&
-        col.isEdit !== false &&
-        typeof col.isEdit !== "function"
-      ) {
-        return true;
-      }
-      if (this.validateEditMode("row") && col.isEdit !== false) {
+      if (this.validateEditMode("cell") && col.isEdit) {
         return true;
       }
       return false;
     },
     showRequired(col) {
-      return col.required === true;
+      return this.validateEditMode("cell") && col.required === true;
     },
   },
 };
