@@ -81,9 +81,6 @@
       left: -8px;
     }
     // 必填-单元格样式
-    .is-required {
-      position: relative;
-    }
     .is-required::before {
       position: absolute;
       top: 0;
@@ -146,31 +143,10 @@
       color: var(--color-danger) !important;
     }
   }
-  // 单元格编辑样式
-  .sc-crud-cell__edit--active {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    .save-icon {
-      flex-shrink: 0;
-      width: 51px;
-      margin-left: 5px;
-    }
-  }
-  .sc-crud-cell__edit {
-    position: relative;
-    .content {
-      transition: all 0.3s;
-    }
-  }
-  .sc-crud-cell__edit--hover:hover {
-    .content {
-      opacity: 0;
-    }
-  }
 
   // 自定义单元格样式
   .custom-cell {
+    position: relative;
     .cell {
       display: flex;
       align-items: center;

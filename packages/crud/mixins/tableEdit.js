@@ -262,10 +262,7 @@ export default {
 
     // 行点击事件
     handleRowClick(scope, prop) {
-      if (
-        this.editConfig.mode === "row" &&
-        this.editConfig.trigger === "click"
-      ) {
+      if (this.validateEditMode("row") && this.editConfig.trigger === "click") {
         if (this.editState.isRowEditing(scope.row)) return;
         const editRow = this.editState.getEditingRows()[0]?.row;
 
@@ -525,7 +522,7 @@ export default {
 
     // 单元格编辑事件
     handleCellEdit(scope, column) {
-      if (this.editConfig.mode !== "cell") return;
+      if (!this.validateEditMode("cell")) return;
       // 评估列的编辑条件
       const canEdit =
         typeof column.isEdit === "function"
@@ -551,7 +548,7 @@ export default {
     // 单元格点击事件
     handleCellClick(scope, col) {
       if (
-        this.editConfig.mode === "cell" &&
+        this.validateEditMode("cell") &&
         this.editConfig.trigger === "click"
       ) {
         if (this.editState.isCellEditing(scope.row, col.prop)) return;
@@ -628,15 +625,16 @@ export default {
       if (this._documentClickHandler) return;
       this.$nextTick(() => {
         if (
-          this.editConfig.trigger === "click" ||
-          this.editConfig.trigger === "dblclick"
+          this.validateEditMode() &&
+          (this.editConfig.trigger === "click" ||
+            this.editConfig.trigger === "dblclick")
         ) {
           this._documentClickHandler = (e) => {
             const target = e.target;
             const isClickInCell = this.isClickInTableCell(target);
             const isClickInputClear = this.isClickInputClear(target);
             if (!isClickInCell && !isClickInputClear && !this._isClick) {
-              if (this.editConfig.mode === "row") {
+              if (this.validateEditMode("row")) {
                 const editRow = this.editState.getEditingRows()[0]?.row;
                 if (editRow) {
                   const scope = {
@@ -649,7 +647,7 @@ export default {
                 } else {
                   this.editState.clearOtherEditingRows();
                 }
-              } else {
+              } else if (this.validateEditMode("cell")) {
                 const editCell = this.editState.getEditingCell();
                 if (editCell) {
                   this.handleCellSave(
@@ -684,7 +682,7 @@ export default {
 
     // 最后添加事件
     handleLastAdd() {
-      if (this.editConfig.mode === "dialog") {
+      if (this.validateEditMode("dialog")) {
         this.handleAdd((this.editConfig.lastAdd || {}).addType || "last");
       } else {
         this.handleRowAdd(

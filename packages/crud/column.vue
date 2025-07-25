@@ -78,9 +78,6 @@ export default create({
       }
       return false;
     },
-    showRequired() {
-      return this.ctx.validateEditMode("cell") && this.col.required === true;
-    },
   },
   methods: {
     bindColumnConfig() {
@@ -119,7 +116,7 @@ export default create({
     const columnHeader = () => {
       return (
         <div
-          class={[this.b(["header"]), { "is-required": this.showRequired }]}
+          class={[this.b(["header"])]}
           style={{ color: this.isSearch ? "var(--color-primary)" : "" }}
         >
           {this.showEditIcon && (
