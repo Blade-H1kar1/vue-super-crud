@@ -10,19 +10,35 @@ export default create({
   inheritAttrs: false,
   name: "cell",
   props: {
+    // 单元格宽度（跨越的列数）
     widthSize: {
       type: [Number, String],
       default: 1,
+      validator: (value) => Number(value) > 0,
     },
+    // 单元格高度（跨越的行数）
     heightSize: {
       type: [Number, String],
       default: 1,
+      validator: (value) => Number(value) > 0,
     },
-    area: {},
-    center: {},
-    left: {},
-    top: {},
-    center: {},
+    // 网格区域名称
+    area: {
+      type: String,
+    },
+    // 是否居中显示内容
+    center: {
+      type: Boolean,
+    },
+    // 起始列位置
+    left: {
+      type: [Number, String],
+    },
+    // 起始行位置
+    top: {
+      type: [Number, String],
+    },
+    // 自定义单元格样式
     cellStyle: {
       type: Object,
       default: () => ({}),
@@ -30,33 +46,50 @@ export default create({
   },
   computed: {
     mergeStyle() {
-      return {
+      // 基础样式设置
+      const baseStyles = {
         height: "100%",
         minWidth: 0,
-        gridArea: this.area || "auto",
-        gridColumnEnd: `span ${this.widthSize}`, // 使用 grid-column-end 属性设置网格元素跨越多少列，或者在哪一列结束。
-        gridRowEnd: `span ${this.heightSize}`, // grid-row-start 属性指定哪一行开始显示网格元素
-        gridColumnStart: this.left, // grid-column-start 属性定义了网格元素从哪一列开始
-        gridRowStart: this.top, // grid-row-end 属性指定哪一行停止显示网格元素，或设置跨越多少行
-        textAlign:
-          this.center !== undefined && this.center !== null && "center",
-        ...this.middleStyle(this.center),
         boxSizing: "border-box",
-        ...this.$attrs,
-        ...this.cellStyle,
+      };
+
+      // 网格位置样式
+      const gridStyles = this.area
+        ? {
+            gridArea: this.area || "auto",
+          }
+        : {
+            gridColumnEnd: `span ${this.widthSize}`,
+            gridRowEnd: `span ${this.heightSize}`,
+            gridColumnStart: this.left,
+            gridRowStart: this.top,
+          };
+
+      // 内容对齐样式
+      const alignmentStyles = this.center
+        ? {
+            textAlign: "center",
+            ...this.getCenterStyle(),
+          }
+        : {};
+
+      return {
+        ...baseStyles,
+        ...gridStyles,
+        ...alignmentStyles,
+        ...this.$attrs, // 透传属性
+        ...this.cellStyle, // 自定义样式（优先级最高）
       };
     },
   },
   methods: {
-    middleStyle(center) {
-      if (center !== undefined && center !== null) {
-        return {
-          display: "inline-flex",
-          flexFlow: "column wrap",
-          justifyContent: "center",
-          justifySelf: "stretch",
-        };
-      }
+    getCenterStyle() {
+      return {
+        display: "inline-flex",
+        flexFlow: "column wrap",
+        justifyContent: "center",
+        justifySelf: "stretch",
+      };
     },
   },
 });

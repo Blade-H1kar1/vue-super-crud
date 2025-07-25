@@ -1,272 +1,93 @@
-# 布局组件
+# 基本使用
 
-布局组件基于CSS Grid实现，提供了灵活的网格布局系统。组件包含两个主要部分：
-- `sc-grid`: 网格容器组件
-- `sc-cell`: 网格单元格组件
+`Grid` 是一个基于 CSS Grid 布局封装的灵活网格组件，提供了丰富的布局功能和灵活的配置选项。它可以轻松创建响应式网格布局，支持自动填充、固定列数、区域命名等多种布局方式。
 
-## 基本使用
+## 基础布局
 
-```vue
-<template>
-  <sc-grid :columns="3" :gap="20">
-    <sc-cell :widthSize="2">占据2列</sc-cell>
-    <sc-cell>占据1列</sc-cell>
-    <sc-cell>占据1列</sc-cell>
-  </sc-grid>
-</template>
-```
+`Grid` 组件通过 `columns` 属性设置列数，`columnWidth` 属性设置固定列宽。
 
-## 布局模式
+<ClientOnly>
+<common-code-format>
+  <grid-base slot="source"></grid-base>
+                  
+  <<< @/docs/.vuepress/components/grid/base.vue
+</common-code-format>
+</ClientOnly>
 
-### 固定列数模式（默认）
+## 自动填充模式
 
-最基本的网格布局方式，通过columns属性指定列数：
+`Grid` 组件支持自动填充模式，通过 `autoFill` 属性配置：
+- `true` 或 `'autoFill'`：自动填充模式，根据容器宽度自动填充尽可能多的列
+- `'autoFit'`：自动适应模式，根据容器宽度自动调整列数，确保填满整个容器
+- `'fixedWidth'`：固定宽度模式，所有列使用相同的固定宽度
 
-```vue
-<sc-grid :columns="3">
-  <sc-cell>1</sc-cell>
-  <sc-cell>2</sc-cell>
-  <sc-cell>3</sc-cell>
-</sc-grid>
-```
+<ClientOnly>
+<common-code-format>
+  <grid-autoFill slot="source"></grid-autoFill>
+                  
+  <<< @/docs/.vuepress/components/grid/autoFill.vue
+</common-code-format>
+</ClientOnly>
 
-### 自动填充模式-自动适应
-```vue
-<sc-grid autoFill="autoFit" :columnWidth="200">
-  <sc-cell>自适应宽度</sc-cell>
-  <sc-cell>自适应宽度</sc-cell>
-</sc-grid>
-```
+## 网格区域
 
-### 自动填充模式-固定宽度
-```vue
-<sc-grid autoFill="fixedWidth" :columnWidth="200">
-  <sc-cell>固定宽度</sc-cell>
-  <sc-cell>固定宽度</sc-cell>
-</sc-grid>
-```
+`Grid` 组件支持通过 `areas` 属性定义命名的网格区域，配合 `Cell` 组件的 `area` 属性使用。网格区域是CSS Grid布局中的一个强大特性，允许您为网格的特定区域命名，然后将内容放置在这些命名区域中。
 
-### 自动填充模式-响应式布局
-```vue
-<sc-grid 
-  autoFill="autoFit" 
-  :minColumns="2" 
-  :maxColumns="4" 
-  :columnWidth="300"
->
-  <sc-cell>响应式单元格</sc-cell>
-  <sc-cell>响应式单元格</sc-cell>
-  <sc-cell>响应式单元格</sc-cell>
-</sc-grid>
-```
+<ClientOnly>
+<common-code-format>
+  <grid-areas slot="source"></grid-areas>
+                  
+  <<< @/docs/.vuepress/components/grid/areas.vue
+</common-code-format>
+</ClientOnly>
+
+## 单元格定位
+
+`Cell` 组件可以通过 `widthSize`、`heightSize`、`left` 和 `top` 属性精确控制单元格的大小和位置。这些属性允许您创建复杂的网格布局，而无需使用命名区域。
 
 
-### 列宽控制-固定列宽
-```vue
-<sc-grid :columns="3" columnWidth="200px">
-  <sc-cell>固定200px</sc-cell>
-  <sc-cell>固定200px</sc-cell>
-</sc-grid>
-```
+<ClientOnly>
+<common-code-format>
+  <grid-cell slot="source"></grid-cell>
+                  
+  <<< @/docs/.vuepress/components/grid/cell.vue
+</common-code-format>
+</ClientOnly>
 
-### 列宽控制-最小最大列宽
-```vue
-<sc-grid :columns="3" :minColumnWidth="200" :maxColumnWidth="300">
-  <sc-cell>最小200px，最大300px</sc-cell>
-  <sc-cell>最小200px，最大300px</sc-cell>
-</sc-grid>
-```
 
-### 列宽控制-自适应列宽
-```vue
-<sc-grid :columns="3">
-  <sc-cell>自适应宽度</sc-cell>
-  <sc-cell>自适应宽度</sc-cell>
-</sc-grid>
-```
-
-## 单元格布局
-
-###  基础跨列
-```vue
-<sc-grid :columns="3">
-  <sc-cell :widthSize="2">占据2列</sc-cell>
-  <sc-cell>占据1列</sc-cell>
-</sc-grid>
-```
-
-###  跨行跨列
-```vue
-<sc-grid :columns="3">
-  <sc-cell :widthSize="2" :heightSize="2">占据2x2</sc-cell>
-  <sc-cell>占据1x1</sc-cell>
-  <sc-cell>占据1x1</sc-cell>
-</sc-grid>
-```
-
-###  指定位置
-```vue
-<sc-grid :columns="3">
-  <sc-cell :left="2" :top="1">从第2列第1行开始</sc-cell>
-  <sc-cell>默认位置</sc-cell>
-</sc-grid>
-```
-
-###  居中对齐
-```vue
-<sc-grid :columns="3">
-  <sc-cell center>居中内容</sc-cell>
-  <sc-cell>默认对齐</sc-cell>
-</sc-grid>
-```
-
-## 高级用法
-
-### 网格区域
-
-使用areas属性定义网格区域，实现复杂布局：
-
-```vue
-<sc-grid 
-  :columns="3" 
-  :areas="[
-    'header header header',
-    'sidebar main main',
-    'footer footer footer'
-  ]"
->
-  <sc-cell area="header">头部</sc-cell>
-  <sc-cell area="sidebar">侧边栏</sc-cell>
-  <sc-cell area="main">主要内容</sc-cell>
-  <sc-cell area="footer">底部</sc-cell>
-</sc-grid>
-```
-
-### 自定义样式
-
-通过gridStyle和cellStyle属性自定义样式：
-
-```vue
-<sc-grid 
-  :gridStyle="{ backgroundColor: '#f5f5f5' }"
-  :columns="3"
->
-  <sc-cell 
-    :cellStyle="{ padding: '20px', backgroundColor: '#fff' }"
-  >
-    自定义样式单元格
-  </sc-cell>
-</sc-grid>
-```
-
-### 间距控制
-
-使用gap属性控制网格间距：
-
-```vue
-<sc-grid :columns="3" :gap="20">
-  <sc-cell>间距20px</sc-cell>
-  <sc-cell>间距20px</sc-cell>
-</sc-grid>
-```
-
-也可以分别控制行列间距：
-
-```vue
-<sc-grid 
-  :columns="3" 
-  :columnGap="20"
-  :rowGap="30"
->
-  <sc-cell>列间距20px，行间距30px</sc-cell>
-  <sc-cell>列间距20px，行间距30px</sc-cell>
-</sc-grid>
-```
-
-## 常见应用场景
-
-### 表单布局
-```vue
-<sc-grid :columns="2" :gap="20">
-  <sc-cell>表单项1</sc-cell>
-  <sc-cell>表单项2</sc-cell>
-  <sc-cell :widthSize="2">表单项3（占满行）</sc-cell>
-</sc-grid>
-```
-
-### 卡片布局
-```vue
-<sc-grid 
-  autoFill="autoFit" 
-  :columnWidth="300"
-  :gap="20"
->
-  <sc-cell>卡片1</sc-cell>
-  <sc-cell>卡片2</sc-cell>
-  <sc-cell>卡片3</sc-cell>
-</sc-grid>
-```
-
-### 响应式页面布局
-```vue
-<sc-grid 
-  :columns="12"
-  :areas="[
-    'header header header header header header header header header header header header',
-    'sidebar sidebar main main main main main main main main main main',
-    'footer footer footer footer footer footer footer footer footer footer footer footer'
-  ]"
->
-  <sc-cell area="header">头部导航</sc-cell>
-  <sc-cell area="sidebar">侧边菜单</sc-cell>
-  <sc-cell area="main">主要内容</sc-cell>
-  <sc-cell area="footer">页脚信息</sc-cell>
-</sc-grid>
-```
-
-## 注意事项
-
-1. Grid组件必须设置columns属性来定义网格列数
-2. Cell组件的widthSize不能超过Grid的columns值
-3. 使用areas属性时，需要确保每个cell都有对应的area属性
-4. 自动填充模式下，columnWidth属性是必需的
-5. 使用minColumnWidth和maxColumnWidth时，建议同时设置columns属性
-
-## API
+## API 文档
 
 ### Grid 属性
 
-| 参数           | 说明             | 类型                                 | 默认值 |
-| -------------- | ---------------- | ------------------------------------ | ------ |
-| columns        | 网格列数         | number                               | 1      |
-| autoFill       | 自动填充模式     | boolean \| 'autoFit' \| 'fixedWidth' | -      |
-| fillCell       | 是否填充满单元格 | boolean                              | false  |
-| minColumns     | 最小列数         | number                               | -      |
-| maxColumns     | 最大列数         | number                               | -      |
-| columnWidth    | 列宽             | string \| number                     | -      |
-| minColumnWidth | 最小列宽         | string \| number                     | -      |
-| maxColumnWidth | 最大列宽         | string \| number                     | -      |
-| gap            | 网格间距         | object                               | -      |
-| columnGap      | 列间距           | string \| number                     | -      |
-| rowGap         | 行间距           | string \| number                     | -      |
-| areas          | 网格区域         | array \| string                      | -      |
-| minRowHeight   | 最小行高         | string \| number                     | -      |
-| maxRowHeight   | 最大行高         | string \| number                     | -      |
-| alignContent   | 垂直对齐方式     | string                               | -      |
-| rows           | 行数             | number \| string                     | -      |
-| justifyContent | 水平对齐方式     | string                               | -      |
-| flow           | 网格流向         | string                               | -      |
-| height         | 容器高度         | string \| number                     | 'auto' |
-| gridStyle      | 自定义样式       | object                               | {}     |
+| 属性名         | 说明                                                                                          | 类型               | 默认值 |
+| -------------- | --------------------------------------------------------------------------------------------- | ------------------ | ------ |
+| columns        | 列数                                                                                          | `Number`           | 1      |
+| autoFill       | 自动填充模式                                                                                  | `Boolean / String` | false  |
+| fillCell       | 是否填充空白单元格                                                                            | `Boolean`          | false  |
+| columnWidth    | 设置列的基础宽度，在`autoFill`和`autoFit`模式下作为最小宽度，在`fixedWidth`模式下作为固定宽度 | `String / Number`  | -      |
+| minColumnWidth | 设置列的最小宽度，仅在`autoFill`和`autoFit`模式下生效                                         | `String / Number`  | -      |
+| maxColumnWidth | 设置列的最大宽度，仅在`autoFill`和`autoFit`模式下生效                                         | `String / Number`  | -      |
+| gap            | 网格间隙（同时设置行列间隙）                                                                  | `String / Number`  | -      |
+| columnGap      | 列间隙                                                                                        | `String / Number`  | -      |
+| rowGap         | 行间隙                                                                                        | `String / Number`  | -      |
+| areas          | 网格区域名称                                                                                  | `String / Array`   | -      |
+| minRowHeight   | 最小行高                                                                                      | `String / Number`  | 'auto' |
+| maxRowHeight   | 最大行高                                                                                      | `String / Number`  | 'auto' |
+| alignContent   | 垂直对齐方式                                                                                  | `String`           | -      |
+| rows           | 行数配置                                                                                      | `Number / String`  | -      |
+| justifyContent | 水平对齐方式                                                                                  | `String`           | -      |
+| flow           | 网格流动方向                                                                                  | `String`           | -      |
+| height         | 容器高度                                                                                      | `String / Number`  | 'auto' |
+| gridStyle      | 自定义网格样式                                                                                | `Object`           | {}     |
 
 ### Cell 属性
 
-| 参数       | 说明         | 类型             | 默认值 |
-| ---------- | ------------ | ---------------- | ------ |
-| widthSize  | 占据列数     | number \| string | 1      |
-| heightSize | 占据行数     | number \| string | 1      |
-| area       | 网格区域名称 | string           | -      |
-| center     | 是否居中     | boolean          | -      |
-| left       | 起始列位置   | number           | -      |
-| top        | 起始行位置   | number           | -      |
-| cellStyle  | 自定义样式   | object           | {}     |
+| 属性名     | 说明                     | 类型              | 默认值 |
+| ---------- | ------------------------ | ----------------- | ------ |
+| widthSize  | 单元格宽度（跨越的列数） | `Number / String` | 1      |
+| heightSize | 单元格高度（跨越的行数） | `Number / String` | 1      |
+| area       | 网格区域名称             | `String`          | -      |
+| center     | 是否居中显示内容         | `Boolean`         | false  |
+| left       | 起始列位置               | `Number / String` | -      |
+| top        | 起始行位置               | `Number / String` | -      |
+| cellStyle  | 自定义单元格样式         | `Object`          | {}     |
