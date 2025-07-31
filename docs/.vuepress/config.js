@@ -116,6 +116,11 @@ module.exports = {
           children: ["tabs/base"],
         },
         {
+          title: "collapseSplitter组件",
+          collapsable: true,
+          children: ["collapseSplitter/base"],
+        },
+        {
           title: "问题合集",
           collapsable: true,
           children: ["question/base"],

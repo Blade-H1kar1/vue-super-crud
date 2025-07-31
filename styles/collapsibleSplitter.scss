@@ -1,0 +1,269 @@
+// 可折叠分割器组件样式
+.sc-collapse-splitter {
+  width: 100%;
+  height: 100%;
+
+  &--horizontal {
+    .sc-collapse-splitter__panel {
+      height: 100%;
+    }
+  }
+
+  &--vertical {
+    .sc-collapse-splitter__panel {
+      width: 100%;
+    }
+  }
+
+  // 面板样式
+  &__panel {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+    box-sizing: border-box;
+
+    &--collapsed {
+      background-color: var(--background-color-light);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      &:hover {
+        background-color: var(--border-color-lighter);
+        cursor: pointer;
+      }
+    }
+  }
+
+  // 分割线样式
+  &__gutter {
+    background-color: var(--border-color-light);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+
+    &--disabled {
+      cursor: not-allowed;
+
+      &::before,
+      &::after {
+        display: none;
+      }
+    }
+
+    &:hover {
+      background-color: var(--border-color-base);
+    }
+
+    // 左侧/上侧折叠按钮（伪元素）
+    &::before {
+      content: "";
+      position: absolute;
+      background-color: var(--background-color-light);
+      border-left: 1px solid var(--border-color-light);
+      border-top: 1px solid var(--border-color-light);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 10;
+      opacity: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--text-color-regular);
+      transform: scale(0.8);
+      cursor: pointer;
+
+      &:hover {
+        background-color: var(--border-color-lighter);
+      }
+    }
+
+    // 右侧/下侧折叠按钮（伪元素）
+    &::after {
+      content: "";
+      position: absolute;
+      background-color: var(--background-color-light);
+      border-left: 1px solid var(--border-color-light);
+      border-top: 1px solid var(--border-color-light);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 10;
+      opacity: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--text-color-regular);
+      transform: scale(0.8);
+      cursor: pointer;
+
+      &:hover {
+        background-color: var(--border-color-lighter);
+      }
+    }
+
+    // 水平布局下的折叠按钮
+    &--horizontal {
+      &::before {
+        content: "\e6de";
+        font-family: element-icons;
+        top: 0;
+        left: -12px;
+        width: 12px;
+        height: 100%;
+        border-radius: 0 4px 4px 0;
+      }
+
+      &::after {
+        content: "\e6e0";
+        font-family: element-icons;
+        top: 0;
+        right: -12px;
+        width: 12px;
+        height: 100%;
+        border-radius: 4px 0 0 4px;
+      }
+
+      // 当前一个面板折叠时隐藏前按钮
+      &[data-prev-collapsed="true"] {
+        &::before {
+          display: none;
+        }
+      }
+
+      // 当后一个面板折叠时隐藏后按钮
+      &[data-next-collapsed="true"] {
+        &::after {
+          display: none;
+        }
+      }
+
+      // 悬停效果 - 通过父元素控制
+      &.hover-left:not([data-prev-collapsed="true"])::before {
+        opacity: 1;
+        transform: scale(1);
+        background-color: var(--border-color-lighter);
+      }
+
+      &.hover-right:not([data-next-collapsed="true"])::after {
+        opacity: 1;
+        transform: scale(1);
+        background-color: var(--border-color-lighter);
+      }
+    }
+
+    // 垂直布局下的折叠按钮
+    &--vertical {
+      &::before {
+        content: "\e6e1";
+        font-family: element-icons;
+        top: -12px;
+        left: 0;
+        width: 100%;
+        height: 12px;
+        border-radius: 0 0 4px 4px;
+      }
+
+      &::after {
+        content: "\e6df";
+        font-family: element-icons;
+        bottom: -12px;
+        left: 0;
+        width: 100%;
+        height: 12px;
+        border-radius: 4px 4px 0 0;
+      }
+
+      // 当前一个面板折叠时隐藏前按钮
+      &[data-prev-collapsed="true"] {
+        &::before {
+          display: none;
+        }
+      }
+
+      // 当后一个面板折叠时隐藏后按钮
+      &[data-next-collapsed="true"] {
+        &::after {
+          display: none;
+        }
+      }
+
+      // 悬停效果 - 通过父元素控制
+      &.hover-top:not([data-prev-collapsed="true"])::before {
+        opacity: 1;
+        transform: scale(1);
+        background-color: var(--border-color-lighter);
+      }
+
+      &.hover-bottom:not([data-next-collapsed="true"])::after {
+        opacity: 1;
+        transform: scale(1);
+        background-color: var(--border-color-lighter);
+      }
+    }
+  }
+
+  // 展开按钮样式
+  &__expand-button {
+    width: 16px;
+    height: 16px;
+    background-color: var(--color-primary);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-white);
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: var(--color-primary-light-7);
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  // 动画效果
+  &__panel,
+  &__gutter {
+    transition: all 0.3s ease;
+  }
+
+  // 响应式设计
+  @media (max-width: 768px) {
+    &__gutter {
+      &--horizontal {
+        &::before {
+          left: -8px;
+          width: 8px;
+          font-size: 10px;
+        }
+
+        &::after {
+          right: -8px;
+          width: 8px;
+          font-size: 10px;
+        }
+      }
+
+      &--vertical {
+        &::before {
+          top: -8px;
+          height: 8px;
+          font-size: 10px;
+        }
+
+        &::after {
+          bottom: -8px;
+          height: 8px;
+          font-size: 10px;
+        }
+      }
+    }
+  }
+}

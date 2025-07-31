@@ -17,6 +17,8 @@ import cell from "pak/grid/cell.vue";
 import lazyRender from "pak/lazyRender/index.vue";
 import stepForm from "pak/stepForm/index.vue";
 import tableSelect from "pak/tableSelect/index.vue";
+import collapsibleSplitter from "pak/collapsibleSplitter/index.vue";
+import splitterPanel from "pak/collapsibleSplitter/panel.vue";
 
 import { mergeTemplate } from "./template";
 import directive from "pak/directive";
@@ -43,6 +45,8 @@ const components = [
   lazyRender,
   stepForm,
   tableSelect,
+  collapsibleSplitter,
+  splitterPanel,
 ];
 
 const install = function (Vue, opts = {}) {
