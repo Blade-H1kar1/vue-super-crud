@@ -399,7 +399,7 @@ import {
 import { getComponentConfig } from "core/mock/genConfig";
 import { generateMockData } from "core/mock/genData";
 import cache from "utils/cache.js";
-import { uniqueId } from "lodash";
+import { uniqueId } from "lodash-es";
 import { isEmptyData, findComponentInstance } from "utils";
 import { create } from "core";
 
