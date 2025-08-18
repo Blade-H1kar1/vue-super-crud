@@ -3,15 +3,10 @@
 </template>
 
 <script>
+import customComVue from "./customCom.vue";
+
 export default {
   data() {
-    // 非全局组件示例
-    this.CustomComponent = {
-      render: (h) => {
-        return h("div", "自定义组件");
-      },
-    };
-
     return {
       options: {
         renderColumns: [
@@ -98,9 +93,7 @@ export default {
             prop: "custom",
             label: "自定义组件",
             comp: {
-              name: this.CustomComponent,
-              // 自定义属性
-              customProp: "自定义值",
+              name: customComVue,
               // 原生事件
               nativeOn: {
                 click: () => {

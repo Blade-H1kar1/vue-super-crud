@@ -37,7 +37,6 @@ export default {
     commonCompStrategy: Object, // 公共组件策略
     defaultComp: Object, // 默认组件
     rawRules: Array, // 未加工的rules
-    strategies: Object, // 策略
     isWatchFormatValue: Boolean, // 是否监听值变化精确变化格式化值
   },
   inject: {
@@ -164,7 +163,9 @@ export default {
       return funcs.reduce((f1, f2) => {
         return function (...args) {
           var result = f1.apply(this, args);
-          return result ? result : f2.apply(this, args);
+          return result !== undefined && result !== null
+            ? result
+            : f2.apply(this, args);
         };
       });
     },
@@ -275,112 +276,6 @@ export default {
       }
       return _defaultRender.formatter(h, scope);
     },
-    // applyComponentSpecificModifications(vnode, scope) {
-    //   if (!vnode) return vnode;
-
-    //   // 从虚拟DOM中获取组件名称
-    //   let compName;
-    //   if (vnode.componentOptions && vnode.componentOptions.Ctor) {
-    //     compName =
-    //       vnode.componentOptions.Ctor.options.name ||
-    //       (vnode.componentOptions.tag || "").toLowerCase();
-    //   }
-
-    //   // 如果无法获取组件名称，则返回原始vnode
-    //   if (!compName) return vnode;
-
-    //   // 如果提供了组件特定的修改配置
-    //   if (this.strategies) {
-    //     const modifier = this.strategies[compName];
-
-    //     // 如果没有精确匹配，尝试后缀匹配
-    //     let matchedModifier = modifier;
-    //     if (!matchedModifier) {
-    //       const compNameLower = compName.toLowerCase();
-    //       // 查找所有以*开头的键，表示后缀匹配
-    //       for (const key in this.strategies) {
-    //         if (
-    //           key.startsWith("*") &&
-    //           compNameLower.endsWith(key.slice(1).toLowerCase())
-    //         ) {
-    //           matchedModifier = this.strategies[key];
-    //           break;
-    //         }
-    //       }
-    //     }
-
-    //     if (typeof matchedModifier === "function") {
-    //       // 允许通过函数完全控制VNode的修改
-    //       return matchedModifier(vnode, scope, this);
-    //     } else if (matchedModifier && typeof matchedModifier === "object") {
-    //       // 应用预定义的修改
-    //       if (matchedModifier.props && vnode.componentOptions) {
-    //         vnode.componentOptions.propsData = {
-    //           ...vnode.componentOptions.propsData,
-    //           ...(typeof matchedModifier.props === "function"
-    //             ? matchedModifier.props(scope)
-    //             : matchedModifier.props),
-    //         };
-    //       }
-
-    //       // 添加或修改事件
-    //       if (matchedModifier.on && vnode.componentOptions) {
-    //         vnode.componentOptions.listeners =
-    //           vnode.componentOptions.listeners || {};
-    //         Object.entries(matchedModifier.on).forEach(([event, handler]) => {
-    //           const originalHandler = vnode.componentOptions.listeners[event];
-    //           vnode.componentOptions.listeners[event] = originalHandler
-    //             ? (...args) => {
-    //                 originalHandler(...args);
-    //                 handler(...args, scope, this);
-    //               }
-    //             : (...args) => handler(...args, scope, this);
-    //         });
-    //       }
-
-    //       // 添加或修改样式
-    //       if (matchedModifier.style && vnode.data) {
-    //         vnode.data.style = {
-    //           ...(vnode.data.style || {}),
-    //           ...(typeof matchedModifier.style === "function"
-    //             ? matchedModifier.style(scope)
-    //             : matchedModifier.style),
-    //         };
-    //       }
-
-    //       // 添加或修改类名
-    //       if (matchedModifier.class && vnode.data) {
-    //         const newClass =
-    //           typeof matchedModifier.class === "function"
-    //             ? matchedModifier.class(scope)
-    //             : matchedModifier.class;
-
-    //         if (Array.isArray(vnode.data.class)) {
-    //           vnode.data.class = [
-    //             ...vnode.data.class,
-    //             ...(Array.isArray(newClass) ? newClass : [newClass]),
-    //           ];
-    //         } else if (typeof vnode.data.class === "object") {
-    //           vnode.data.class = { ...vnode.data.class, ...newClass };
-    //         } else {
-    //           vnode.data.class = newClass;
-    //         }
-    //       }
-
-    //       // 添加或修改属性
-    //       if (matchedModifier.attrs && vnode.data) {
-    //         vnode.data.attrs = {
-    //           ...(vnode.data.attrs || {}),
-    //           ...(typeof matchedModifier.attrs === "function"
-    //             ? matchedModifier.attrs(scope)
-    //             : matchedModifier.attrs),
-    //         };
-    //       }
-    //     }
-    //   }
-
-    //   return vnode;
-    // },
   },
   render(h) {
     const chains = this.interruptibleCompose(

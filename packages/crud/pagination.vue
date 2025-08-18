@@ -57,13 +57,16 @@ export default create({
       },
     },
     total() {
+      if (this.ctx._total !== undefined) {
+        return this.ctx._total;
+      }
       if (this.ctx.crudOptions.localPagination) {
         if (this.ctx.localFilteredData !== undefined) {
           return this.ctx.localFilteredData?.length || 0;
         }
         return this.ctx.data.length;
       }
-      return this.ctx.total;
+      return 0;
     },
   },
   watch: {
@@ -141,10 +144,14 @@ export default create({
       this.handleDataChange();
       // 设置新页面的滚动位置
       this.setScrollPosition(this.pageNum);
+
+      this.ctx.$emit("sizeChange", val);
     },
 
     handleCurrentChange(val) {
       this.handleDataChange();
+
+      this.ctx.$emit("currentChange", val);
     },
 
     handleDataChange() {

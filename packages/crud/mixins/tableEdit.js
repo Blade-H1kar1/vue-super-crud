@@ -490,6 +490,7 @@ export default {
             });
           this.changeLoading();
         };
+        this.callDeleteApi(this.selectionRow);
         this.runBefore(
           ["batchDelete"],
           callBack,
@@ -515,6 +516,7 @@ export default {
           }
           this.changeLoading();
         };
+        this.callDeleteApi(scope.row);
         this.runBefore(["delete"], callBack, scope, this.changeLoading);
       };
       handleDelete();

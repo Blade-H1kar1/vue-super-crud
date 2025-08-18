@@ -31,7 +31,7 @@
       .form-label:before {
         position: absolute;
         content: "*";
-        color: #9933ff;
+        color: var(--color-danger);
         left: -8px;
         top: 0;
       }

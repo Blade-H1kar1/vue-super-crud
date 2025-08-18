@@ -1,15 +1,11 @@
 <template>
   <div :class="b()">
-    <div v-if="showHandleRow" :class="b('handleRow')" style="flex: 1;">
+    <div v-if="showHandleRow" :class="b('handleRow')">
       <position
         slotName="handleRow"
         :slots="ctx.$scopedSlots"
         :scope="ctx.crudOptions"
-        style="width: 100%;"
-        ><div
-          style="display: flex; width: 100%;"
-          v-if="handleRowButtons.length > 0"
-        >
+        ><div v-if="handleRowButtons.length > 0">
           <button_
             v-for="(btn, index) in handleRowButtons"
             :type="btn.type"
@@ -25,7 +21,7 @@
           /></div
       ></position>
     </div>
-    <div v-if="showToolbar" :class="b('toolbar')">
+    <div v-if="showToolbar || ctx.editConfig.batch" :class="b('toolbar')">
       <position
         slotName="toolbar"
         :slots="ctx.$scopedSlots"
@@ -92,19 +88,27 @@ export default create({
       };
     },
     toolbar() {
-      const toolbar = { ...(this.ctx.crudOptions.toolbar || {}) };
+      let toolbar = { ...(this.ctx.crudOptions.toolbar || {}) };
       const editConfig = this.ctx.editConfig;
+      const batchEditConfig = {
+        batchEdit: editConfig.batch || toolbar.batchEdit,
+        batchSave: editConfig.batch || toolbar.batchEdit,
+        batchCancel: editConfig.batch || toolbar.batchEdit,
+      };
+      // 批量编辑按钮独立于其他工具按钮
+      if (toolbar.show === false && this.ctx.editConfig.batch) {
+        return batchEditConfig;
+      }
+      if (toolbar.cover) {
+        toolbar = {
+          handles: toolbar.handles,
+        };
+      }
       return {
-        batchEdit: editConfig.batch,
-        batchSave: editConfig.batch,
-        batchCancel: editConfig.batch,
+        ...batchEditConfig,
         search: this.hasSearch,
         // excelImport: true,
         // excelExport: true,
-        zoom: true,
-        refresh: true,
-        reset: true,
-        column: true,
         ...toolbar,
       };
     },
@@ -182,6 +186,7 @@ export default create({
         batchEdit: {
           label: "批量编辑",
           type: "primary",
+          order: 1,
           innerHide: this.isBatchEdit,
           disabled:
             this.ctx.list.length === 0 ||
@@ -193,6 +198,7 @@ export default create({
           },
         },
         batchSave: {
+          order: 1,
           type: "primary",
           label: "保存",
           style: {
@@ -206,6 +212,7 @@ export default create({
           },
         },
         batchCancel: {
+          order: 2,
           label: "取消",
           style: {
             marginRight: "10px",
@@ -216,6 +223,7 @@ export default create({
           },
         },
         excelImport: {
+          order: 3,
           icon: "el-icon-upload",
           title: "导入",
           circle: true,
@@ -224,6 +232,7 @@ export default create({
           },
         },
         excelExport: {
+          order: 4,
           icon: "el-icon-download",
           title: "导出",
           circle: true,
@@ -232,6 +241,7 @@ export default create({
           },
         },
         zoom: {
+          order: 5,
           icon: "el-icon-full-screen",
           title: "最大化",
           circle: true,
@@ -241,6 +251,7 @@ export default create({
           },
         },
         refresh: {
+          order: 6,
           icon: "el-icon-refresh",
           title: "刷新",
           circle: true,
@@ -250,6 +261,7 @@ export default create({
           },
         },
         reset: {
+          order: 7,
           icon: "el-icon-refresh-right",
           title: "重置",
           circle: true,
@@ -258,6 +270,7 @@ export default create({
           },
         },
         search: {
+          order: 8,
           icon: "el-icon-search",
           title: "查询",
           circle: true,
@@ -274,6 +287,7 @@ export default create({
           },
         },
         column: {
+          order: 9,
           icon: "el-icon-set-up",
           title: "列设置",
           circle: true,

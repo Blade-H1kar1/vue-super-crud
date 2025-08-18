@@ -13,6 +13,7 @@ export default {
       pageVisibilityMap: new Map(), // 存储每页的可见状态范围
       // 数据验证结果缓存
       invalidRows: new Map(), // 存储有问题的行：index -> errorType
+      internalTotal: 0, // 内部获取的总数
     };
   },
 
@@ -26,6 +27,12 @@ export default {
         Array.isArray(this.data) &&
         this.data.some((item) => Array.isArray(item[this.childrenKey]))
       );
+    },
+    _total() {
+      if (this.crudOptions.listApi) {
+        return this.internalTotal;
+      }
+      return this.total;
     },
   },
   watch: {
@@ -362,10 +369,87 @@ export default {
       });
     },
     getList() {
+      // 如果配置了API，直接调用内部API
+      if (this.crudOptions.listApi) {
+        return this.callGetListApi();
+      }
+      // 否则触发外部getList事件
       this.$emit("getList");
       return new Promise((resolve, reject) => {
         this.getListResolve = resolve;
       });
+    },
+    callGetListApi() {
+      return new Promise(async (resolve, reject) => {
+        if (!isFunction(this.crudOptions.listApi)) {
+          console.warn("API配置无效，请传入一个函数");
+          return;
+        }
+        try {
+          this.loadingStatus = true;
+          // 调用API
+          const response = await this.crudOptions.listApi(this.query);
+          // 处理响应数据
+          this.handleApiResponse(response);
+          resolve();
+        } catch (error) {
+          reject();
+          console.error("API调用失败:", error);
+        } finally {
+          this.loadingStatus = false;
+        }
+      });
+    },
+    // 处理API响应
+    handleApiResponse(response) {
+      // 支持多种响应格式
+      let data = [];
+      let total = 0;
+
+      if (Array.isArray(response)) {
+        // 直接返回数组
+        data = response;
+        total = response.length;
+      } else if (response && typeof response === "object") {
+        data =
+          response.data ||
+          response.list ||
+          response.records ||
+          response.rows ||
+          response[this.crudOptions.props.data] ||
+          [];
+        total =
+          response.total ||
+          response.count ||
+          response[this.crudOptions.props.total] ||
+          data.length;
+      }
+      this.updatedData(data);
+      this.internalTotal = total;
+      this.$emit("getList", {
+        data,
+        total,
+      });
+      this.$emit("update:total", total);
+    },
+    // 调用内置删除API
+    async callDeleteApi(rowData) {
+      if (!this.crudOptions.deleteApi) return;
+      try {
+        this.changeLoading(true);
+        if (Array.isArray(rowData)) {
+          await this.crudOptions.deleteApi(
+            rowData.map((item) => item[this.valueKey]).join(",")
+          );
+        } else {
+          await this.crudOptions.deleteApi(rowData[this.valueKey]);
+        }
+        this.changeLoading(false);
+      } catch (error) {
+        this.changeLoading(false);
+        console.error("删除API调用失败:", error);
+        throw error;
+      }
     },
     initRow(row) {
       this.trueRenderColumns.forEach((column) => {

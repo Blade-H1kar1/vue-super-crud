@@ -60,7 +60,7 @@ export default {
     },
     footerHeight() {
       if (
-        checkVisibility(this.crudOptions.pagination, null, this.total > 0) ===
+        checkVisibility(this.crudOptions.pagination, null, this._total > 0) ===
         false
       )
         return 0;

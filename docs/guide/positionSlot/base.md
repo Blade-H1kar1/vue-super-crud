@@ -32,6 +32,10 @@
 在渲染单元格中使用时，需要使用 `position` 属性，并传入 `true` 启用方位插槽。</br>
 方位插槽可以获取单元格 `scope` 数据。
 
+::: tip
+在编辑单元格中使用时 `position` 属性需要配置在 `form`或`edit`配置对象下。
+:::
+
 <ClientOnly>
 <common-code-format>
   <positionSlot-form slot="source"></positionSlot-form>

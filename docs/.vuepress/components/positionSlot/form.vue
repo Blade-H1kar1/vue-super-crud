@@ -9,16 +9,16 @@
         <el-button>渲染单元格右侧</el-button>
       </template>
       <template #test-top="scope">
-        <el-button style="width: 100%;">{{
+        <el-button style="width: 100%">{{
           scope.row.test || "渲染单元格顶部"
         }}</el-button>
       </template>
       <template #test-bottom>
-        <el-button style="width: 100%;">渲染单元格底部</el-button>
+        <el-button style="width: 100%">渲染单元格底部</el-button>
       </template>
     </sc-form>
     <h3>表格</h3>
-    <sc-crud :options="options" :data="data"
+    <sc-crud :options="tableOptions" :data="data"
       ><template #test-left>
         <el-button>渲染单元格左侧 </el-button>
       </template>
@@ -26,12 +26,29 @@
         <el-button>渲染单元格右侧</el-button>
       </template>
       <template #test-top="scope">
-        <el-button style="width: 100%;">{{
+        <el-button style="width: 100%">{{
           scope.row.test || "渲染单元格顶部"
         }}</el-button>
       </template>
       <template #test-bottom>
-        <el-button style="width: 100%;">渲染单元格底部</el-button>
+        <el-button style="width: 100%">渲染单元格底部</el-button>
+      </template>
+    </sc-crud>
+    <h3>可编辑表格</h3>
+    <sc-crud :options="editTableOptions" :data="data"
+      ><template #test-left>
+        <el-button>编辑渲染单元格左侧 </el-button>
+      </template>
+      <template #test-right>
+        <el-button>编辑渲染单元格右侧</el-button>
+      </template>
+      <template #test-top="scope">
+        <el-button style="width: 100%">{{
+          scope.row.test || "编辑渲染单元格顶部"
+        }}</el-button>
+      </template>
+      <template #test-bottom>
+        <el-button style="width: 100%">编辑渲染单元格底部</el-button>
       </template>
     </sc-crud>
   </div>
@@ -44,7 +61,7 @@ export default {
       form: {},
       data: [
         {
-          test: "",
+          test: "测试",
           test2: "11111",
         },
       ],
@@ -57,6 +74,42 @@ export default {
             position: true,
             comp: {
               name: "el-input",
+            },
+          },
+          {
+            label: "普通单元格",
+            prop: "test2",
+          },
+        ],
+      },
+      tableOptions: {
+        labelWidth: "160px",
+        renderColumns: [
+          {
+            label: "渲染单元格",
+            prop: "test",
+            position: true,
+          },
+          {
+            label: "普通单元格",
+            prop: "test2",
+          },
+        ],
+      },
+      editTableOptions: {
+        labelWidth: "160px",
+        editConfig: {
+          mode: "free",
+        },
+        renderColumns: [
+          {
+            label: "编辑渲染单元格",
+            prop: "test",
+            form: {
+              position: true,
+              comp: {
+                name: "el-input",
+              },
             },
           },
           {

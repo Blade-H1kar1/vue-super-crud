@@ -77,6 +77,9 @@ export default {
       type: String,
       default: "small",
     },
+    listApi: Function, // 列表接口
+    deleteApi: Function, // 删除接口
+    stateKey: String, // 组件级存储键名
     persistPageSize: Boolean, // 是否持久化拖动宽度
     persistWidth: Boolean, // 是否持久化拖动宽度
     delayRender: Boolean, // 是否启用延迟渲染
@@ -275,6 +278,8 @@ export default {
       default: () => ({
         pageNum: "pageNum",
         pageSize: "pageSize",
+        total: "total",
+        data: "data",
       }),
     },
     // 是否本地生成唯一标识
@@ -411,6 +416,13 @@ export default {
           arrayOf: buttonItem,
         },
       },
+      default: () => ({
+        zoom: true,
+        refresh: true,
+        reset: true,
+        column: true,
+        handles: [],
+      }),
     },
     // 操作列配置
     action: {
@@ -584,6 +596,7 @@ export default {
       if (buttonKeys.includes(key) && Array.isArray(value)) {
         source[key] = {
           show: true,
+          cover: true,
           handles: value,
         };
       }

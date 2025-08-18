@@ -1,4 +1,5 @@
-import cache from "utils/cache.js";
+import { StateStorageManager } from "utils/stateStorage.js";
+
 export default {
   data() {
     return {
@@ -9,21 +10,27 @@ export default {
         hidden: [],
         pageSize: 10,
       },
+      stateStorageManager: null,
     };
   },
+  created() {
+    // 初始化状态存储管理器
+    this.stateStorageManager = new StateStorageManager({
+      storageKey: "tableOptions",
+      useRouteKey: true,
+    });
+    this.getLocalCache();
+  },
   methods: {
-    getCacheKey() {
-      if (!this.$route) return "";
-      // 去掉结尾的 /数字 或 数字
-      return this.$route.path.replace(/\/?\d+$/, "");
-    },
     getLocalCache() {
-      if (!this.$route) return;
-      const cacheData = cache.local.getJSON("tableOptions") || {};
-      this.setOptions = Object.assign(
-        this.setOptions,
-        cacheData[this.getCacheKey()]
+      if (!this.stateStorageManager || !this.$route) return;
+      const cachedOptions = this.stateStorageManager.restore(
+        this.crudOptions.stateKey,
+        this.$route
       );
+      if (cachedOptions) {
+        this.setOptions = Object.assign(this.setOptions, cachedOptions);
+      }
     },
     resetLocalCache() {
       this.setOptions.fixed = {};
@@ -32,11 +39,24 @@ export default {
       this.saveLocalCache();
     },
     saveLocalCache(refresh = true) {
-      if (!this.$route) return;
-      let cacheData = cache.local.getJSON("tableOptions") || {};
-      cacheData[this.getCacheKey()] = this.setOptions;
-      cache.local.setJSON("tableOptions", cacheData);
+      if (!this.stateStorageManager || !this.$route) return;
+      this.stateStorageManager.save(
+        this.crudOptions.stateKey,
+        this.setOptions,
+        this.$route
+      );
+
       refresh && this.refreshTable();
+    },
+    // 清除当前路由的缓存
+    clearCurrentCache() {
+      if (!this.stateStorageManager || !this.$route) return;
+      this.stateStorageManager.clear(this.crudOptions.stateKey, this.$route);
+    },
+    // 清除所有缓存
+    clearAllCache() {
+      if (!this.stateStorageManager) return;
+      this.stateStorageManager.clearAll();
     },
   },
 };

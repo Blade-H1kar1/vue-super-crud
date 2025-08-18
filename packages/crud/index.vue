@@ -281,9 +281,6 @@ export default create({
       showMockDialog: false,
     };
   },
-  created() {
-    this.getLocalCache();
-  },
   mounted() {
     this.crudOptions.init && this.initQuery();
     this.extendMethod(this.$refs.tableFormRef, ["validate", "clearValidate"]);

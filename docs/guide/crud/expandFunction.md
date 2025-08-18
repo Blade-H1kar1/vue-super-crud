@@ -20,3 +20,18 @@ const crudOptions = {
   },
 };
 ```
+
+## 设置组件级存储
+
+`stateKey` 配置项用于设置组件级存储的键名，默认为路由级存储。
+
+::: tip
+组件级存储: 每个组件都有自己的存储，互不干扰。</br>
+路由级存储: 多个组件共享同一个配置对象，会相互干扰。
+:::
+
+```js 
+const crudOptions = {
+  stateKey: 'myCrudState',
+};
+```
