@@ -1,3 +1,15 @@
+import {
+  parseCellKey,
+  createCellKey,
+  isFormElement,
+  getCellText,
+  getColumnIndexByClass,
+  getCellElement,
+  calculateSelectionBounds,
+  fallbackCopyToClipboard,
+  getBoundaryCellFromMousePosition,
+} from "../utils/cellSelectionUtils.js";
+
 export default {
   data() {
     return {
@@ -11,12 +23,16 @@ export default {
       _globalHandlers: null, // 全局事件处理器
       _globalEventsAdded: false, // 全局事件是否已添加
       _justFinishedDragging: false, // 刚刚结束拖拽标志
+      // 遮罩层相关
+      selectionOverlay: null, // 选中区域遮罩层DOM元素
+      overlayVisible: false, // 遮罩层是否可见
     };
   },
 
   mounted() {
     this.initCellSelectionEvents();
     this.initKeyboardEvents();
+    this.createSelectionOverlay();
   },
 
   beforeDestroy() {
@@ -24,30 +40,33 @@ export default {
     this.removeKeyboardEvents();
     // 确保清理全局事件监听器
     this.removeGlobalEvents();
+    // 清理遮罩层
+    this.removeSelectionOverlay();
   },
 
   computed: {
     // 获取选中的单元格数据
     selectedCellsData() {
-      const result = [];
-      this.selectedCells.forEach((cellKey) => {
-        const [rowIndex, columnIndex] = cellKey.split("-").map(Number);
-        const cellElement = this.getCellElement(rowIndex, columnIndex);
-        if (cellElement) {
-          // 获取单元格文本内容
-          const cellText = this.getCellText(cellElement);
-          result.push({
+      const tableEl = this.$refs.tableRef?.$el;
+      if (!tableEl) return [];
+
+      return this.selectedCells
+        .map((cellKey) => {
+          const { rowIndex, columnIndex } = parseCellKey(cellKey);
+          const element = getCellElement(tableEl, rowIndex, columnIndex);
+          if (!element) return null;
+
+          const cellText = getCellText(element);
+          return {
             rowIndex,
             columnIndex,
-            element: cellElement,
+            element,
             cellText,
             value: cellText,
             cellKey,
-          });
-        }
-      });
-      console.log(result, "selectedCellsData");
-      return result;
+          };
+        })
+        .filter(Boolean);
     },
   },
 
@@ -93,7 +112,7 @@ export default {
             tableEl.addEventListener(event, this._cellSelectionHandlers[event]);
           });
 
-          // // 阻止表格默认的文本选择，但允许表单元素正常交互
+          // 阻止表格默认的文本选择
           tableEl.style.userSelect = "none";
         }
       });
@@ -208,13 +227,9 @@ export default {
         this.clearCellSelection();
       }
 
-      // 选中当前单元格
       this.selectCell(cellInfo.rowIndex, cellInfo.columnIndex);
-
-      // 绑定全局事件监听器以支持拖拽到表格外
       this.addGlobalEvents();
 
-      // 触发单元格选中事件
       this.$emit("cell-selection-start", {
         cellInfo,
         selectedCells: this.selectedCellsData,
@@ -225,40 +240,20 @@ export default {
     handleGlobalMouseMove(event) {
       if (!this.isMouseDown || !this.dragStartCell) return;
 
-      // 尝试从事件中获取单元格信息
-      const cellInfo = this.getCellInfoFromEvent(event);
+      const cellInfo =
+        this.getCellInfoFromEvent(event) ||
+        getBoundaryCellFromMousePosition(event, this.$refs.tableRef?.$el);
 
-      // 如果鼠标在表格内，正常处理
       if (cellInfo) {
         this.isDragging = true;
         this.dragEndCell = cellInfo;
-
-        // 选中拖拽范围内的所有单元格
         this.selectCellRange(this.dragStartCell, cellInfo);
 
-        // 触发拖拽选中事件
         this.$emit("cell-selection-drag", {
           startCell: this.dragStartCell,
           endCell: cellInfo,
           selectedCells: this.selectedCellsData,
         });
-      } else {
-        // 如果鼠标在表格外，根据鼠标位置计算边界单元格
-        const boundaryCell = this.getBoundaryCellFromMousePosition(event);
-        if (boundaryCell) {
-          this.isDragging = true;
-          this.dragEndCell = boundaryCell;
-
-          // 选中拖拽范围内的所有单元格
-          this.selectCellRange(this.dragStartCell, boundaryCell);
-
-          // 触发拖拽选中事件
-          this.$emit("cell-selection-drag", {
-            startCell: this.dragStartCell,
-            endCell: boundaryCell,
-            selectedCells: this.selectedCellsData,
-          });
-        }
       }
     },
 
@@ -304,93 +299,6 @@ export default {
       // 如果正在拖拽，继续让全局事件处理
     },
 
-    // 根据鼠标位置计算边界单元格（当鼠标在表格外时）
-    getBoundaryCellFromMousePosition(event) {
-      const tableEl = this.$refs.tableRef?.$el;
-      if (!tableEl) return null;
-
-      const tableRect = tableEl.getBoundingClientRect();
-      const mouseX = event.clientX;
-      const mouseY = event.clientY;
-
-      // 获取表格的tbody元素
-      const tbody = tableEl.querySelector(".el-table__body tbody");
-      if (!tbody) return null;
-
-      const rows = tbody.querySelectorAll("tr");
-      if (rows.length === 0) return null;
-
-      // 计算目标行索引
-      let targetRowIndex;
-      if (mouseY < tableRect.top) {
-        // 鼠标在表格上方，选择第一行
-        targetRowIndex = 0;
-      } else if (mouseY > tableRect.bottom) {
-        // 鼠标在表格下方，选择最后一行
-        targetRowIndex = rows.length - 1;
-      } else {
-        // 鼠标在表格垂直范围内，根据Y坐标计算行索引
-        targetRowIndex = 0;
-        let accumulatedHeight = tableRect.top;
-
-        // 获取表头高度（如果存在）
-        const thead = tableEl.querySelector(".el-table__header");
-        if (thead) {
-          accumulatedHeight += thead.getBoundingClientRect().height;
-        }
-
-        for (let i = 0; i < rows.length; i++) {
-          const rowRect = rows[i].getBoundingClientRect();
-          if (mouseY <= rowRect.bottom) {
-            targetRowIndex = i;
-            break;
-          }
-          targetRowIndex = i;
-        }
-        targetRowIndex = Math.max(0, Math.min(targetRowIndex, rows.length - 1));
-      }
-
-      // 获取目标行的所有单元格
-      const targetRow = rows[targetRowIndex];
-      const cells = targetRow.querySelectorAll("td");
-      if (cells.length === 0) return null;
-
-      // 计算目标列索引
-      let targetColumnIndex;
-      if (mouseX < tableRect.left) {
-        // 鼠标在表格左侧，选择第一列
-        targetColumnIndex = 0;
-      } else if (mouseX > tableRect.right) {
-        // 鼠标在表格右侧，选择最后一列
-        targetColumnIndex = cells.length - 1;
-      } else {
-        // 鼠标在表格水平范围内，根据X坐标计算列索引
-        let accumulatedWidth = tableRect.left;
-        targetColumnIndex = 0;
-        for (let i = 0; i < cells.length; i++) {
-          const cellRect = cells[i].getBoundingClientRect();
-          accumulatedWidth += cellRect.width;
-          if (mouseX <= accumulatedWidth) {
-            targetColumnIndex = i;
-            break;
-          }
-          targetColumnIndex = i;
-        }
-      }
-
-      // 使用getColumnIndexByClass获取准确的列索引
-      const targetCell = cells[targetColumnIndex];
-      const accurateColumnIndex = this.getColumnIndexByClass(targetCell);
-
-      return {
-        rowIndex: targetRowIndex,
-        columnIndex:
-          accurateColumnIndex !== -1 ? accurateColumnIndex : targetColumnIndex,
-        element: targetCell,
-        cellText: this.getCellText(targetCell),
-      };
-    },
-
     // 从事件中获取单元格信息
     getCellInfoFromEvent(event) {
       let target = event.target.classList.contains("el-table__cell")
@@ -405,10 +313,13 @@ export default {
       const rowIndex = Array.from(tbody.children).indexOf(tr);
 
       // 获取列索引 - 通过class名称精确匹配，兼容合并单元格
-      const columnIndex = this.getColumnIndexByClass(target);
+      const columnIndex = getColumnIndexByClass(
+        target,
+        this.$refs.tableRef?.$el
+      );
 
       // 获取单元格文本内容
-      const cellText = this.getCellText(target);
+      const cellText = getCellText(target);
 
       return {
         rowIndex,
@@ -421,7 +332,7 @@ export default {
 
     // 选中单个单元格
     selectCell(rowIndex, columnIndex) {
-      const cellKey = `${rowIndex}-${columnIndex}`;
+      const cellKey = createCellKey(rowIndex, columnIndex);
 
       if (!this.selectedCells.includes(cellKey)) {
         this.selectedCells.push(cellKey);
@@ -443,10 +354,10 @@ export default {
     selectCellRange(startCell, endCell, keepExisting = false) {
       if (!startCell || !endCell) return;
 
-      const minRow = Math.min(startCell.rowIndex, endCell.rowIndex);
-      const maxRow = Math.max(startCell.rowIndex, endCell.rowIndex);
-      const minCol = Math.min(startCell.columnIndex, endCell.columnIndex);
-      const maxCol = Math.max(startCell.columnIndex, endCell.columnIndex);
+      const startRow = Math.min(startCell.rowIndex, endCell.rowIndex);
+      const endRow = Math.max(startCell.rowIndex, endCell.rowIndex);
+      const startCol = Math.min(startCell.columnIndex, endCell.columnIndex);
+      const endCol = Math.max(startCell.columnIndex, endCell.columnIndex);
 
       // 清除之前的选择（如果不保持现有选择）
       if (!keepExisting) {
@@ -454,10 +365,14 @@ export default {
       }
 
       // 选中范围内的所有单元格
-      for (let row = minRow; row <= maxRow; row++) {
-        for (let col = minCol; col <= maxCol; col++) {
+      for (let row = startRow; row <= endRow; row++) {
+        for (let col = startCol; col <= endCol; col++) {
           // 通过DOM检查单元格是否存在
-          const cellElement = this.getCellElement(row, col);
+          const cellElement = getCellElement(
+            this.$refs.tableRef?.$el,
+            row,
+            col
+          );
           if (cellElement) {
             this.selectCell(row, col);
           }
@@ -474,208 +389,148 @@ export default {
       this.$emit("cell-selection-clear");
     },
 
-    // 更新单元格样式
+    // 更新单元格样式（使用遮罩层）
     updateCellStyles() {
       this.$nextTick(() => {
-        const tableEl = this.$refs.tableRef?.$el;
-        if (!tableEl) return;
+        if (this.selectedCells.length === 0) {
+          this.hideSelectionOverlay();
+          return;
+        }
 
-        // 移除所有选中样式
-        const allCells = tableEl.querySelectorAll(".el-table__cell");
-        allCells.forEach((cell) => {
-          cell.classList.remove("cell-selected");
-        });
-
-        // 添加选中样式
-        this.selectedCells.forEach((cellKey) => {
-          const [rowIndex, columnIndex] = cellKey.split("-").map(Number);
-          const cell = this.getCellElement(rowIndex, columnIndex);
-          if (cell) {
-            cell.classList.add("cell-selected");
-          }
-        });
+        this.updateSelectionOverlay();
       });
     },
 
-    // 获取单元格DOM元素
-    getCellElement(rowIndex, columnIndex) {
-      const tableEl = this.$refs.tableRef?.$el;
-      if (!tableEl) return null;
+    // 创建选中区域遮罩层
+    createSelectionOverlay() {
+      if (this.selectionOverlay) return;
 
-      const tbody = tableEl.querySelector(".el-table__body tbody");
-      if (!tbody) return null;
+      const overlay = document.createElement("div");
+      overlay.className = "cell-selection-overlay";
+      overlay.style.cssText = `
+        position: absolute;
+        pointer-events: none;
+        z-index: 10;
+        box-sizing: border-box;
+        display: none;
+      `;
 
-      const tr = tbody.children[rowIndex];
-      if (!tr) return null;
+      this.selectionOverlay = overlay;
 
-      // 首先尝试通过class名称查找单元格（兼容合并单元格）
-      const thead = tableEl.querySelector(".el-table__header thead");
-      if (thead) {
-        const headerRow = thead.querySelector("tr");
-        if (headerRow && headerRow.children[columnIndex]) {
-          const headerCell = headerRow.children[columnIndex];
-          const columnClass = Array.from(headerCell.classList).find((cls) =>
-            cls.match(/^el-table_\d+_column_\d+$/)
-          );
-
-          if (columnClass) {
-            // 在当前行中查找具有相同列class的单元格
-            const cellWithClass = tr.querySelector(`.${columnClass}`);
-            if (cellWithClass) {
-              return cellWithClass;
-            }
-          }
+      // 将遮罩层添加到表格容器中
+      this.$nextTick(() => {
+        const tableEl = this.$refs.tableRef?.$el;
+        if (tableEl) {
+          const tableWrapper =
+            tableEl.querySelector(".el-table__body-wrapper") || tableEl;
+          tableWrapper.style.position = "relative";
+          tableWrapper.appendChild(overlay);
         }
-      }
-
-      // 回退到原来的索引方法
-      return tr.children[columnIndex];
+      });
     },
 
-    // 通过class名称获取列索引，兼容合并单元格
-    getColumnIndexByClass(cellElement) {
-      if (!cellElement) return -1;
+    // 移除选中区域遮罩层
+    removeSelectionOverlay() {
+      if (this.selectionOverlay && this.selectionOverlay.parentNode) {
+        this.selectionOverlay.parentNode.removeChild(this.selectionOverlay);
+        this.selectionOverlay = null;
+      }
+    },
 
-      // 从单元格class中提取列标识符（如 el-table_3_column_14）
-      const classList = Array.from(cellElement.classList);
-      const columnClass = classList.find((cls) =>
-        cls.match(/^el-table_\d+_column_\d+$/)
-      );
-
-      if (!columnClass) {
-        // 如果没有找到标准的列class，回退到原来的方法
-        const tr = cellElement.parentElement;
-        return Array.from(tr.children).indexOf(cellElement);
+    // 更新选中区域遮罩层
+    updateSelectionOverlay() {
+      if (!this.selectionOverlay || this.selectedCells.length === 0) {
+        this.hideSelectionOverlay();
+        return;
       }
 
-      // 在表头中查找相同class的列，获取其索引
       const tableEl = this.$refs.tableRef?.$el;
-      if (!tableEl) return -1;
-
-      const thead = tableEl.querySelector(".el-table__header thead");
-      if (!thead) return -1;
-
-      const headerRow = thead.querySelector("tr");
-      if (!headerRow) return -1;
-
-      // 查找具有相同列class的表头单元格
-      const headerCells = Array.from(headerRow.children);
-      const columnIndex = headerCells.findIndex((th) =>
-        th.classList.contains(columnClass)
-      );
-
-      return columnIndex >= 0 ? columnIndex : -1;
-    },
-
-    getCellText(element) {
-      if (!element) return "";
-      const inputs = element.querySelectorAll("input, textarea, select");
-
-      if (inputs.length > 0) {
-        const values = [];
-
-        inputs.forEach((input) => {
-          let value = "";
-          if (input.type === "checkbox") {
-            value = input.checked ? input.value || "✓" : "";
-          } else if (input.type === "radio") {
-            value = input.checked ? input.value || "已选中" : "";
-          } else {
-            value = input.value || "";
-          }
-          if (value) {
-            values.push(value);
-          }
-        });
-
-        if (values.length > 0) {
-          return values.join("，");
-        }
+      const bounds = calculateSelectionBounds(this.selectedCells, tableEl);
+      if (!bounds) {
+        this.hideSelectionOverlay();
+        return;
       }
 
-      return (element.textContent || element.innerText || "").trim();
+      Object.assign(this.selectionOverlay.style, {
+        position: "absolute",
+        pointerEvents: "none",
+        zIndex: "10",
+        backgroundColor: "rgba(24, 144, 255, 0.1)",
+        border: "2px solid #1890ff",
+        boxSizing: "border-box",
+        display: "block",
+        left: `${bounds.left}px`,
+        top: `${bounds.top}px`,
+        width: `${bounds.width}px`,
+        height: `${bounds.height}px`,
+      });
+
+      this.overlayVisible = true;
     },
 
-    // 获取选中单元格的值（简化版）
-    getSelectedCellsValues() {
-      return this.selectedCellsData.map((cell) => ({
-        row: cell.rowIndex,
-        column: cell.columnIndex,
-        value: cell.value,
-        cellText: cell.cellText,
-      }));
+    // 隐藏选中区域遮罩层
+    hideSelectionOverlay() {
+      if (this.selectionOverlay) {
+        this.selectionOverlay.style.display = "none";
+        this.overlayVisible = false;
+      }
     },
 
     // 复制选中单元格的值
-    copyCellsValues() {
-      const values = this.getSelectedCellsValues();
-      if (values.length === 0) return;
-
-      // 创建表格格式的文本
-      const rows = {};
-      values.forEach((cell) => {
-        if (!rows[cell.row]) rows[cell.row] = {};
-        rows[cell.row][cell.column] = cell.value || "";
-      });
-
-      const sortedRows = Object.keys(rows).sort(
-        (a, b) => Number(a) - Number(b)
-      );
-      const sortedCols = values
-        .reduce((cols, cell) => {
-          if (!cols.includes(cell.column)) cols.push(cell.column);
-          return cols;
-        }, [])
-        .sort((a, b) => a - b);
-
-      const textData = sortedRows
-        .map((rowKey) => {
-          return sortedCols
-            .map((colKey) => rows[rowKey][colKey] || "")
-            .join("\t");
-        })
-        .join("\n");
-
-      // 复制到剪贴板
-      if (navigator.clipboard) {
-        navigator.clipboard
-          .writeText(textData)
-          .then(() => {
-            this.$message.success("已复制到剪贴板");
-          })
-          .catch(() => {
-            this.fallbackCopyToClipboard(textData);
-          });
-      } else {
-        this.fallbackCopyToClipboard(textData);
-      }
-
-      // 触发复制事件
-      this.$emit("cells-copied", {
-        values,
-        textData,
-      });
-    },
-
-    // 降级复制方法
-    fallbackCopyToClipboard(text) {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.style.position = "fixed";
-      textArea.style.left = "-999999px";
-      textArea.style.top = "-999999px";
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
+    async copyCellsValues() {
+      if (this.selectedCells.length === 0) return;
 
       try {
-        document.execCommand("copy");
-        this.$message.success("已复制到剪贴板");
-      } catch (err) {
-        this.$message.error("复制失败");
-      }
+        const cellsData = this.selectedCellsData.sort((a, b) => {
+          if (a.rowIndex !== b.rowIndex) return a.rowIndex - b.rowIndex;
+          return a.columnIndex - b.columnIndex;
+        });
 
-      document.body.removeChild(textArea);
+        // 构建表格数据
+        const rows = {};
+        cellsData.forEach((cell) => {
+          if (!rows[cell.rowIndex]) rows[cell.rowIndex] = {};
+          rows[cell.rowIndex][cell.columnIndex] = cell.cellText || "";
+        });
+
+        // 转换为二维数组
+        const tableData = [];
+        const rowIndices = Object.keys(rows)
+          .map(Number)
+          .sort((a, b) => a - b);
+
+        rowIndices.forEach((rowIndex) => {
+          const row = rows[rowIndex];
+          const colIndices = Object.keys(row)
+            .map(Number)
+            .sort((a, b) => a - b);
+          const minCol = Math.min(...colIndices);
+          const maxCol = Math.max(...colIndices);
+
+          const rowData = [];
+          for (let col = minCol; col <= maxCol; col++) {
+            rowData.push(row[col] || "");
+          }
+          tableData.push(rowData);
+        });
+
+        const textData = tableData.map((row) => row.join("\t")).join("\n");
+
+        // 使用 Clipboard API 或降级方法
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(textData);
+        } else {
+          fallbackCopyToClipboard(textData);
+        }
+
+        this.$emit("cells-copied", {
+          cellsData,
+          textData,
+          selectedCells: this.selectedCells,
+        });
+      } catch (error) {
+        console.error("复制失败:", error);
+      }
     },
   },
 };

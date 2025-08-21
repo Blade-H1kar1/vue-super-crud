@@ -1,10 +1,13 @@
 // 单元格选中功能的 SCSS 样式
 
-// 单元格选中样式
-.cell-selected {
-  background-color: #e6f7ff !important;
-  position: relative;
-  box-shadow: inset 0 0 0 2px #1890ff;
-  background-color: rgba(24, 144, 255, 0.1) !important;
-  transition: all 0.2s ease;
+// 选中区域遮罩层样式
+.cell-selection-overlay {
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+  background-color: rgba(24, 144, 255, 0.1);
+  border: 2px solid #1890ff;
+  box-sizing: border-box;
+  transition: all 0.1s ease;
+  border-radius: 2px;
 }
