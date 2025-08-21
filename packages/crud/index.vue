@@ -165,6 +165,7 @@ import columnHandler from "./mixins/columnHandler";
 import cacheHandler from "./mixins/cacheHandler";
 import searchHandler from "./mixins/searchHandler";
 import mockData from "./mixins/mockData";
+import cellSelection from "./mixins/cellSelection.js";
 // 组件
 import search from "./search.vue";
 import menuBar from "./menuBar.vue";
@@ -221,6 +222,7 @@ export default create({
     cacheHandler,
     searchHandler,
     mockData,
+    cellSelection,
   ],
   props: {
     // 防止scope中携带实例时，拷贝合并报错
@@ -593,6 +595,14 @@ export default create({
         this.setOptions.fixedWidth[column.property] = newWidth;
         this.saveLocalCache(false); // 不刷新表格，避免死循环
       }
+    },
+    cellMouseEnter(row, column, cell, event) {
+      // 触发校验提示
+      this.triggerValidateTooltip(row, column, cell, event);
+    },
+    cellMouseLeave(row, column, cell, event) {
+      // 移除校验提示
+      this.removeValidateTooltip(row, column, cell, event);
     },
   },
 });
