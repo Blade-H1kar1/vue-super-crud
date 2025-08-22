@@ -3,11 +3,24 @@
 // 选中区域遮罩层样式
 .cell-selection-overlay {
   position: absolute;
+  display: none;
   pointer-events: none;
   z-index: 10;
   background-color: rgba(24, 144, 255, 0.1);
   border: 2px solid #1890ff;
   box-sizing: border-box;
   transition: all 0.1s ease;
+  border-radius: 2px;
+}
+
+// 复制虚线框样式
+.copy-dash-overlay {
+  position: absolute;
+  display: none;
+  pointer-events: none;
+  z-index: 15;
+  box-sizing: border-box;
+  background: transparent;
+  border: 2px dashed #409eff;
   border-radius: 2px;
 }

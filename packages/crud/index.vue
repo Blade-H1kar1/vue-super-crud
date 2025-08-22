@@ -482,6 +482,8 @@ export default create({
       this.$nextTick(() => {
         // 触发表格重新渲染
         this.key = Date.now();
+        // 通知单元格选择混入更新覆盖层
+        this.updateCellOverlays();
       });
     },
     defineRowIndex({ row, rowIndex }) {
@@ -567,6 +569,10 @@ export default create({
     // 强制更新表格
     _forceUpdate() {
       this.$refs?.tableRef?.store?.updateColumns();
+      this.$nextTick(() => {
+        // 通知单元格选择混入更新覆盖层
+        this.updateCellOverlays && this.updateCellOverlays();
+      });
     },
     rowClick(row, column, event) {
       this.selectRowClick(row, column, event);
@@ -595,6 +601,10 @@ export default create({
         this.setOptions.fixedWidth[column.property] = newWidth;
         this.saveLocalCache(false); // 不刷新表格，避免死循环
       }
+      // 列宽变化后更新覆盖层位置
+      this.$nextTick(() => {
+        this.updateCellOverlays && this.updateCellOverlays();
+      });
     },
     cellMouseEnter(row, column, cell, event) {
       // 触发校验提示

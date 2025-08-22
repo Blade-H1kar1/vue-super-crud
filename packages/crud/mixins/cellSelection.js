@@ -9,6 +9,7 @@ import {
   fallbackCopyToClipboard,
   getBoundaryCellFromMousePosition,
 } from "../utils/cellSelectionUtils.js";
+import { debounce } from "lodash-es";
 
 export default {
   data() {
@@ -26,6 +27,12 @@ export default {
       // 遮罩层相关
       selectionOverlay: null, // 选中区域遮罩层DOM元素
       overlayVisible: false, // 遮罩层是否可见
+      // 复制虚线框相关
+      copyDashOverlay: null, // 复制虚线框DOM元素
+      copyDashVisible: false, // 复制虚线框是否可见
+      copiedCells: [], // 已复制的单元格索引信息
+      // DOM变化监听
+      tableObserver: null, // DOM变化监听器
     };
   },
 
@@ -33,6 +40,9 @@ export default {
     this.initCellSelectionEvents();
     this.initKeyboardEvents();
     this.createSelectionOverlay();
+    this.createCopyDashOverlay();
+
+    this.debouncedUpdateCellOverlays = debounce(this.updateCellOverlays, 50);
   },
 
   beforeDestroy() {
@@ -42,6 +52,10 @@ export default {
     this.removeGlobalEvents();
     // 清理遮罩层
     this.removeSelectionOverlay();
+    // 清理复制虚线框
+    this.removeCopyDashOverlay();
+    // 清理DOM变化监听器
+    this.destroyTableObserver();
   },
 
   computed: {
@@ -211,6 +225,10 @@ export default {
         if (this.selectedCells.length > 0) {
           this.clearCellSelection();
         }
+        // 清除复制虚线框
+        if (this.copyDashVisible) {
+          this.hideCopyDashOverlay();
+        }
       }
     },
 
@@ -264,8 +282,10 @@ export default {
       const wasDragging = this.isDragging;
 
       // 重置状态
-      this.isMouseDown = false;
-      this.isDragging = false;
+      setTimeout(() => {
+        this.isMouseDown = false;
+        this.isDragging = false;
+      }, 0);
 
       // 如果刚结束拖拽，设置标志防止立即触发清除逻辑
       if (wasDragging) {
@@ -394,10 +414,12 @@ export default {
       this.$nextTick(() => {
         if (this.selectedCells.length === 0) {
           this.hideSelectionOverlay();
-          return;
+        } else {
+          this.updateSelectionOverlay();
         }
 
-        this.updateSelectionOverlay();
+        // 检查是否需要DOM监听器
+        this.checkObserverNeed();
       });
     },
 
@@ -407,13 +429,6 @@ export default {
 
       const overlay = document.createElement("div");
       overlay.className = "cell-selection-overlay";
-      overlay.style.cssText = `
-        position: absolute;
-        pointer-events: none;
-        z-index: 10;
-        box-sizing: border-box;
-        display: none;
-      `;
 
       this.selectionOverlay = overlay;
 
@@ -523,6 +538,15 @@ export default {
           fallbackCopyToClipboard(textData);
         }
 
+        // 在复制时保存复制的单元格DOM
+        this.copiedCells = [...this.selectedCells];
+
+        // 显示复制虚线框
+        this.showCopyDashOverlay();
+
+        // 检查是否需要DOM监听器
+        this.checkObserverNeed();
+
         this.$emit("cells-copied", {
           cellsData,
           textData,
@@ -530,6 +554,141 @@ export default {
         });
       } catch (error) {
         console.error("复制失败:", error);
+      }
+    },
+
+    // 创建复制虚线框
+    createCopyDashOverlay() {
+      if (this.copyDashOverlay) return;
+
+      const overlay = document.createElement("div");
+      overlay.className = "copy-dash-overlay";
+
+      this.copyDashOverlay = overlay;
+
+      // 将虚线框添加到表格容器中，与遮罩层使用相同的容器
+      this.$nextTick(() => {
+        const tableEl = this.$refs.tableRef?.$el;
+        if (tableEl) {
+          const tableWrapper =
+            tableEl.querySelector(".el-table__body-wrapper") || tableEl;
+          tableWrapper.style.position = "relative";
+          tableWrapper.appendChild(overlay);
+        }
+      });
+    },
+
+    // 显示复制虚线框
+    showCopyDashOverlay() {
+      // 创建虚线框（如果不存在）
+      this.createCopyDashOverlay();
+      if (!this.copyDashOverlay || this.copiedCells.length === 0) return;
+
+      const tableEl = this.$refs.tableRef?.$el;
+      if (!tableEl) return;
+
+      // 根据保存的复制单元格索引重新计算边界信息
+      const bounds = calculateSelectionBounds(this.copiedCells, tableEl);
+      if (!bounds) return;
+
+      // 设置虚线框位置和大小，比选中区域小1px显示在内部
+      Object.assign(this.copyDashOverlay.style, {
+        position: "absolute",
+        pointerEvents: "none",
+        zIndex: "15",
+        boxSizing: "border-box",
+        display: "block",
+        left: `${bounds.left + 1}px`,
+        top: `${bounds.top + 1}px`,
+        width: `${bounds.width - 2}px`,
+        height: `${bounds.height - 2}px`,
+      });
+
+      this.copyDashVisible = true;
+    },
+
+    // 隐藏复制虚线框
+    hideCopyDashOverlay() {
+      if (this.copyDashOverlay) {
+        this.copyDashOverlay.style.display = "none";
+      }
+      this.copyDashVisible = false;
+      this.copiedCells = [];
+
+      // 检查是否需要DOM监听器
+      this.checkObserverNeed();
+    },
+
+    // 移除复制虚线框
+    removeCopyDashOverlay() {
+      if (this.copyDashOverlay && this.copyDashOverlay.parentNode) {
+        this.copyDashOverlay.parentNode.removeChild(this.copyDashOverlay);
+      }
+      this.copyDashOverlay = null;
+      this.copyDashVisible = false;
+      this.copiedCells = [];
+    },
+
+    // 初始化DOM变化监听器
+    initTableObserver() {
+      if (
+        this.tableObserver ||
+        (this.selectedCells.length === 0 && this.copiedCells.length === 0)
+      ) {
+        return;
+      }
+
+      this.tableObserver = new MutationObserver(() => {
+        if (this.isDragging) return;
+        this.$nextTick(() => {
+          this.debouncedUpdateCellOverlays();
+        });
+      });
+
+      this.$nextTick(() => {
+        const tableEl = this.$refs.tableRef?.$el;
+        if (tableEl) {
+          this.tableObserver.observe(tableEl, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["style", "class"],
+          });
+        }
+      });
+    },
+
+    // 检查是否需要监听器
+    checkObserverNeed() {
+      const needObserver =
+        this.selectedCells.length > 0 || this.copiedCells.length > 0;
+
+      if (needObserver && !this.tableObserver) {
+        // 创建监听器
+        this.initTableObserver();
+      } else if (!needObserver && this.tableObserver) {
+        // 销毁监听器
+        this.destroyTableObserver();
+      }
+    },
+
+    // 销毁DOM变化监听器
+    destroyTableObserver() {
+      if (this.tableObserver) {
+        this.tableObserver.disconnect();
+        this.tableObserver = null;
+      }
+    },
+
+    // 更新单元格覆盖层（选中框和复制框）
+    updateCellOverlays() {
+      // 更新选中框位置
+      if (this.overlayVisible && this.selectedCells.length > 0) {
+        this.updateSelectionOverlay();
+      }
+      // 更新复制框位置
+      if (this.copyDashVisible && this.copiedCells.length > 0) {
+        this.showCopyDashOverlay();
       }
     },
   },
