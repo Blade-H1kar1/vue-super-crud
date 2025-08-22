@@ -1,26 +1,89 @@
 // 单元格选中功能的 SCSS 样式
 
-// 选中区域遮罩层样式
-.cell-selection-overlay {
+// 遮罩层基础样式
+%overlay-base {
   position: absolute;
   display: none;
   pointer-events: none;
-  z-index: 10;
-  background-color: rgba(24, 144, 255, 0.1);
-  border: 2px solid #1890ff;
   box-sizing: border-box;
   transition: all 0.1s ease;
+}
+
+// 选中区域遮罩层样式
+.cell-selection-overlay {
+  @extend %overlay-base;
+  z-index: 1000;
+  background-color: rgba(64, 158, 255, 0.1);
+  border: 1px solid #409eff;
   border-radius: 2px;
+
+  // 允许内部的拖拽小方块响应鼠标事件
+  .fill-handle {
+    pointer-events: auto;
+  }
 }
 
 // 复制虚线框样式
 .copy-dash-overlay {
-  position: absolute;
-  display: none;
-  pointer-events: none;
-  z-index: 15;
-  box-sizing: border-box;
+  @extend %overlay-base;
+  z-index: 1000;
   background: transparent;
   border: 2px dashed #409eff;
   border-radius: 2px;
+}
+
+// 扩展选中区域样式
+.extended-selection-overlay {
+  @extend %overlay-base;
+  z-index: 1000;
+  border: 2px dashed #909399;
+  border-radius: 2px;
+}
+
+// 填充手柄样式
+.fill-handle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background-color: #409eff;
+  cursor: crosshair;
+  z-index: 1001;
+  display: none;
+  box-sizing: border-box;
+  border-radius: 1px;
+  transition: all 0.1s ease;
+
+  &:hover {
+    background-color: #40a9ff;
+    transform: scale(1.2);
+    box-shadow: 0 0 4px rgba(64, 158, 255, 0.5);
+  }
+
+  &:active {
+    background-color: #096dd9;
+    transform: scale(1.1);
+  }
+}
+
+// 兼容旧的类名
+.cell-fill-handle {
+  @extend .fill-handle;
+  right: -3px;
+  bottom: -3px;
+  width: 4px;
+  height: 4px;
+  background-color: #1890ff;
+  border: 1px solid #fff;
+  z-index: 1;
+
+  &:hover {
+    background-color: #40a9ff;
+    transform: scale(1.2);
+    box-shadow: 0 0 4px rgba(24, 144, 255, 0.5);
+  }
+
+  &:active {
+    background-color: #096dd9;
+    transform: scale(1.1);
+  }
 }

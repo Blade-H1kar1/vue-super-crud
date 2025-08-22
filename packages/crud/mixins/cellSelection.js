@@ -1,7 +1,6 @@
 import {
   parseCellKey,
   createCellKey,
-  isFormElement,
   getCellText,
   getColumnIndexByClass,
   getCellElement,
@@ -16,114 +15,270 @@ export default {
     return {
       // 单元格选中状态
       selectedCells: [], // 存储选中的单元格 "rowIndex-columnIndex"
-      isDragging: false, // 是否正在拖拽
-      dragStartCell: null, // 拖拽开始的单元格
-      dragEndCell: null, // 拖拽结束的单元格
-      isMouseDown: false, // 鼠标是否按下
-      _cellSelectionHandlers: null, // 事件处理器
-      _globalHandlers: null, // 全局事件处理器
-      _globalEventsAdded: false, // 全局事件是否已添加
-      _justFinishedDragging: false, // 刚刚结束拖拽标志
-      // 遮罩层相关
-      selectionOverlay: null, // 选中区域遮罩层DOM元素
-      overlayVisible: false, // 遮罩层是否可见
-      // 复制虚线框相关
-      copyDashOverlay: null, // 复制虚线框DOM元素
-      copyDashVisible: false, // 复制虚线框是否可见
       copiedCells: [], // 已复制的单元格索引信息
-      // DOM变化监听
-      tableObserver: null, // DOM变化监听器
+
+      // 拖拽状态
+      dragState: {
+        isMouseDown: false,
+        isDragging: false,
+        isFillDragging: false,
+        justFinishedDragging: false,
+        startCell: null,
+        endCell: null,
+        fillStartCell: null,
+        fillEndCell: null,
+        fillDirection: null, // 'horizontal', 'vertical', null
+      },
+
+      // 遮罩层管理
+      overlays: {
+        selection: { element: null, visible: false },
+        copyDash: { element: null, visible: false },
+        extended: { element: null, visible: false },
+        fillHandle: { element: null, visible: false },
+      },
+
+      // 事件处理器
+      eventHandlers: {
+        cell: null,
+        global: null,
+        keyboard: null,
+        documentClick: null,
+        fillHandle: null,
+        fillGlobal: null,
+      },
+
+      // DOM监听
+      tableObserver: null,
+      globalEventsAdded: false,
+      
+      // requestAnimationFrame防抖
+      mouseMoveAnimationId: null,
     };
   },
 
   mounted() {
-    this.initCellSelectionEvents();
-    this.initKeyboardEvents();
-    this.createSelectionOverlay();
-    this.createCopyDashOverlay();
-
-    this.debouncedUpdateCellOverlays = debounce(this.updateCellOverlays, 50);
+    this.initEvents();
+    this.initOverlays();
+    this.debouncedUpdateOverlays = debounce(this.updateOverlays, 50);
   },
 
   beforeDestroy() {
-    this.removeCellSelectionEvents();
-    this.removeKeyboardEvents();
-    // 确保清理全局事件监听器
-    this.removeGlobalEvents();
-    // 清理遮罩层
-    this.removeSelectionOverlay();
-    // 清理复制虚线框
-    this.removeCopyDashOverlay();
-    // 清理DOM变化监听器
-    this.destroyTableObserver();
+    this.cleanup();
   },
 
   computed: {
     // 获取选中的单元格数据
     selectedCellsData() {
-      const tableEl = this.$refs.tableRef?.$el;
-      if (!tableEl) return [];
+      return this.selectedCells.map((cellKey) => {
+        const { rowIndex, columnIndex } = parseCellKey(cellKey);
+        return {
+          rowIndex,
+          columnIndex,
+          cellKey,
+        };
+      });
+    },
 
-      return this.selectedCells
-        .map((cellKey) => {
-          const { rowIndex, columnIndex } = parseCellKey(cellKey);
-          const element = getCellElement(tableEl, rowIndex, columnIndex);
-          if (!element) return null;
-
-          const cellText = getCellText(element);
-          return {
-            rowIndex,
-            columnIndex,
-            element,
-            cellText,
-            value: cellText,
-            cellKey,
-          };
-        })
-        .filter(Boolean);
+    // 获取表格容器元素
+    tableWrapper() {
+      const tableEl = this.getTableElement();
+      return tableEl?.querySelector(".el-table__body-wrapper") || tableEl;
     },
   },
 
   methods: {
+    // ========== 公共方法 ==========
+
+    // 获取表格元素
+    getTableElement() {
+      return this.$refs.tableRef?.$el;
+    },
+
+    // 初始化所有事件
+    initEvents() {
+      this.initCellSelectionEvents();
+      this.initKeyboardEvents();
+    },
+
+    // 初始化所有遮罩层
+    initOverlays() {
+      this.createOverlay("selection");
+      this.createOverlay("copyDash");
+      this.createOverlay("extended");
+      this.createOverlay("fillHandle");
+    },
+
+    // 清理所有资源
+    cleanup() {
+      this.removeAllEvents();
+      this.removeAllOverlays();
+      this.destroyTableObserver();
+      
+      // 清理requestAnimationFrame
+      if (this.mouseMoveAnimationId) {
+        cancelAnimationFrame(this.mouseMoveAnimationId);
+        this.mouseMoveAnimationId = null;
+      }
+    },
+
+    // ========== 遮罩层管理 ==========
+
+    // 创建遮罩层
+    createOverlay(type) {
+      if (this.overlays[type].element) return;
+
+      const overlay = document.createElement("div");
+      overlay.className = this.getOverlayClassName(type);
+
+      const container = this.getOverlayContainer();
+      if (container) {
+        container.appendChild(overlay);
+        this.overlays[type].element = overlay;
+
+        if (type === "fillHandle") {
+          this.initFillHandleEvents(overlay);
+        }
+      }
+    },
+
+    // 初始化填充手柄事件
+    initFillHandleEvents(fillHandle) {
+      if (!fillHandle || this.eventHandlers.fillHandle) return;
+
+      this.eventHandlers.fillHandle = {
+        mousedown: this.handleFillHandleMouseDown.bind(this),
+      };
+
+      fillHandle.addEventListener(
+        "mousedown",
+        this.eventHandlers.fillHandle.mousedown
+      );
+    },
+
+    // 获取遮罩层类名
+    getOverlayClassName(type) {
+      const classNames = {
+        selection: "cell-selection-overlay",
+        copyDash: "copy-dash-overlay",
+        extended: "extended-selection-overlay",
+        fillHandle: "fill-handle",
+      };
+      return classNames[type] || "";
+    },
+
+    // 获取遮罩层容器
+    getOverlayContainer() {
+      return this.tableWrapper;
+    },
+
+    // 显示遮罩层
+    showOverlay(type, bounds = null) {
+      const overlay = this.overlays[type];
+      if (!overlay.element) return;
+
+      if (bounds) {
+        this.updateOverlayPosition(type, bounds);
+      }
+
+      overlay.element.style.display = "block";
+      overlay.visible = true;
+    },
+
+    // 隐藏遮罩层
+    hideOverlay(type) {
+      const overlay = this.overlays[type];
+      if (!overlay.element) return;
+
+      overlay.element.style.display = "none";
+      overlay.visible = false;
+    },
+
+    // 更新遮罩层位置
+    updateOverlayPosition(type, bounds) {
+      const overlay = this.overlays[type].element;
+      if (!overlay) return;
+
+      const { left, top, width, height } = bounds;
+      overlay.style.left = left + "px";
+      overlay.style.top = top + "px";
+      overlay.style.width = width + "px";
+      overlay.style.height = height + "px";
+    },
+
+    // 移除所有遮罩层
+    removeAllOverlays() {
+      Object.keys(this.overlays).forEach((type) => {
+        this.removeOverlay(type);
+      });
+    },
+
+    // 移除单个遮罩层
+    removeOverlay(type) {
+      const overlay = this.overlays[type];
+      if (overlay.element) {
+        overlay.element.remove();
+        overlay.element = null;
+        overlay.visible = false;
+      }
+    },
+
+    // ========== 事件管理 ==========
+
+    // 移除所有事件
+    removeAllEvents() {
+      this.removeCellSelectionEvents();
+      this.removeKeyboardEvents();
+      this.removeGlobalEvents();
+    },
+
     // 添加全局事件监听器
     addGlobalEvents() {
-      if (this._globalEventsAdded || !this._globalHandlers) return;
+      if (this.globalEventsAdded) return;
 
-      document.addEventListener("mousemove", this._globalHandlers.mousemove);
-      document.addEventListener("mouseup", this._globalHandlers.mouseup);
-      this._globalEventsAdded = true;
+      this.eventHandlers.global = {
+        mousemove: this.handleGlobalMouseMove.bind(this),
+        mouseup: this.handleGlobalMouseUp.bind(this),
+      };
+
+      document.addEventListener(
+        "mousemove",
+        this.eventHandlers.global.mousemove
+      );
+      document.addEventListener("mouseup", this.eventHandlers.global.mouseup);
+      this.globalEventsAdded = true;
     },
 
     // 移除全局事件监听器
     removeGlobalEvents() {
-      if (!this._globalEventsAdded || !this._globalHandlers) return;
+      if (!this.globalEventsAdded || !this.eventHandlers.global) return;
 
-      document.removeEventListener("mousemove", this._globalHandlers.mousemove);
-      document.removeEventListener("mouseup", this._globalHandlers.mouseup);
-      this._globalEventsAdded = false;
+      document.removeEventListener(
+        "mousemove",
+        this.eventHandlers.global.mousemove
+      );
+      document.removeEventListener(
+        "mouseup",
+        this.eventHandlers.global.mouseup
+      );
+      this.eventHandlers.global = null;
+      this.globalEventsAdded = false;
     },
 
     // 初始化单元格选中事件
     initCellSelectionEvents() {
-      if (this._cellSelectionHandlers) return;
+      if (this.eventHandlers.cell) return;
 
-      this._cellSelectionHandlers = {
+      this.eventHandlers.cell = {
         mousedown: this.handleCellMouseDown.bind(this),
         mouseleave: this.handleTableMouseLeave.bind(this),
-      };
-
-      // 全局事件处理器（用于拖拽时绑定到document）
-      this._globalHandlers = {
-        mousemove: this.handleGlobalMouseMove.bind(this),
-        mouseup: this.handleGlobalMouseUp.bind(this),
       };
 
       this.$nextTick(() => {
         const tableEl = this.$refs.tableRef?.$el;
         if (tableEl) {
-          // 只绑定mousedown和mouseleave到表格元素
-          Object.keys(this._cellSelectionHandlers).forEach((event) => {
-            tableEl.addEventListener(event, this._cellSelectionHandlers[event]);
+          Object.keys(this.eventHandlers.cell).forEach((event) => {
+            tableEl.addEventListener(event, this.eventHandlers.cell[event]);
           });
 
           // 阻止表格默认的文本选择
@@ -134,15 +289,12 @@ export default {
 
     // 移除单元格选中事件
     removeCellSelectionEvents() {
-      if (!this._cellSelectionHandlers) return;
+      if (!this.eventHandlers.cell) return;
 
       const tableEl = this.$refs.tableRef?.$el;
       if (tableEl) {
-        Object.keys(this._cellSelectionHandlers).forEach((event) => {
-          tableEl.removeEventListener(
-            event,
-            this._cellSelectionHandlers[event]
-          );
+        Object.keys(this.eventHandlers.cell).forEach((event) => {
+          tableEl.removeEventListener(event, this.eventHandlers.cell[event]);
         });
 
         // 恢复文本选择
@@ -152,65 +304,54 @@ export default {
       // 移除全局事件监听器
       this.removeGlobalEvents();
 
-      this._cellSelectionHandlers = null;
-      this._globalHandlers = null;
-      this._globalEventsAdded = false;
+      this.eventHandlers.cell = null;
     },
 
     // 初始化键盘事件
     initKeyboardEvents() {
-      this._keyboardHandler = this.handleKeyDown.bind(this);
-      this._documentClickHandler = this.handleDocumentClick.bind(this);
-      document.addEventListener("keydown", this._keyboardHandler);
-      document.addEventListener("click", this._documentClickHandler);
+      this.eventHandlers.keyboard = this.handleKeyDown.bind(this);
+      this.eventHandlers.documentClick = this.handleDocumentClick.bind(this);
+      document.addEventListener("keydown", this.eventHandlers.keyboard);
+      document.addEventListener("click", this.eventHandlers.documentClick);
     },
 
     // 移除键盘事件
     removeKeyboardEvents() {
-      if (this._keyboardHandler) {
-        document.removeEventListener("keydown", this._keyboardHandler);
-        this._keyboardHandler = null;
+      if (this.eventHandlers.keyboard) {
+        document.removeEventListener("keydown", this.eventHandlers.keyboard);
+        this.eventHandlers.keyboard = null;
       }
-      if (this._documentClickHandler) {
-        document.removeEventListener("click", this._documentClickHandler);
-        this._documentClickHandler = null;
+      if (this.eventHandlers.documentClick) {
+        document.removeEventListener("click", this.eventHandlers.documentClick);
+        this.eventHandlers.documentClick = null;
       }
     },
 
     // 键盘事件处理
     handleKeyDown(event) {
-      // 只在表格获得焦点时处理键盘事件
-      const tableEl = this.$refs.tableRef?.$el;
-      if (!tableEl) {
-        return;
-      }
-
+      if (this.selectedCells.length === 0) return;
       // Ctrl+C 复制
       if (event.ctrlKey && event.key === "c") {
-        if (this.selectedCells.length > 0) {
-          event.preventDefault();
-          this.copyCellsValues();
-        }
+        event.preventDefault();
+        this.copyCellsValues();
       }
 
       // Escape 清除选择
       if (event.key === "Escape") {
-        if (this.selectedCells.length > 0) {
-          event.preventDefault();
-          this.clearCellSelection();
-        }
+        event.preventDefault();
+        this.clearCellSelection();
       }
     },
 
     // 文档点击事件处理
     handleDocumentClick(event) {
       // 如果正在拖拽，不处理点击事件
-      if (this.isDragging || this.isMouseDown) {
+      if (this.dragState.isDragging || this.dragState.isMouseDown) {
         return;
       }
 
       // 如果是 mouseup 事件触发的点击，延迟处理以避免与拖拽结束冲突
-      if (event.type === "click" && this._justFinishedDragging) {
+      if (event.type === "click" && this.dragState.justFinishedDragging) {
         return;
       }
 
@@ -226,8 +367,9 @@ export default {
           this.clearCellSelection();
         }
         // 清除复制虚线框
-        if (this.copyDashVisible) {
-          this.hideCopyDashOverlay();
+        if (this.overlays.copyDash.visible) {
+          this.hideOverlay("copyDash");
+          this.copiedCells = [];
         }
       }
     },
@@ -237,8 +379,8 @@ export default {
       const cellInfo = this.getCellInfoFromEvent(event);
       if (!cellInfo) return;
 
-      this.isMouseDown = true;
-      this.dragStartCell = cellInfo;
+      this.dragState.isMouseDown = true;
+      this.dragState.startCell = cellInfo;
 
       // 如果没有按住Ctrl键，清除之前的选择
       if (!event.ctrlKey && !event.metaKey) {
@@ -256,48 +398,59 @@ export default {
 
     // 全局鼠标移动事件（支持拖拽到表格外）
     handleGlobalMouseMove(event) {
-      if (!this.isMouseDown || !this.dragStartCell) return;
+      const { isMouseDown, startCell } = this.dragState;
+      if (!isMouseDown || !startCell) return;
 
-      const cellInfo =
-        this.getCellInfoFromEvent(event) ||
-        getBoundaryCellFromMousePosition(event, this.$refs.tableRef?.$el);
-
-      if (cellInfo) {
-        this.isDragging = true;
-        this.dragEndCell = cellInfo;
-        this.selectCellRange(this.dragStartCell, cellInfo);
-
-        this.$emit("cell-selection-drag", {
-          startCell: this.dragStartCell,
-          endCell: cellInfo,
-          selectedCells: this.selectedCellsData,
-        });
+      // 取消之前的动画帧
+      if (this.mouseMoveAnimationId) {
+        cancelAnimationFrame(this.mouseMoveAnimationId);
       }
+
+      // 使用requestAnimationFrame进行防抖优化
+      this.mouseMoveAnimationId = requestAnimationFrame(() => {
+        const cellInfo =
+          this.getCellInfoFromEvent(event) ||
+          getBoundaryCellFromMousePosition(event, this.$refs.tableRef?.$el);
+
+        if (cellInfo) {
+          this.dragState.isDragging = true;
+          this.dragState.endCell = cellInfo;
+          this.selectCellRange(startCell, cellInfo);
+
+          this.$emit("cell-selection-drag", {
+            startCell,
+            endCell: cellInfo,
+            selectedCells: this.selectedCellsData,
+          });
+        }
+        
+        this.mouseMoveAnimationId = null;
+      });
     },
 
     // 全局鼠标抬起事件
     handleGlobalMouseUp(event) {
-      if (!this.isMouseDown) return;
+      if (!this.dragState.isMouseDown) return;
 
-      const wasDragging = this.isDragging;
+      const wasDragging = this.dragState.isDragging;
 
       // 重置状态
       setTimeout(() => {
-        this.isMouseDown = false;
-        this.isDragging = false;
+        this.dragState.isMouseDown = false;
+        this.dragState.isDragging = false;
       }, 0);
 
       // 如果刚结束拖拽，设置标志防止立即触发清除逻辑
       if (wasDragging) {
-        this._justFinishedDragging = true;
+        this.dragState.justFinishedDragging = true;
         // 延迟重置标志，给点击事件处理留出时间
         setTimeout(() => {
-          this._justFinishedDragging = false;
+          this.dragState.justFinishedDragging = false;
         }, 10);
 
         this.$emit("cell-selection-end", {
-          startCell: this.dragStartCell,
-          endCell: this.dragEndCell,
+          startCell: this.dragState.startCell,
+          endCell: this.dragState.endCell,
           selectedCells: this.selectedCellsData,
         });
       }
@@ -306,14 +459,14 @@ export default {
       this.removeGlobalEvents();
 
       // 清理拖拽状态
-      this.dragStartCell = null;
-      this.dragEndCell = null;
+      this.dragState.startCell = null;
+      this.dragState.endCell = null;
     },
 
     // 鼠标离开表格事件
     handleTableMouseLeave(event) {
       // 如果没有在拖拽且鼠标已按下，结束选择
-      if (!this.isDragging && this.isMouseDown) {
+      if (!this.dragState.isDragging && this.dragState.isMouseDown) {
         this.handleGlobalMouseUp(event);
       }
       // 如果正在拖拽，继续让全局事件处理
@@ -332,11 +485,11 @@ export default {
       const tbody = tr.parentElement;
       const rowIndex = Array.from(tbody.children).indexOf(tr);
 
+      // 提取表格元素，避免重复访问
+      const tableEl = this.$refs.tableRef?.$el;
+
       // 获取列索引 - 通过class名称精确匹配，兼容合并单元格
-      const columnIndex = getColumnIndexByClass(
-        target,
-        this.$refs.tableRef?.$el
-      );
+      const columnIndex = getColumnIndexByClass(target, tableEl);
 
       // 获取单元格文本内容
       const cellText = getCellText(target);
@@ -384,15 +537,14 @@ export default {
         this.clearCellSelection();
       }
 
+      // 提取表格元素，避免重复访问
+      const tableEl = this.$refs.tableRef?.$el;
+
       // 选中范围内的所有单元格
       for (let row = startRow; row <= endRow; row++) {
         for (let col = startCol; col <= endCol; col++) {
           // 通过DOM检查单元格是否存在
-          const cellElement = getCellElement(
-            this.$refs.tableRef?.$el,
-            row,
-            col
-          );
+          const cellElement = getCellElement(tableEl, row, col);
           if (cellElement) {
             this.selectCell(row, col);
           }
@@ -404,6 +556,9 @@ export default {
     clearCellSelection() {
       this.selectedCells.splice(0, this.selectedCells.length);
       this.updateCellStyles();
+      this.hideOverlay("selection");
+      this.hideOverlay("fillHandle");
+      this.hideOverlay("extended");
 
       // 触发清除选择事件
       this.$emit("cell-selection-clear");
@@ -413,9 +568,10 @@ export default {
     updateCellStyles() {
       this.$nextTick(() => {
         if (this.selectedCells.length === 0) {
-          this.hideSelectionOverlay();
+          this.hideOverlay("selection");
+          this.hideOverlay("fillHandle");
         } else {
-          this.updateSelectionOverlay();
+          this.updateOverlays();
         }
 
         // 检查是否需要DOM监听器
@@ -423,78 +579,50 @@ export default {
       });
     },
 
-    // 创建选中区域遮罩层
-    createSelectionOverlay() {
-      if (this.selectionOverlay) return;
-
-      const overlay = document.createElement("div");
-      overlay.className = "cell-selection-overlay";
-
-      this.selectionOverlay = overlay;
-
-      // 将遮罩层添加到表格容器中
-      this.$nextTick(() => {
-        const tableEl = this.$refs.tableRef?.$el;
-        if (tableEl) {
-          const tableWrapper =
-            tableEl.querySelector(".el-table__body-wrapper") || tableEl;
-          tableWrapper.style.position = "relative";
-          tableWrapper.appendChild(overlay);
-        }
-      });
-    },
-
-    // 移除选中区域遮罩层
-    removeSelectionOverlay() {
-      if (this.selectionOverlay && this.selectionOverlay.parentNode) {
-        this.selectionOverlay.parentNode.removeChild(this.selectionOverlay);
-        this.selectionOverlay = null;
-      }
-    },
-
     // 更新选中区域遮罩层
     updateSelectionOverlay() {
-      if (!this.selectionOverlay || this.selectedCells.length === 0) {
-        this.hideSelectionOverlay();
+      if (this.selectedCells.length === 0) {
+        this.hideOverlay("selection");
         return;
       }
 
-      const tableEl = this.$refs.tableRef?.$el;
+      const tableEl = this.getTableElement();
       const bounds = calculateSelectionBounds(this.selectedCells, tableEl);
       if (!bounds) {
-        this.hideSelectionOverlay();
+        this.hideOverlay("selection");
         return;
       }
 
-      Object.assign(this.selectionOverlay.style, {
-        position: "absolute",
-        pointerEvents: "none",
-        zIndex: "10",
-        backgroundColor: "rgba(24, 144, 255, 0.1)",
-        border: "2px solid #1890ff",
-        boxSizing: "border-box",
-        display: "block",
-        left: `${bounds.left}px`,
-        top: `${bounds.top}px`,
-        width: `${bounds.width}px`,
-        height: `${bounds.height}px`,
-      });
-
-      this.overlayVisible = true;
+      this.showOverlay("selection", bounds);
+      this.updateFillHandle();
     },
 
-    // 隐藏选中区域遮罩层
-    hideSelectionOverlay() {
-      if (this.selectionOverlay) {
-        this.selectionOverlay.style.display = "none";
-        this.overlayVisible = false;
+    // 更新填充手柄位置
+    updateFillHandle() {
+      if (this.selectedCells.length === 0) {
+        this.hideOverlay("fillHandle");
+        return;
       }
+
+      const tableEl = this.getTableElement();
+      const bounds = calculateSelectionBounds(this.selectedCells, tableEl);
+      if (!bounds) {
+        this.hideOverlay("fillHandle");
+        return;
+      }
+
+      const { left, top, width, height } = bounds;
+      // 填充手柄位置在选中区域右下角
+      const handleBounds = {
+        left: left + width - 3,
+        top: top + height - 3,
+      };
+
+      this.showOverlay("fillHandle", handleBounds);
     },
 
     // 复制选中单元格的值
     async copyCellsValues() {
-      if (this.selectedCells.length === 0) return;
-
       try {
         const cellsData = this.selectedCellsData.sort((a, b) => {
           if (a.rowIndex !== b.rowIndex) return a.rowIndex - b.rowIndex;
@@ -502,10 +630,15 @@ export default {
         });
 
         // 构建表格数据
+        const tableEl = this.getTableElement();
         const rows = {};
         cellsData.forEach((cell) => {
-          if (!rows[cell.rowIndex]) rows[cell.rowIndex] = {};
-          rows[cell.rowIndex][cell.columnIndex] = cell.cellText || "";
+          const { rowIndex, columnIndex } = cell;
+          if (!rows[rowIndex]) rows[rowIndex] = {};
+          // 只在复制时获取单元格元素和文本
+          const element = getCellElement(tableEl, rowIndex, columnIndex);
+          const cellText = element ? getCellText(element) : "";
+          rows[rowIndex][columnIndex] = cellText;
         });
 
         // 转换为二维数组
@@ -542,7 +675,10 @@ export default {
         this.copiedCells = [...this.selectedCells];
 
         // 显示复制虚线框
-        this.showCopyDashOverlay();
+        const bounds = calculateSelectionBounds(this.copiedCells, tableEl);
+        if (bounds) {
+          this.showOverlay("copyDash", bounds);
+        }
 
         // 检查是否需要DOM监听器
         this.checkObserverNeed();
@@ -557,78 +693,6 @@ export default {
       }
     },
 
-    // 创建复制虚线框
-    createCopyDashOverlay() {
-      if (this.copyDashOverlay) return;
-
-      const overlay = document.createElement("div");
-      overlay.className = "copy-dash-overlay";
-
-      this.copyDashOverlay = overlay;
-
-      // 将虚线框添加到表格容器中，与遮罩层使用相同的容器
-      this.$nextTick(() => {
-        const tableEl = this.$refs.tableRef?.$el;
-        if (tableEl) {
-          const tableWrapper =
-            tableEl.querySelector(".el-table__body-wrapper") || tableEl;
-          tableWrapper.style.position = "relative";
-          tableWrapper.appendChild(overlay);
-        }
-      });
-    },
-
-    // 显示复制虚线框
-    showCopyDashOverlay() {
-      // 创建虚线框（如果不存在）
-      this.createCopyDashOverlay();
-      if (!this.copyDashOverlay || this.copiedCells.length === 0) return;
-
-      const tableEl = this.$refs.tableRef?.$el;
-      if (!tableEl) return;
-
-      // 根据保存的复制单元格索引重新计算边界信息
-      const bounds = calculateSelectionBounds(this.copiedCells, tableEl);
-      if (!bounds) return;
-
-      // 设置虚线框位置和大小，比选中区域小1px显示在内部
-      Object.assign(this.copyDashOverlay.style, {
-        position: "absolute",
-        pointerEvents: "none",
-        zIndex: "15",
-        boxSizing: "border-box",
-        display: "block",
-        left: `${bounds.left + 1}px`,
-        top: `${bounds.top + 1}px`,
-        width: `${bounds.width - 2}px`,
-        height: `${bounds.height - 2}px`,
-      });
-
-      this.copyDashVisible = true;
-    },
-
-    // 隐藏复制虚线框
-    hideCopyDashOverlay() {
-      if (this.copyDashOverlay) {
-        this.copyDashOverlay.style.display = "none";
-      }
-      this.copyDashVisible = false;
-      this.copiedCells = [];
-
-      // 检查是否需要DOM监听器
-      this.checkObserverNeed();
-    },
-
-    // 移除复制虚线框
-    removeCopyDashOverlay() {
-      if (this.copyDashOverlay && this.copyDashOverlay.parentNode) {
-        this.copyDashOverlay.parentNode.removeChild(this.copyDashOverlay);
-      }
-      this.copyDashOverlay = null;
-      this.copyDashVisible = false;
-      this.copiedCells = [];
-    },
-
     // 初始化DOM变化监听器
     initTableObserver() {
       if (
@@ -639,14 +703,14 @@ export default {
       }
 
       this.tableObserver = new MutationObserver(() => {
-        if (this.isDragging) return;
+        if (this.dragState.isDragging) return;
         this.$nextTick(() => {
-          this.debouncedUpdateCellOverlays();
+          this.debouncedUpdateOverlays();
         });
       });
 
       this.$nextTick(() => {
-        const tableEl = this.$refs.tableRef?.$el;
+        const tableEl = this.getTableElement();
         if (tableEl) {
           this.tableObserver.observe(tableEl, {
             childList: true,
@@ -680,16 +744,291 @@ export default {
       }
     },
 
-    // 更新单元格覆盖层（选中框和复制框）
-    updateCellOverlays() {
+    // 更新所有遮罩层
+    updateOverlays() {
       // 更新选中框位置
-      if (this.overlayVisible && this.selectedCells.length > 0) {
-        this.updateSelectionOverlay();
+      if (this.selectedCells.length > 0) {
+        const tableEl = this.getTableElement();
+        const bounds = calculateSelectionBounds(this.selectedCells, tableEl);
+        if (bounds) {
+          this.showOverlay("selection", bounds);
+          this.updateFillHandle();
+        }
+      } else {
+        this.hideOverlay("selection");
+        this.hideOverlay("fillHandle");
       }
+
       // 更新复制框位置
-      if (this.copyDashVisible && this.copiedCells.length > 0) {
-        this.showCopyDashOverlay();
+      if (this.copiedCells.length > 0) {
+        const tableEl = this.getTableElement();
+        const bounds = calculateSelectionBounds(this.copiedCells, tableEl);
+        if (bounds) {
+          this.showOverlay("copyDash", bounds);
+        }
+      } else {
+        this.hideOverlay("copyDash");
       }
+    },
+
+    // ==================== 扩展选中区域相关方法 ====================
+
+    // 更新扩展选中区域遮罩层
+    updateExtendedSelectionOverlay(originalSelectionBounds, dragEndCell) {
+      if (!originalSelectionBounds || !dragEndCell) {
+        this.hideOverlay("extended");
+        return;
+      }
+
+      const tableEl = this.getTableElement();
+      const tableWrapper = this.tableWrapper;
+      const wrapperBounds = tableWrapper?.getBoundingClientRect();
+
+      if (!wrapperBounds) {
+        this.hideOverlay("extended");
+        return;
+      }
+
+      // 提取常用变量
+      const {
+        minRow: origMinRow,
+        maxRow: origMaxRow,
+        minCol: origMinCol,
+        maxCol: origMaxCol,
+      } = originalSelectionBounds;
+      const { rowIndex: dragRow, columnIndex: dragCol } = dragEndCell;
+
+      // 计算扩展选中区域的行列范围（包含原始选中区域和拖拽结束位置）
+      const extendedBounds = {
+        minRow: Math.min(origMinRow, dragRow),
+        maxRow: Math.max(origMaxRow, dragRow),
+        minCol: Math.min(origMinCol, dragCol),
+        maxCol: Math.max(origMaxCol, dragCol),
+      };
+
+      // 获取扩展区域左上角和右下角单元格的DOM元素
+      const { minRow, maxRow, minCol, maxCol } = extendedBounds;
+      const topLeftCell = getCellElement(tableEl, minRow, minCol);
+      const bottomRightCell = getCellElement(tableEl, maxRow, maxCol);
+
+      if (!topLeftCell || !bottomRightCell) {
+        this.hideOverlay("extended");
+        return;
+      }
+
+      // 获取单元格的边界信息
+      const topLeftBounds = topLeftCell.getBoundingClientRect();
+      const bottomRightBounds = bottomRightCell.getBoundingClientRect();
+      const { left: wrapperLeft, top: wrapperTop } = wrapperBounds;
+
+      // 计算扩展选中区域的像素坐标（相对于表格容器）
+      const left = topLeftBounds.left - wrapperLeft;
+      const top = topLeftBounds.top - wrapperTop;
+      const right = bottomRightBounds.right - wrapperLeft;
+      const bottom = bottomRightBounds.bottom - wrapperTop;
+
+      const bounds = {
+        left,
+        top,
+        width: right - left,
+        height: bottom - top,
+      };
+
+      this.showOverlay("extended", bounds);
+    },
+
+    // ==================== 拖拽填充小方块相关方法 ====================
+
+    // 拖拽填充小方块鼠标按下事件
+    handleFillHandleMouseDown(event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (this.selectedCells.length === 0) return;
+
+      const dragState = this.dragState;
+      const eventHandlers = this.eventHandlers;
+
+      // 设置拖拽状态
+      Object.assign(dragState, {
+        isFillDragging: true,
+        fillStartCell: this.getSelectionBounds(),
+        fillDirection: null, // 重置拖拽方向
+      });
+
+      // 确保在开始拖拽时隐藏扩展选中区域
+      this.hideOverlay("extended");
+
+      // 添加全局事件监听器用于拖拽
+      const fillGlobal = {
+        mousemove: this.handleFillDragMove.bind(this),
+        mouseup: this.handleFillDragEnd.bind(this),
+      };
+      eventHandlers.fillGlobal = fillGlobal;
+
+      document.addEventListener("mousemove", fillGlobal.mousemove);
+      document.addEventListener("mouseup", fillGlobal.mouseup);
+
+      // 改变鼠标样式
+      document.body.style.cursor = "crosshair";
+
+      this.$emit("fill-drag-start", {
+        startBounds: dragState.fillStartCell,
+        selectedCells: this.selectedCells,
+      });
+    },
+
+    // 拖拽填充移动事件
+    handleFillDragMove(event) {
+      const { isFillDragging, fillDirection } = this.dragState;
+      if (!isFillDragging) return;
+
+      const cellInfo =
+        this.getCellInfoFromEvent(event) ||
+        getBoundaryCellFromMousePosition(event, this.$refs.tableRef?.$el);
+
+      if (cellInfo) {
+        const originalSelectionBounds = this.getSelectionBounds();
+        if (!originalSelectionBounds) return;
+
+        const { rowIndex: currentRow, columnIndex: currentCol } = cellInfo;
+        const { minRow, maxRow, minCol, maxCol } = originalSelectionBounds;
+
+        // 确定拖拽方向（只在第一次移动时确定）
+        if (fillDirection === null) {
+          // 计算当前位置相对于选中区域边界的偏移
+          const isOutsideRight = currentCol > maxCol;
+          const isOutsideLeft = currentCol < minCol;
+          const isOutsideBottom = currentRow > maxRow;
+          const isOutsideTop = currentRow < minRow;
+
+          // 计算水平和垂直方向的移动距离
+          let horizontalDistance = 0;
+          let verticalDistance = 0;
+
+          if (isOutsideRight) {
+            horizontalDistance = currentCol - maxCol;
+          } else if (isOutsideLeft) {
+            horizontalDistance = minCol - currentCol;
+          }
+
+          if (isOutsideBottom) {
+            verticalDistance = currentRow - maxRow;
+          } else if (isOutsideTop) {
+            verticalDistance = minRow - currentRow;
+          }
+
+          // 根据移动距离较大的方向确定拖拽方向
+          if (verticalDistance > horizontalDistance && verticalDistance > 0) {
+            this.dragState.fillDirection = "vertical";
+          } else if (
+            horizontalDistance > verticalDistance &&
+            horizontalDistance > 0
+          ) {
+            this.dragState.fillDirection = "horizontal";
+          } else {
+            // 如果还在选中区域内或移动距离相等，暂时不确定方向
+            return;
+          }
+        }
+
+        // 根据确定的方向限制拖拽结束位置
+        let constrainedCellInfo = { ...cellInfo };
+        const currentFillDirection = this.dragState.fillDirection;
+
+        if (currentFillDirection === "horizontal") {
+          // 水平方向：保持在选中区域的行范围内，只允许列变化
+          if (currentCol > maxCol) {
+            // 向右扩展：使用选中区域的最后一行
+            constrainedCellInfo.rowIndex = maxRow;
+          } else if (currentCol < minCol) {
+            // 向左扩展：使用选中区域的第一行
+            constrainedCellInfo.rowIndex = minRow;
+          }
+        } else if (currentFillDirection === "vertical") {
+          // 垂直方向：保持在选中区域的列范围内，只允许行变化
+          if (currentRow > maxRow) {
+            // 向下扩展：使用选中区域的最后一列
+            constrainedCellInfo.columnIndex = maxCol;
+          } else if (currentRow < minRow) {
+            // 向上扩展：使用选中区域的第一列
+            constrainedCellInfo.columnIndex = minCol;
+          }
+        }
+
+        this.dragState.fillEndCell = constrainedCellInfo;
+
+        // 显示扩展选中区域（传入原始选中区域边界和约束后的拖拽结束单元格信息）
+        this.updateExtendedSelectionOverlay(
+          originalSelectionBounds,
+          constrainedCellInfo
+        );
+
+        // 触发拖拽移动事件
+        this.$emit("fill-drag-move", {
+          startBounds: this.dragState.fillStartCell,
+          endCell: constrainedCellInfo,
+          selectedCells: this.selectedCells,
+        });
+      }
+    },
+
+    // 拖拽填充结束事件
+    handleFillDragEnd(event) {
+      const { isFillDragging, fillEndCell } = this.dragState;
+      if (!isFillDragging) return;
+
+      // 移除全局事件监听器
+      const { fillGlobal } = this.eventHandlers;
+      if (fillGlobal) {
+        const { mousemove, mouseup } = fillGlobal;
+        document.removeEventListener("mousemove", mousemove);
+        document.removeEventListener("mouseup", mouseup);
+        this.eventHandlers.fillGlobal = null;
+      }
+
+      // 恢复鼠标样式
+      document.body.style.cursor = "";
+
+      // 重置拖拽状态
+      Object.assign(this.dragState, {
+        isFillDragging: false,
+        fillStartCell: null,
+        fillEndCell: null,
+        fillDirection: null, // 重置拖拽方向
+      });
+
+      // 隐藏扩展选中区域
+      this.hideOverlay("extended");
+
+      // 触发填充完成事件
+      this.$emit("fill-drag-end", {
+        startBounds: this.getSelectionBounds(),
+        endCell: fillEndCell,
+        selectedCells: this.selectedCells,
+      });
+    },
+
+    // 获取当前选中区域的边界信息
+    getSelectionBounds() {
+      if (this.selectedCells.length === 0) return null;
+
+      const bounds = {
+        minRow: Infinity,
+        maxRow: -1,
+        minCol: Infinity,
+        maxCol: -1,
+      };
+
+      this.selectedCells.forEach((cellKey) => {
+        const { rowIndex, columnIndex } = parseCellKey(cellKey);
+        bounds.minRow = Math.min(bounds.minRow, rowIndex);
+        bounds.maxRow = Math.max(bounds.maxRow, rowIndex);
+        bounds.minCol = Math.min(bounds.minCol, columnIndex);
+        bounds.maxCol = Math.max(bounds.maxCol, columnIndex);
+      });
+
+      return bounds;
     },
   },
 };
