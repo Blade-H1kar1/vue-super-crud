@@ -13,13 +13,6 @@ export function createCellKey(rowIndex, columnIndex) {
   return `${rowIndex}-${columnIndex}`;
 }
 
-// 检查是否为表单元素
-export function isFormElement(element) {
-  return element.matches(
-    'input, textarea, select, button, [contenteditable="true"]'
-  );
-}
-
 // 获取单元格文本内容
 export function getCellText(element) {
   if (!element) return "";

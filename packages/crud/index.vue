@@ -166,6 +166,7 @@ import cacheHandler from "./mixins/cacheHandler";
 import searchHandler from "./mixins/searchHandler";
 import mockData from "./mixins/mockData";
 import cellSelection from "./mixins/cellSelection.js";
+import cellDataProcessor from "./mixins/cellDataProcessor.js";
 // 组件
 import search from "./search.vue";
 import menuBar from "./menuBar.vue";
@@ -223,6 +224,7 @@ export default create({
     searchHandler,
     mockData,
     cellSelection,
+    cellDataProcessor,
   ],
   props: {
     // 防止scope中携带实例时，拷贝合并报错

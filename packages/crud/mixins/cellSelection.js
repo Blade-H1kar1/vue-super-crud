@@ -51,7 +51,7 @@ export default {
       // DOM监听
       tableObserver: null,
       globalEventsAdded: false,
-      
+
       // requestAnimationFrame防抖
       mouseMoveAnimationId: null,
     };
@@ -114,7 +114,7 @@ export default {
       this.removeAllEvents();
       this.removeAllOverlays();
       this.destroyTableObserver();
-      
+
       // 清理requestAnimationFrame
       if (this.mouseMoveAnimationId) {
         cancelAnimationFrame(this.mouseMoveAnimationId);
@@ -423,7 +423,7 @@ export default {
             selectedCells: this.selectedCellsData,
           });
         }
-        
+
         this.mouseMoveAnimationId = null;
       });
     },
@@ -978,6 +978,51 @@ export default {
       const { isFillDragging, fillEndCell } = this.dragState;
       if (!isFillDragging) return;
 
+      // 获取原始选中区域的边界
+      const originalBounds = this.getSelectionBounds();
+      let fillCells = [];
+
+      // 如果有填充结束单元格，计算填充区域的所有单元格
+      if (fillEndCell && originalBounds) {
+        // 计算填充区域的边界（包含原始选中区域和填充区域）
+        const fillStartRow = Math.min(
+          originalBounds.minRow,
+          fillEndCell.rowIndex
+        );
+        const fillEndRow = Math.max(
+          originalBounds.maxRow,
+          fillEndCell.rowIndex
+        );
+        const fillStartCol = Math.min(
+          originalBounds.minCol,
+          fillEndCell.columnIndex
+        );
+        const fillEndCol = Math.max(
+          originalBounds.maxCol,
+          fillEndCell.columnIndex
+        );
+
+        // 提取表格元素，避免重复访问
+        const tableEl = this.$refs.tableRef?.$el;
+
+        // 遍历填充区域内的所有单元格
+        for (let row = fillStartRow; row <= fillEndRow; row++) {
+          for (let col = fillStartCol; col <= fillEndCol; col++) {
+            // 通过DOM检查单元格是否存在
+            const cellElement = getCellElement(tableEl, row, col);
+            if (cellElement) {
+              const cellKey = createCellKey(row, col);
+              fillCells.push({
+                rowIndex: row,
+                columnIndex: col,
+                cellKey,
+                element: cellElement,
+              });
+            }
+          }
+        }
+      }
+
       // 移除全局事件监听器
       const { fillGlobal } = this.eventHandlers;
       if (fillGlobal) {
@@ -1001,11 +1046,12 @@ export default {
       // 隐藏扩展选中区域
       this.hideOverlay("extended");
 
-      // 触发填充完成事件
+      // 触发填充完成事件，包含所有填充区域的单元格信息
       this.$emit("fill-drag-end", {
-        startBounds: this.getSelectionBounds(),
+        startBounds: originalBounds,
         endCell: fillEndCell,
         selectedCells: this.selectedCells,
+        fillCells: fillCells,
       });
     },
 
