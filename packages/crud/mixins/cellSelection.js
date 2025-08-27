@@ -336,6 +336,12 @@ export default {
         this.copyCellsValues();
       }
 
+      // Ctrl+V 粘贴
+      if (event.ctrlKey && event.key === "v") {
+        event.preventDefault();
+        this.pasteCellsValues();
+      }
+
       // Escape 清除选择
       if (event.key === "Escape") {
         event.preventDefault();
@@ -537,7 +543,6 @@ export default {
         this.clearCellSelection();
       }
 
-      // 提取表格元素，避免重复访问
       const tableEl = this.$refs.tableRef?.$el;
 
       // 选中范围内的所有单元格
@@ -686,10 +691,76 @@ export default {
         this.$emit("cells-copied", {
           cellsData,
           textData,
-          selectedCells: this.selectedCells,
+          selectedCells: this.selectedCellsData,
         });
       } catch (error) {
         console.error("复制失败:", error);
+      }
+    },
+
+    // 粘贴选中单元格的值
+    async pasteCellsValues() {
+      try {
+        // 检查是否有选中的单元格
+        if (this.selectedCells.length === 0) {
+          console.warn("请先选择要粘贴的目标区域");
+          return;
+        }
+
+        // 使用cellDataProcessor中的processPaste方法
+        const result = await this.processPaste(null, this.selectedCellsData);
+
+        if (result.success) {
+          // 粘贴成功，触发事件
+          this.$emit("cells-pasted", {
+            affectedCells: result.affectedCells,
+            clipboardDimensions: result.clipboardDimensions,
+            selectionBounds: result.selectionBounds,
+            pasteDataCount: result.pasteDataCount,
+            selectedCells: this.selectedCellsData,
+          });
+
+          // 清除复制虚线框（如果存在）
+          this.hideOverlay("copyDash");
+          this.copiedCells = [];
+
+          // 如果有粘贴区域边界信息，更新选中状态到粘贴的区域
+          if (result.pasteBounds) {
+            const { minRow, maxRow, minCol, maxCol } = result.pasteBounds;
+
+            // 清除当前选中状态
+            this.clearCellSelection();
+
+            // 选中粘贴的区域
+            this.selectCellRange(
+              { rowIndex: minRow, columnIndex: minCol },
+              { rowIndex: maxRow, columnIndex: maxCol }
+            );
+          }
+
+          // 更新表格显示
+          this.$nextTick(() => {
+            this.updateCellStyles();
+            this.updateSelectionOverlay();
+          });
+
+          console.log(`粘贴成功：${result.pasteDataCount} 个单元格`);
+        } else {
+          // 粘贴失败，显示错误信息
+          console.error("粘贴失败:", result.message);
+          this.$emit("paste-error", {
+            message: result.message,
+            error: result.error,
+            selectedCells: this.selectedCellsData,
+          });
+        }
+      } catch (error) {
+        console.error("粘贴操作失败:", error);
+        this.$emit("paste-error", {
+          message: `粘贴操作失败: ${error.message}`,
+          error,
+          selectedCells: this.selectedCells,
+        });
       }
     },
 
