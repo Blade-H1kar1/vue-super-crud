@@ -497,15 +497,11 @@ export default {
       // 获取列索引 - 通过class名称精确匹配，兼容合并单元格
       const columnIndex = getColumnIndexByClass(target, tableEl);
 
-      // 获取单元格文本内容
-      const cellText = getCellText(target);
-
       return {
         rowIndex,
         columnIndex,
         element: target,
         cellKey: `${rowIndex}-${columnIndex}`,
-        cellText,
       };
     },
 
@@ -675,17 +671,17 @@ export default {
           const cellText = element ? getCellText(element) : "";
           textRows[rowIndex][columnIndex] = cellText;
 
-          // 获取实际值并转换为文本格式（用于组件间复制）
-          const cellValue = this.getCellValue
-            ? this.getCellValue(rowIndex, columnIndex)
-            : cellText;
+          // 获取实际值（用于组件间复制）
+          const cellValue =
+            this.getCellValue(rowIndex, columnIndex) || cellText || "";
 
           let valueText = "";
-          if (Array.isArray(cellValue)) {
-            // 数组值用逗号分隔
-            valueText = cellValue.join(",");
-          } else if (cellValue === null || cellValue === undefined) {
-            valueText = "";
+          if (
+            Array.isArray(cellValue) ||
+            (typeof cellValue === "object" && cellValue !== null)
+          ) {
+            // 数组或对象直接保存为 JSON 字符串
+            valueText = JSON.stringify(cellValue);
           } else {
             valueText = String(cellValue);
           }
@@ -712,7 +708,7 @@ export default {
           // 同时存储 text/plain 和 JSON 格式
           const clipboardItem = new ClipboardItem({
             "text/plain": new Blob([textData], { type: "text/plain" }),
-            applicationType: new Blob([JSON.stringify(jsonData)], {
+            [applicationType]: new Blob([JSON.stringify(jsonData)], {
               type: applicationType,
             }),
           });
@@ -757,7 +753,32 @@ export default {
         const result = this.applyPasteData(textData, isValueMode);
 
         if (result?.success) {
-          this.handlePasteSuccess(result);
+          // 触发粘贴事件
+          this.$emit("cells-pasted", {
+            affectedCells: result.affectedCells,
+            clipboardDimensions: result.clipboardDimensions,
+            selectionBounds: result.selectionBounds,
+            pasteDataCount: result.pasteDataCount,
+            selectedCells: this.selectedCellsData,
+          });
+
+          // 清除复制状态
+          this.hideOverlay("copyDash");
+          this.copiedCells = [];
+
+          // 更新选中区域到粘贴范围
+          if (result.pasteBounds) {
+            const { minRow, maxRow, minCol, maxCol } = result.pasteBounds;
+            this.clearCellSelection();
+            this.selectCellRange(
+              { rowIndex: minRow, columnIndex: minCol },
+              { rowIndex: maxRow, columnIndex: maxCol }
+            );
+          }
+          this.$nextTick(() => {
+            this.updateCellStyles();
+            this.updateSelectionOverlay();
+          });
         } else {
           console.error("粘贴失败:", result?.message);
         }
@@ -797,36 +818,6 @@ export default {
         const textData = await navigator.clipboard.readText();
         return { textData, isValueMode: false };
       }
-    },
-
-    // 处理粘贴成功
-    handlePasteSuccess(result) {
-      // 触发粘贴事件
-      this.$emit("cells-pasted", {
-        affectedCells: result.affectedCells,
-        clipboardDimensions: result.clipboardDimensions,
-        selectionBounds: result.selectionBounds,
-        pasteDataCount: result.pasteDataCount,
-        selectedCells: this.selectedCellsData,
-      });
-
-      // 清除复制状态
-      this.hideOverlay("copyDash");
-      this.copiedCells = [];
-
-      // 更新选中区域到粘贴范围
-      if (result.pasteBounds) {
-        const { minRow, maxRow, minCol, maxCol } = result.pasteBounds;
-        this.clearCellSelection();
-        this.selectCellRange(
-          { rowIndex: minRow, columnIndex: minCol },
-          { rowIndex: maxRow, columnIndex: maxCol }
-        );
-      }
-      this.$nextTick(() => {
-        this.updateCellStyles();
-        this.updateSelectionOverlay();
-      });
     },
 
     // 初始化DOM变化监听器

@@ -17,15 +17,70 @@ export function createCellKey(rowIndex, columnIndex) {
 export function getCellText(element) {
   if (!element) return "";
 
-  // 优先处理 Element UI 组件
-  const input = element.querySelector(".el-input__inner");
-  if (input) return input.value || "";
+  // 处理 el-select 多选
+  const selectTags = element.querySelector(".el-select__tags");
+  if (selectTags) {
+    const tagTexts = selectTags.querySelectorAll(".el-select__tags-text");
+    if (tagTexts.length > 0) {
+      const texts = [];
+      for (let i = 0; i < tagTexts.length; i++) {
+        const text = tagTexts[i].textContent?.trim();
+        if (text) texts.push(text);
+      }
+      return texts.join(",");
+    }
+    return selectTags.textContent?.trim() || "";
+  }
 
-  const textarea = element.querySelector(".el-textarea__inner");
-  if (textarea) return textarea.value || "";
+  // 处理 el-switch
+  const switchElement = element.querySelector(".el-switch");
+  if (switchElement) {
+    return switchElement.classList.contains("is-checked") ? "是" : "否";
+  }
 
-  const selectInput = element.querySelector(".el-select .el-input__inner");
-  if (selectInput) return selectInput.value || "";
+  // 处理 el-radio
+  const checkedRadio = element.querySelector(".el-radio.is-checked");
+  if (checkedRadio) {
+    const label = checkedRadio.querySelector(".el-radio__label");
+    if (label) {
+      const text = label.textContent?.trim();
+      if (text) return text;
+    }
+  }
+
+  // 处理 el-checkbox
+  const checkedCheckboxes = element.querySelectorAll(".el-checkbox.is-checked");
+  if (checkedCheckboxes.length > 0) {
+    const checkedTexts = [];
+    for (let i = 0; i < checkedCheckboxes.length; i++) {
+      const label = checkedCheckboxes[i].querySelector(".el-checkbox__label");
+      if (label) {
+        const text = label.textContent?.trim();
+        if (text) checkedTexts.push(text);
+      }
+    }
+    if (checkedTexts.length > 0) {
+      return checkedTexts.join(", ");
+    }
+  }
+
+  // 获取输入组件的值
+  const inputs = element.querySelectorAll("input, textarea");
+  if (inputs.length > 0) {
+    const inputValues = [];
+    for (let i = 0; i < inputs.length; i++) {
+      if (inputs[i].value) {
+        inputValues.push(inputs[i].value);
+      }
+    }
+    if (inputValues.length > 0) {
+      return inputValues.join(" ");
+    }
+  }
+
+  // 处理 el-cascader
+  const cascader = element.querySelector(".el-cascader");
+  if (cascader) return;
 
   // 回退到纯文本内容
   return element.textContent?.trim() || "";

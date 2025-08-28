@@ -125,8 +125,23 @@ export default {
 
         if (!row || !column || !prop) return false;
 
+        // 解析 JSON
+        let finalValue = value;
+        if (typeof value === "string" && value.trim()) {
+          try {
+            // 检查是否为 JSON 格式（以 { 或 [ 开头）
+            const trimmedValue = value.trim();
+            if (trimmedValue.startsWith("{") || trimmedValue.startsWith("[")) {
+              finalValue = JSON.parse(trimmedValue);
+            }
+          } catch (parseError) {
+            // 如果解析失败，保持原始字符串值
+            finalValue = value;
+          }
+        }
+
         // 直接设置值，不进行任何格式化处理
-        this.setByProp(row, prop, value);
+        this.setByProp(row, prop, finalValue);
         return true;
       } catch (error) {
         console.warn(
