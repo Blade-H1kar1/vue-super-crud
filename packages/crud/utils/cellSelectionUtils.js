@@ -141,31 +141,6 @@ export function calculateSelectionBounds(selectedCells, tableEl) {
 }
 
 /**
- * 复制文本到剪贴板（回退方案）
- * @param {string} text - 要复制的文本
- * @returns {boolean} 是否成功
- */
-export function fallbackCopyToClipboard(text) {
-  const textArea = document.createElement("textarea");
-  textArea.value = text;
-  textArea.style.position = "fixed";
-  textArea.style.left = "-999999px";
-  textArea.style.top = "-999999px";
-  document.body.appendChild(textArea);
-  textArea.focus();
-  textArea.select();
-
-  try {
-    const successful = document.execCommand("copy");
-    document.body.removeChild(textArea);
-    return successful;
-  } catch (err) {
-    document.body.removeChild(textArea);
-    return false;
-  }
-}
-
-/**
  * 根据鼠标位置计算边界单元格
  * @param {MouseEvent} event - 鼠标事件
  * @param {Element} tableEl - 表格DOM元素

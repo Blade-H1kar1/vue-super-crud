@@ -116,6 +116,27 @@ export default {
       }
     },
 
+    // 直接设置单元格的值（不进行格式化处理，用于值模式粘贴）
+    setCellValueDirect(rowIndex, columnIndex, value) {
+      try {
+        const row = this.getRowDataByIndex(rowIndex);
+        const column = this.getColumnByIndex(columnIndex);
+        const prop = column.form?.prop || column.prop;
+
+        if (!row || !column || !prop) return false;
+
+        // 直接设置值，不进行任何格式化处理
+        this.setByProp(row, prop, value);
+        return true;
+      } catch (error) {
+        console.warn(
+          `直接设置单元格值失败 (${rowIndex}, ${columnIndex}):`,
+          error
+        );
+        return false;
+      }
+    },
+
     // 根据组件配置格式化值
     formatValueByComponentConfig(value, config) {
       if (!config || value === null || value === undefined) {
@@ -434,10 +455,57 @@ export default {
 
     /**
      * 应用粘贴数据到表格
-     * @param {Array} pasteData - 要粘贴的数据
+     * @param {string|Array} pasteData - 要粘贴的数据（字符串或数组）
+     * @param {boolean} isValueMode - 是否为值模式（跳过格式化）
      * @returns {Object} 粘贴结果信息
      */
-    applyPasteData(pasteData) {
+    applyPasteData(pasteData, isValueMode = false) {
+      // 如果传入的是字符串，先解析为数组
+      if (typeof pasteData === "string") {
+        const selectedCells = this.selectedCellsData;
+        if (!selectedCells || selectedCells.length === 0) {
+          return {
+            success: false,
+            message: "没有选中的单元格",
+            affectedCells: [],
+          };
+        }
+
+        // 获取选中区域边界
+        const selectionBounds = this.getSelectedCellsBounds(selectedCells);
+        if (!selectionBounds) {
+          return {
+            success: false,
+            message: "无法确定选中区域边界",
+            affectedCells: [],
+          };
+        }
+
+        // 解析剪贴板数据
+        const clipboardData = this.parseClipboardData(
+          pasteData,
+          selectionBounds.minRow,
+          selectionBounds.minCol
+        );
+
+        if (clipboardData.length === 0) {
+          return {
+            success: false,
+            message: "剪贴板数据为空",
+            affectedCells: [],
+          };
+        }
+
+        // 计算剪贴板数据维度
+        const clipboardDimensions = this.getClipboardDataDimensions(pasteData);
+
+        // 根据Excel规则计算填充数据
+        pasteData = this.calculatePasteDataWithFill(
+          clipboardData,
+          clipboardDimensions,
+          selectionBounds
+        );
+      }
       if (!this.validatePasteData(pasteData)) {
         return {
           success: false,
@@ -475,8 +543,10 @@ export default {
           // 获取旧值
           const oldValue = this.getCellValue(rowIndex, columnIndex);
 
-          // 设置单元格值
-          const success = this.setCellValue(rowIndex, columnIndex, value);
+          // 设置单元格值（值模式下跳过格式化）
+          const success = isValueMode
+            ? this.setCellValueDirect(rowIndex, columnIndex, value)
+            : this.setCellValue(rowIndex, columnIndex, value);
           if (success) {
             affectedCells.push({
               rowIndex,

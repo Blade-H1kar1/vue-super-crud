@@ -5,11 +5,11 @@ import {
   getColumnIndexByClass,
   getCellElement,
   calculateSelectionBounds,
-  fallbackCopyToClipboard,
   getBoundaryCellFromMousePosition,
 } from "../utils/cellSelectionUtils.js";
 import { debounce } from "lodash-es";
 
+const applicationType = "web application/super-crud-data";
 export default {
   data() {
     return {
@@ -626,6 +626,32 @@ export default {
       this.showOverlay("fillHandle", handleBounds);
     },
 
+    // 将行数据转换为二维数组
+    convertRowsToTableData(rows) {
+      const rowIndices = Object.keys(rows)
+        .map(Number)
+        .sort((a, b) => a - b);
+
+      const tableData = [];
+      rowIndices.forEach((rowIndex) => {
+        const row = rows[rowIndex];
+        const colIndices = Object.keys(row)
+          .map(Number)
+          .sort((a, b) => a - b);
+        const minCol = Math.min(...colIndices);
+        const maxCol = Math.max(...colIndices);
+
+        const rowData = [];
+        for (let col = minCol; col <= maxCol; col++) {
+          rowData.push(row[col] || "");
+        }
+        tableData.push(rowData);
+      });
+
+      const textData = tableData.map((row) => row.join("\t")).join("\n");
+      return { tableData, textData };
+    },
+
     // 复制选中单元格的值
     async copyCellsValues() {
       try {
@@ -634,46 +660,67 @@ export default {
           return a.columnIndex - b.columnIndex;
         });
 
-        // 构建表格数据
         const tableEl = this.getTableElement();
-        const rows = {};
+        const textRows = {}; // 存储文本值
+        const valueTextRows = {}; // 存储转换后的实际值
+
+        // 统一处理单元格数据收集
         cellsData.forEach((cell) => {
           const { rowIndex, columnIndex } = cell;
-          if (!rows[rowIndex]) rows[rowIndex] = {};
-          // 只在复制时获取单元格元素和文本
+          if (!textRows[rowIndex]) textRows[rowIndex] = {};
+          if (!valueTextRows[rowIndex]) valueTextRows[rowIndex] = {};
+
+          // 获取文本（用于剪贴板）
           const element = getCellElement(tableEl, rowIndex, columnIndex);
           const cellText = element ? getCellText(element) : "";
-          rows[rowIndex][columnIndex] = cellText;
-        });
+          textRows[rowIndex][columnIndex] = cellText;
 
-        // 转换为二维数组
-        const tableData = [];
-        const rowIndices = Object.keys(rows)
-          .map(Number)
-          .sort((a, b) => a - b);
+          // 获取实际值并转换为文本格式（用于组件间复制）
+          const cellValue = this.getCellValue
+            ? this.getCellValue(rowIndex, columnIndex)
+            : cellText;
 
-        rowIndices.forEach((rowIndex) => {
-          const row = rows[rowIndex];
-          const colIndices = Object.keys(row)
-            .map(Number)
-            .sort((a, b) => a - b);
-          const minCol = Math.min(...colIndices);
-          const maxCol = Math.max(...colIndices);
-
-          const rowData = [];
-          for (let col = minCol; col <= maxCol; col++) {
-            rowData.push(row[col] || "");
+          let valueText = "";
+          if (Array.isArray(cellValue)) {
+            // 数组值用逗号分隔
+            valueText = cellValue.join(",");
+          } else if (cellValue === null || cellValue === undefined) {
+            valueText = "";
+          } else {
+            valueText = String(cellValue);
           }
-          tableData.push(rowData);
+          valueTextRows[rowIndex][columnIndex] = valueText;
         });
 
-        const textData = tableData.map((row) => row.join("\t")).join("\n");
+        // 使用通用方法转换数据
+        const { textData } = this.convertRowsToTableData(textRows);
+        const { textData: valueTextData } =
+          this.convertRowsToTableData(valueTextRows);
 
-        // 使用 Clipboard API 或降级方法
-        if (navigator.clipboard && window.isSecureContext) {
+        try {
+          // 创建 JSON 数据
+          const jsonData = {
+            type: "super-crud-data",
+            data: {
+              valueTextRows: valueTextRows,
+              textData: valueTextData,
+              originalTextData: textData,
+              timestamp: Date.now(),
+            },
+          };
+
+          // 同时存储 text/plain 和 JSON 格式
+          const clipboardItem = new ClipboardItem({
+            "text/plain": new Blob([textData], { type: "text/plain" }),
+            applicationType: new Blob([JSON.stringify(jsonData)], {
+              type: applicationType,
+            }),
+          });
+
+          await navigator.clipboard.write([clipboardItem]);
+        } catch (error) {
+          console.warn("使用多格式剪贴板失败，降级到文本模式:", error);
           await navigator.clipboard.writeText(textData);
-        } else {
-          fallbackCopyToClipboard(textData);
         }
 
         // 在复制时保存复制的单元格DOM
@@ -690,7 +737,6 @@ export default {
 
         this.$emit("cells-copied", {
           cellsData,
-          textData,
           selectedCells: this.selectedCellsData,
         });
       } catch (error) {
@@ -701,67 +747,86 @@ export default {
     // 粘贴选中单元格的值
     async pasteCellsValues() {
       try {
-        // 检查是否有选中的单元格
-        if (this.selectedCells.length === 0) {
-          console.warn("请先选择要粘贴的目标区域");
+        const { textData, isValueMode } = await this.readClipboardData();
+
+        if (!textData) {
+          console.warn("无法获取剪贴板数据");
           return;
         }
 
-        // 使用cellDataProcessor中的processPaste方法
-        const result = await this.processPaste(null, this.selectedCellsData);
+        const result = this.applyPasteData(textData, isValueMode);
 
-        if (result.success) {
-          // 粘贴成功，触发事件
-          this.$emit("cells-pasted", {
-            affectedCells: result.affectedCells,
-            clipboardDimensions: result.clipboardDimensions,
-            selectionBounds: result.selectionBounds,
-            pasteDataCount: result.pasteDataCount,
-            selectedCells: this.selectedCellsData,
-          });
-
-          // 清除复制虚线框（如果存在）
-          this.hideOverlay("copyDash");
-          this.copiedCells = [];
-
-          // 如果有粘贴区域边界信息，更新选中状态到粘贴的区域
-          if (result.pasteBounds) {
-            const { minRow, maxRow, minCol, maxCol } = result.pasteBounds;
-
-            // 清除当前选中状态
-            this.clearCellSelection();
-
-            // 选中粘贴的区域
-            this.selectCellRange(
-              { rowIndex: minRow, columnIndex: minCol },
-              { rowIndex: maxRow, columnIndex: maxCol }
-            );
-          }
-
-          // 更新表格显示
-          this.$nextTick(() => {
-            this.updateCellStyles();
-            this.updateSelectionOverlay();
-          });
-
-          console.log(`粘贴成功：${result.pasteDataCount} 个单元格`);
+        if (result?.success) {
+          this.handlePasteSuccess(result);
         } else {
-          // 粘贴失败，显示错误信息
-          console.error("粘贴失败:", result.message);
-          this.$emit("paste-error", {
-            message: result.message,
-            error: result.error,
-            selectedCells: this.selectedCellsData,
-          });
+          console.error("粘贴失败:", result?.message);
         }
       } catch (error) {
         console.error("粘贴操作失败:", error);
-        this.$emit("paste-error", {
-          message: `粘贴操作失败: ${error.message}`,
-          error,
-          selectedCells: this.selectedCells,
-        });
       }
+    },
+
+    // 读取剪贴板数据
+    async readClipboardData() {
+      try {
+        const clipboardItems = await navigator.clipboard.read();
+
+        // 优先查找 JSON 数据
+        for (const item of clipboardItems) {
+          if (item.types.includes(applicationType)) {
+            const jsonData = JSON.parse(
+              await (await item.getType(applicationType)).text()
+            );
+            if (jsonData.type === "super-crud-data" && jsonData.data) {
+              return { textData: jsonData.data.textData, isValueMode: true };
+            }
+          }
+        }
+
+        // 查找文本数据
+        for (const item of clipboardItems) {
+          if (item.types.includes("text/plain")) {
+            const textData = await (await item.getType("text/plain")).text();
+            return { textData, isValueMode: false };
+          }
+        }
+
+        return { textData: "", isValueMode: false };
+      } catch (error) {
+        console.warn("读取多格式剪贴板数据失败，尝试文本模式:", error);
+        const textData = await navigator.clipboard.readText();
+        return { textData, isValueMode: false };
+      }
+    },
+
+    // 处理粘贴成功
+    handlePasteSuccess(result) {
+      // 触发粘贴事件
+      this.$emit("cells-pasted", {
+        affectedCells: result.affectedCells,
+        clipboardDimensions: result.clipboardDimensions,
+        selectionBounds: result.selectionBounds,
+        pasteDataCount: result.pasteDataCount,
+        selectedCells: this.selectedCellsData,
+      });
+
+      // 清除复制状态
+      this.hideOverlay("copyDash");
+      this.copiedCells = [];
+
+      // 更新选中区域到粘贴范围
+      if (result.pasteBounds) {
+        const { minRow, maxRow, minCol, maxCol } = result.pasteBounds;
+        this.clearCellSelection();
+        this.selectCellRange(
+          { rowIndex: minRow, columnIndex: minCol },
+          { rowIndex: maxRow, columnIndex: maxCol }
+        );
+      }
+      this.$nextTick(() => {
+        this.updateCellStyles();
+        this.updateSelectionOverlay();
+      });
     },
 
     // 初始化DOM变化监听器
