@@ -288,7 +288,7 @@ export default {
       };
       const cellElement = element.querySelector("[data-prop]");
 
-      const prop = cellElement.getAttribute("data-prop");
+      const prop = cellElement?.getAttribute("data-prop");
       if (!prop) return;
 
       const vnode = cellElement.__vue__?.$vnode;

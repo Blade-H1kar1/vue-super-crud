@@ -1102,12 +1102,13 @@ export default {
 
     // 拖拽填充结束事件
     handleFillDragEnd(event) {
-      const { isFillDragging, fillEndCell } = this.dragState;
+      const { isFillDragging, fillEndCell, fillDirection } = this.dragState;
       if (!isFillDragging) return;
 
       // 获取原始选中区域的边界
       const originalBounds = this.getSelectionBounds();
       let fillCells = [];
+      let fillResult = null;
 
       // 如果有填充结束单元格，计算填充区域的所有单元格
       if (fillEndCell && originalBounds) {
@@ -1148,6 +1149,18 @@ export default {
             }
           }
         }
+
+        // 执行填充操作
+        fillResult = this.performFillOperation(
+          originalBounds,
+          fillCells,
+          fillDirection
+        );
+
+        // 输出填充结果日志
+        if (!fillResult.success) {
+          console.warn(`拖拽填充失败: ${fillResult.message}`);
+        }
       }
 
       // 移除全局事件监听器
@@ -1179,6 +1192,7 @@ export default {
         endCell: fillEndCell,
         selectedCells: this.selectedCells,
         fillCells: fillCells,
+        fillResult: fillResult,
       });
     },
 
@@ -1202,6 +1216,158 @@ export default {
       });
 
       return bounds;
+    },
+
+    // 执行填充操作
+    performFillOperation(originalBounds, fillCells, fillDirection) {
+      if (!originalBounds || !fillCells || fillCells.length === 0) {
+        return { success: false, message: "填充参数无效" };
+      }
+
+      try {
+        // 获取原始选中区域的数据
+        const sourceData = this.getSourceDataForFill(originalBounds);
+        if (!sourceData || sourceData.length === 0) {
+          return { success: false, message: "源数据为空" };
+        }
+
+        // 简单值复制：生成填充数据
+        const fillData = this.generateSimpleFillData(
+          sourceData,
+          originalBounds,
+          fillCells
+        );
+
+        // 应用填充数据到目标单元格
+        const applyResult = this.applyFillData(fillData);
+
+        return {
+          success: applyResult.success,
+          message: applyResult.message,
+          affectedCells: applyResult.affectedCells,
+          sourceData,
+          fillData,
+        };
+      } catch (error) {
+        console.error("填充操作失败:", error);
+        return {
+          success: false,
+          message: `填充操作失败: ${error.message}`,
+        };
+      }
+    },
+
+    // 获取源数据用于填充
+    getSourceDataForFill(originalBounds) {
+      const sourceData = [];
+      const { minRow, maxRow, minCol, maxCol } = originalBounds;
+
+      for (let row = minRow; row <= maxRow; row++) {
+        for (let col = minCol; col <= maxCol; col++) {
+          const value = this.getCellValue(row, col);
+          sourceData.push({
+            rowIndex: row,
+            columnIndex: col,
+            value: value,
+            relativeRow: row - minRow,
+            relativeCol: col - minCol,
+          });
+        }
+      }
+
+      return sourceData;
+    },
+
+    // 生成简单填充数据（值复制）
+    generateSimpleFillData(sourceData, originalBounds, fillCells) {
+      const fillData = [];
+      const { minRow, maxRow, minCol, maxCol } = originalBounds;
+      const sourceRows = maxRow - minRow + 1;
+      const sourceCols = maxCol - minCol + 1;
+
+      fillCells.forEach((cell) => {
+        const { rowIndex, columnIndex } = cell;
+
+        // 跳过原始选中区域内的单元格
+        if (
+          rowIndex >= minRow &&
+          rowIndex <= maxRow &&
+          columnIndex >= minCol &&
+          columnIndex <= maxCol
+        ) {
+          return;
+        }
+
+        // 计算在源数据中的相对位置（循环复制）
+        const sourceRowIndex = Math.abs(rowIndex - minRow) % sourceRows;
+        const sourceColIndex = Math.abs(columnIndex - minCol) % sourceCols;
+
+        // 查找对应的源数据
+        const sourceCell = sourceData.find(
+          (data) =>
+            data.relativeRow === sourceRowIndex &&
+            data.relativeCol === sourceColIndex
+        );
+
+        if (sourceCell) {
+          fillData.push({
+            rowIndex,
+            columnIndex,
+            value: sourceCell.value, // 直接复制值
+            sourceValue: sourceCell.value,
+            sourceRow: sourceCell.rowIndex,
+            sourceCol: sourceCell.columnIndex,
+          });
+        }
+      });
+
+      return fillData;
+    },
+
+    // 应用填充数据
+    applyFillData(fillData) {
+      if (!fillData || fillData.length === 0) {
+        return {
+          success: false,
+          message: "没有要填充的数据",
+          affectedCells: [],
+        };
+      }
+
+      const affectedCells = [];
+      const errors = [];
+
+      fillData.forEach((data) => {
+        try {
+          const { rowIndex, columnIndex, value } = data;
+          const oldValue = this.getCellValue(rowIndex, columnIndex);
+
+          const success = this.setCellValue(rowIndex, columnIndex, value);
+          if (success) {
+            affectedCells.push({
+              rowIndex,
+              columnIndex,
+              oldValue,
+              newValue: value,
+              originalValue: value,
+              sourceValue: data.sourceValue,
+            });
+          } else {
+            errors.push(`设置单元格 (${rowIndex}, ${columnIndex}) 值失败`);
+          }
+        } catch (error) {
+          errors.push(
+            `处理单元格 (${data.rowIndex}, ${data.columnIndex}) 时出错: ${error.message}`
+          );
+        }
+      });
+
+      return {
+        success: errors.length === 0,
+        message: errors.length > 0 ? errors.join("; ") : "填充成功",
+        affectedCells,
+        errors,
+      };
     },
   },
 };
