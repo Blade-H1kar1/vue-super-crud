@@ -38,16 +38,6 @@ export default {
         fillHandle: { element: null, visible: false },
       },
 
-      // 事件处理器
-      eventHandlers: {
-        cell: null,
-        global: null,
-        keyboard: null,
-        documentClick: null,
-        fillHandle: null,
-        fillGlobal: null,
-      },
-
       // DOM监听
       tableObserver: null,
       globalEventsAdded: false,
@@ -112,7 +102,6 @@ export default {
     // 清理所有资源
     cleanup() {
       this.removeAllEvents();
-      this.removeAllOverlays();
       this.destroyTableObserver();
 
       // 清理requestAnimationFrame
@@ -127,7 +116,6 @@ export default {
     // 创建遮罩层
     createOverlay(type) {
       if (this.overlays[type].element) return;
-
       const overlay = document.createElement("div");
       overlay.className = this.getOverlayClassName(type);
 
@@ -144,16 +132,8 @@ export default {
 
     // 初始化填充手柄事件
     initFillHandleEvents(fillHandle) {
-      if (!fillHandle || this.eventHandlers.fillHandle) return;
-
-      this.eventHandlers.fillHandle = {
-        mousedown: this.handleFillHandleMouseDown.bind(this),
-      };
-
-      fillHandle.addEventListener(
-        "mousedown",
-        this.eventHandlers.fillHandle.mousedown
-      );
+      if (!fillHandle) return;
+      fillHandle.addEventListener("mousedown", this.handleFillHandleMouseDown);
     },
 
     // 获取遮罩层类名
@@ -206,23 +186,6 @@ export default {
       overlay.style.height = height + "px";
     },
 
-    // 移除所有遮罩层
-    removeAllOverlays() {
-      Object.keys(this.overlays).forEach((type) => {
-        this.removeOverlay(type);
-      });
-    },
-
-    // 移除单个遮罩层
-    removeOverlay(type) {
-      const overlay = this.overlays[type];
-      if (overlay.element) {
-        overlay.element.remove();
-        overlay.element = null;
-        overlay.visible = false;
-      }
-    },
-
     // ========== 事件管理 ==========
 
     // 移除所有事件
@@ -236,52 +199,26 @@ export default {
     addGlobalEvents() {
       if (this.globalEventsAdded) return;
 
-      this.eventHandlers.global = {
-        mousemove: this.handleGlobalMouseMove.bind(this),
-        mouseup: this.handleGlobalMouseUp.bind(this),
-      };
-
-      document.addEventListener(
-        "mousemove",
-        this.eventHandlers.global.mousemove
-      );
-      document.addEventListener("mouseup", this.eventHandlers.global.mouseup);
+      document.addEventListener("mousemove", this.handleGlobalMouseMove);
+      document.addEventListener("mouseup", this.handleGlobalMouseUp);
       this.globalEventsAdded = true;
     },
 
     // 移除全局事件监听器
     removeGlobalEvents() {
-      if (!this.globalEventsAdded || !this.eventHandlers.global) return;
+      if (!this.globalEventsAdded) return;
 
-      document.removeEventListener(
-        "mousemove",
-        this.eventHandlers.global.mousemove
-      );
-      document.removeEventListener(
-        "mouseup",
-        this.eventHandlers.global.mouseup
-      );
-      this.eventHandlers.global = null;
+      document.removeEventListener("mousemove", this.handleGlobalMouseMove);
+      document.removeEventListener("mouseup", this.handleGlobalMouseUp);
       this.globalEventsAdded = false;
     },
 
     // 初始化单元格选中事件
     initCellSelectionEvents() {
-      if (this.eventHandlers.cell) return;
-
-      this.eventHandlers.cell = {
-        mousedown: this.handleCellMouseDown.bind(this),
-        mouseleave: this.handleTableMouseLeave.bind(this),
-      };
-
       this.$nextTick(() => {
         const tableEl = this.$refs.tableRef?.$el;
         if (tableEl) {
-          Object.keys(this.eventHandlers.cell).forEach((event) => {
-            tableEl.addEventListener(event, this.eventHandlers.cell[event]);
-          });
-
-          // 阻止表格默认的文本选择
+          tableEl.addEventListener("mousedown", this.handleCellMouseDown);
           tableEl.style.userSelect = "none";
         }
       });
@@ -289,42 +226,26 @@ export default {
 
     // 移除单元格选中事件
     removeCellSelectionEvents() {
-      if (!this.eventHandlers.cell) return;
-
       const tableEl = this.$refs.tableRef?.$el;
       if (tableEl) {
-        Object.keys(this.eventHandlers.cell).forEach((event) => {
-          tableEl.removeEventListener(event, this.eventHandlers.cell[event]);
-        });
-
+        tableEl.removeEventListener("mousedown", this.handleCellMouseDown);
         // 恢复文本选择
         tableEl.style.userSelect = "";
       }
-
       // 移除全局事件监听器
       this.removeGlobalEvents();
-
-      this.eventHandlers.cell = null;
     },
 
     // 初始化键盘事件
     initKeyboardEvents() {
-      this.eventHandlers.keyboard = this.handleKeyDown.bind(this);
-      this.eventHandlers.documentClick = this.handleDocumentClick.bind(this);
-      document.addEventListener("keydown", this.eventHandlers.keyboard);
-      document.addEventListener("click", this.eventHandlers.documentClick);
+      document.addEventListener("keydown", this.handleKeyDown);
+      document.addEventListener("click", this.handleDocumentClick);
     },
 
     // 移除键盘事件
     removeKeyboardEvents() {
-      if (this.eventHandlers.keyboard) {
-        document.removeEventListener("keydown", this.eventHandlers.keyboard);
-        this.eventHandlers.keyboard = null;
-      }
-      if (this.eventHandlers.documentClick) {
-        document.removeEventListener("click", this.eventHandlers.documentClick);
-        this.eventHandlers.documentClick = null;
-      }
+      document.removeEventListener("keydown", this.handleKeyDown);
+      document.removeEventListener("click", this.handleDocumentClick);
     },
 
     // 键盘事件处理
@@ -382,6 +303,8 @@ export default {
 
     // 鼠标按下事件
     handleCellMouseDown(event) {
+      // 只处理鼠标左键点击
+      if (event.button !== 0) return;
       const cellInfo = this.getCellInfoFromEvent(event);
       if (!cellInfo) return;
 
@@ -414,6 +337,8 @@ export default {
 
       // 使用requestAnimationFrame进行防抖优化
       this.mouseMoveAnimationId = requestAnimationFrame(() => {
+        console.log("handleGlobalMouseMove");
+
         const cellInfo =
           this.getCellInfoFromEvent(event) ||
           getBoundaryCellFromMousePosition(event, this.$refs.tableRef?.$el);
@@ -467,15 +392,6 @@ export default {
       // 清理拖拽状态
       this.dragState.startCell = null;
       this.dragState.endCell = null;
-    },
-
-    // 鼠标离开表格事件
-    handleTableMouseLeave(event) {
-      // 如果没有在拖拽且鼠标已按下，结束选择
-      if (!this.dragState.isDragging && this.dragState.isMouseDown) {
-        this.handleGlobalMouseUp(event);
-      }
-      // 如果正在拖拽，继续让全局事件处理
     },
 
     // 从事件中获取单元格信息
@@ -974,7 +890,6 @@ export default {
       if (this.selectedCells.length === 0) return;
 
       const dragState = this.dragState;
-      const eventHandlers = this.eventHandlers;
 
       // 设置拖拽状态
       Object.assign(dragState, {
@@ -986,15 +901,9 @@ export default {
       // 确保在开始拖拽时隐藏扩展选中区域
       this.hideOverlay("extended");
 
-      // 添加全局事件监听器用于拖拽
-      const fillGlobal = {
-        mousemove: this.handleFillDragMove.bind(this),
-        mouseup: this.handleFillDragEnd.bind(this),
-      };
-      eventHandlers.fillGlobal = fillGlobal;
-
-      document.addEventListener("mousemove", fillGlobal.mousemove);
-      document.addEventListener("mouseup", fillGlobal.mouseup);
+      // 绑定全局事件
+      document.addEventListener("mousemove", this.handleFillDragMove);
+      document.addEventListener("mouseup", this.handleFillDragEnd);
 
       // 改变鼠标样式
       document.body.style.cursor = "crosshair";
@@ -1164,13 +1073,8 @@ export default {
       }
 
       // 移除全局事件监听器
-      const { fillGlobal } = this.eventHandlers;
-      if (fillGlobal) {
-        const { mousemove, mouseup } = fillGlobal;
-        document.removeEventListener("mousemove", mousemove);
-        document.removeEventListener("mouseup", mouseup);
-        this.eventHandlers.fillGlobal = null;
-      }
+      document.removeEventListener("mousemove", this.handleFillDragMove);
+      document.removeEventListener("mouseup", this.handleFillDragEnd);
 
       // 恢复鼠标样式
       document.body.style.cursor = "";

@@ -6,7 +6,6 @@
   display: none;
   pointer-events: none;
   box-sizing: border-box;
-  transition: all 0.1s ease;
 }
 
 // 选中区域遮罩层样式
@@ -51,7 +50,6 @@
   display: none;
   box-sizing: border-box;
   border-radius: 1px;
-  transition: all 0.1s ease;
 
   &:hover {
     background-color: #40a9ff;
