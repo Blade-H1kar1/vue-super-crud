@@ -137,7 +137,6 @@ export function getCellElement(tableEl, rowIndex, columnIndex) {
       const columnClass = Array.from(headerCell.classList).find((cls) =>
         cls.match(/^el-table_\d+_column_\d+$/)
       );
-
       if (columnClass) {
         const cellWithClass = tr.querySelector(`.${columnClass}`);
         if (cellWithClass) return cellWithClass;
@@ -149,6 +148,9 @@ export function getCellElement(tableEl, rowIndex, columnIndex) {
   return tr.children[columnIndex];
 }
 
+// 区域边界结果缓存
+const boundsCache = new WeakMap();
+
 /**
  * 计算选中区域的边界
  * @param {Array} selectedCells - 选中的单元格键值数组
@@ -158,41 +160,71 @@ export function getCellElement(tableEl, rowIndex, columnIndex) {
 export function calculateSelectionBounds(selectedCells, tableEl) {
   if (selectedCells.length === 0 || !tableEl) return null;
 
+  // 简单缓存检查
+  const cacheKey = selectedCells.slice().sort().join(",");
+  let tableCache = boundsCache.get(tableEl);
+  if (!tableCache) {
+    tableCache = new Map();
+    boundsCache.set(tableEl, tableCache);
+  }
+
+  const cachedResult = tableCache.get(cacheKey);
+  const now = Date.now();
+  if (cachedResult && now - cachedResult.timestamp < 100) {
+    return cachedResult.bounds;
+  }
+
   const tableBodyWrapper = tableEl.querySelector(".el-table__body-wrapper");
   if (!tableBodyWrapper) return null;
 
   const wrapperRect = tableBodyWrapper.getBoundingClientRect();
+
   let minLeft = Infinity;
   let minTop = Infinity;
   let maxRight = -Infinity;
   let maxBottom = -Infinity;
 
   // 遍历所有选中的单元格，计算边界
-  selectedCells.forEach((cellKey) => {
+  for (const cellKey of selectedCells) {
     const { rowIndex, columnIndex } = parseCellKey(cellKey);
-    const cell = getCellElement(tableEl, rowIndex, columnIndex);
-    if (cell) {
-      const cellRect = cell.getBoundingClientRect();
-      const relativeLeft = cellRect.left - wrapperRect.left;
-      const relativeTop = cellRect.top - wrapperRect.top;
-      const relativeRight = relativeLeft + cellRect.width;
-      const relativeBottom = relativeTop + cellRect.height;
+    const cellElement = getCellElement(tableEl, rowIndex, columnIndex);
 
-      minLeft = Math.min(minLeft, relativeLeft);
-      minTop = Math.min(minTop, relativeTop);
-      maxRight = Math.max(maxRight, relativeRight);
-      maxBottom = Math.max(maxBottom, relativeBottom);
+    if (cellElement) {
+      const cellRect = cellElement.getBoundingClientRect();
+      const left = cellRect.left - wrapperRect.left;
+      const top = cellRect.top - wrapperRect.top;
+      const right = left + cellRect.width;
+      const bottom = top + cellRect.height;
+
+      minLeft = Math.min(minLeft, left);
+      minTop = Math.min(minTop, top);
+      maxRight = Math.max(maxRight, right);
+      maxBottom = Math.max(maxBottom, bottom);
     }
-  });
+  }
 
   if (minLeft === Infinity) return null;
 
-  return {
+  const bounds = {
     left: minLeft,
     top: minTop,
     width: maxRight - minLeft,
     height: maxBottom - minTop,
   };
+
+  // 缓存结果（保留少量缓存）
+  tableCache.set(cacheKey, {
+    bounds,
+    timestamp: now,
+  });
+
+  // 限制缓存大小
+  if (tableCache.size > 20) {
+    const oldestKey = tableCache.keys().next().value;
+    tableCache.delete(oldestKey);
+  }
+
+  return bounds;
 }
 
 /**
