@@ -30,24 +30,6 @@ export default {
     },
 
     /**
-     * 获取树形数据中选中区域的完整节点信息
-     * @param {Array} selectedCells - 选中的单元格数组
-     * @returns {Array} 包含树形信息的选中数据
-     */
-    getSelectedInfo(selectedCells) {
-      return selectedCells.map((cell) => {
-        const { rowIndex, columnIndex } = cell;
-        const row = this.getRowDataByIndex(rowIndex);
-        const column = this.getColumnByIndex(columnIndex);
-        return {
-          row,
-          column,
-          value: get(row, column.form.prop || column.prop),
-        };
-      });
-    },
-
-    /**
      * 获取单元格的值
      * @param {number} rowIndex - 行索引
      * @param {number} columnIndex - 列索引
@@ -63,7 +45,7 @@ export default {
         }
 
         // 获取列的属性路径
-        const prop = column.form?.prop || column.prop;
+        const prop = column?.form?.prop || column?.prop;
         if (!prop) {
           return null;
         }
@@ -75,54 +57,64 @@ export default {
       }
     },
 
-    /**
-     * 设置单元格的值
-     * @param {number} rowIndex - 行索引
-     * @param {number} columnIndex - 列索引
-     * @param {any} value - 要设置的值
-     * @returns {boolean} 是否设置成功
-     */
-    setCellValue(rowIndex, columnIndex, value) {
-      try {
-        const row = this.getRowDataByIndex(rowIndex);
-        const column = this.getColumnByIndex(columnIndex);
-        const tableEl = this.$refs.tableRef?.$el;
-        const prop = column.form?.prop || column.prop;
+    // 设置单元格的值
+    setCellValue(row, column, prop, rowIndex, columnIndex, value) {
+      const tableEl = this.$refs.tableRef?.$el;
+      if (!row || !column || !prop) return false;
+      const cellElement = getCellElement(tableEl, rowIndex, columnIndex);
+      const componentInfo = this.analyzeComponentConfigs(cellElement);
 
-        if (!row || !column || !prop) return false;
+      // 根据组件配置格式化值
+      const formattedValue = this.formatValueByComponentConfig(
+        value,
+        componentInfo?.config
+      );
 
-        const cellElement = getCellElement(tableEl, rowIndex, columnIndex);
-        const componentInfo = this.analyzeComponentConfigs(cellElement);
-
-        // 根据组件配置格式化值
-        const formattedValue = this.formatValueByComponentConfig(
-          value,
-          componentInfo?.config
+      if (componentInfo?.setFormatValue) {
+        this.setByProp(
+          row,
+          prop,
+          componentInfo.setFormatValue(formattedValue, true)
         );
-
-        if (componentInfo?.setFormatValue) {
-          this.setByProp(
-            row,
-            prop,
-            componentInfo.setFormatValue(formattedValue, true)
-          );
-        } else {
-          this.setByProp(row, prop, formattedValue);
-        }
-        return true;
-      } catch (error) {
-        console.warn(`设置单元格值失败 (${rowIndex}, ${columnIndex}):`, error);
-        return false;
+      } else {
+        this.setByProp(row, prop, formattedValue);
       }
+      return true;
+    },
+
+    // 检查粘贴权限
+    checkPastePermission(row, column) {
+      if (this.crudOptions.pasteAll) return true;
+      const scope = { row, $index: row.$index };
+      const { mode, disabled, isRowEdit } = this.editConfig;
+      const canEdit =
+        typeof column.isEdit === "function"
+          ? column.isEdit(scope)
+          : column.isEdit;
+      if (mode === "row") {
+        if (
+          (isRowEdit ? isRowEdit(scope) !== false : true) &&
+          canEdit !== false &&
+          !disabled
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      if (["cell", "free"].includes(mode)) {
+        if (canEdit !== false && !disabled) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      return canEdit && !disabled ? true : false;
     },
 
     // 直接设置单元格的值（不进行格式化处理，用于值模式粘贴）
-    setCellValueDirect(rowIndex, columnIndex, value) {
+    setCellValueDirect(row, column, prop, value) {
       try {
-        const row = this.getRowDataByIndex(rowIndex);
-        const column = this.getColumnByIndex(columnIndex);
-        const prop = column.form?.prop || column.prop;
-
         if (!row || !column || !prop) return false;
 
         // 解析 JSON
@@ -144,10 +136,7 @@ export default {
         this.setByProp(row, prop, finalValue);
         return true;
       } catch (error) {
-        console.warn(
-          `直接设置单元格值失败 (${rowIndex}, ${columnIndex}):`,
-          error
-        );
+        console.warn(`设置单元格值失败 (${row}, ${column}):`, error);
         return false;
       }
     },
@@ -448,27 +437,6 @@ export default {
     },
 
     /**
-     * 验证粘贴数据是否有效
-     * @param {Array} pasteData - 要粘贴的数据
-     * @returns {boolean} 是否有效
-     */
-    validatePasteData(pasteData) {
-      if (!Array.isArray(pasteData) || pasteData.length === 0) {
-        return false;
-      }
-
-      return pasteData.every((cell) => {
-        return (
-          typeof cell === "object" &&
-          typeof cell.rowIndex === "number" &&
-          typeof cell.columnIndex === "number" &&
-          cell.rowIndex >= 0 &&
-          cell.columnIndex >= 0
-        );
-      });
-    },
-
-    /**
      * 应用粘贴数据到表格
      * @param {string|Array} pasteData - 要粘贴的数据（字符串或数组）
      * @param {boolean} isValueMode - 是否为值模式（跳过格式化）
@@ -478,23 +446,7 @@ export default {
       // 如果传入的是字符串，先解析为数组
       if (typeof pasteData === "string") {
         const selectedCells = this.selectedCellsData;
-        if (!selectedCells || selectedCells.length === 0) {
-          return {
-            success: false,
-            message: "没有选中的单元格",
-            affectedCells: [],
-          };
-        }
-
-        // 获取选中区域边界
         const selectionBounds = this.getSelectedCellsBounds(selectedCells);
-        if (!selectionBounds) {
-          return {
-            success: false,
-            message: "无法确定选中区域边界",
-            affectedCells: [],
-          };
-        }
 
         // 解析剪贴板数据
         const clipboardData = this.parseClipboardData(
@@ -521,13 +473,6 @@ export default {
           selectionBounds
         );
       }
-      if (!this.validatePasteData(pasteData)) {
-        return {
-          success: false,
-          message: "粘贴数据格式无效",
-          affectedCells: [],
-        };
-      }
 
       const affectedCells = [];
       const errors = [];
@@ -537,36 +482,32 @@ export default {
           const { rowIndex, columnIndex, value } = cell;
 
           // 检查目标单元格是否在有效范围内
-          if (rowIndex < 0 || columnIndex < 0) {
-            errors.push(`单元格索引无效 (${rowIndex}, ${columnIndex})`);
-            return;
-          }
-
+          if (rowIndex < 0 || columnIndex < 0) return;
           // 检查是否超出数据范围
           const row = this.getRowDataByIndex(rowIndex);
-          if (!row) {
-            errors.push(`行索引超出范围 (${rowIndex})`);
-            return;
-          }
-
           const column = this.getColumnByIndex(columnIndex);
-          if (!column) {
-            errors.push(`列索引超出范围 (${columnIndex})`);
-            return;
-          }
 
-          // 获取旧值
-          const oldValue = this.getCellValue(rowIndex, columnIndex);
+          const prop = column?.form?.prop || column?.prop;
+          if (!column || !row) return;
+
+          // 检查粘贴权限
+          if (!this.checkPastePermission(row, column)) return;
 
           // 设置单元格值（值模式下跳过格式化）
           const success = isValueMode
-            ? this.setCellValueDirect(rowIndex, columnIndex, value)
-            : this.setCellValue(rowIndex, columnIndex, value);
+            ? this.setCellValueDirect(row, column, prop, value)
+            : this.setCellValue(
+                row,
+                column,
+                prop,
+                rowIndex,
+                columnIndex,
+                value
+              );
           if (success) {
             affectedCells.push({
               rowIndex,
               columnIndex,
-              oldValue,
               newValue: value,
             });
           } else {

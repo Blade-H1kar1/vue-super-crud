@@ -863,7 +863,7 @@ export default {
       const topLeftBounds = topLeftCell.getBoundingClientRect();
       const bottomRightBounds = bottomRightCell.getBoundingClientRect();
       const { left: wrapperLeft, top: wrapperTop } = wrapperBounds;
-      
+
       // 获取滚动偏移量
       const scrollLeft = tableWrapper.scrollLeft;
       const scrollTop = tableWrapper.scrollTop;
@@ -1098,10 +1098,10 @@ export default {
       if (fillResult && fillResult.success && fillCells.length > 0) {
         // 计算填充区域的边界
         const fillBounds = {
-          minRow: Math.min(...fillCells.map(cell => cell.rowIndex)),
-          maxRow: Math.max(...fillCells.map(cell => cell.rowIndex)),
-          minCol: Math.min(...fillCells.map(cell => cell.columnIndex)),
-          maxCol: Math.max(...fillCells.map(cell => cell.columnIndex))
+          minRow: Math.min(...fillCells.map((cell) => cell.rowIndex)),
+          maxRow: Math.max(...fillCells.map((cell) => cell.rowIndex)),
+          minCol: Math.min(...fillCells.map((cell) => cell.columnIndex)),
+          maxCol: Math.max(...fillCells.map((cell) => cell.columnIndex)),
         };
 
         // 清除当前选中区域并选中整个填充区域
@@ -1274,7 +1274,10 @@ export default {
           const { rowIndex, columnIndex, value } = data;
           const oldValue = this.getCellValue(rowIndex, columnIndex);
 
-          const success = this.setCellValue(rowIndex, columnIndex, value);
+          const row = this.getRowDataByIndex(rowIndex);
+          const column = this.getColumnByIndex(columnIndex);
+          const prop = column.form?.prop || column.prop;
+          const success = this.setCellValueDirect(row, column, prop, value);
           if (success) {
             affectedCells.push({
               rowIndex,
