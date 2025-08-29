@@ -82,9 +82,68 @@ export default {
       return true;
     },
 
+    /**
+   * 检查单元格操作权限
+   * @param {String} operation - 操作类型 (paste, copy, cut, fill, select, pasteAll)
+   * @returns {Boolean} 是否允许操作
+   */
+  checkCellOperationPermission(operation) {
+    const cellOperations = this.crudOptions.cellOperations;
+    
+    // 如果没有配置cellOperations，使用默认值
+    if (!cellOperations) {
+      return operation !== 'pasteAll'; // pasteAll默认为false，其他操作默认为true
+    }
+
+    // 如果cellOperations为false，禁用所有操作
+    if (cellOperations === false) {
+      return false;
+    }
+
+    // 如果cellOperations为true，允许所有操作（除了pasteAll）
+    if (cellOperations === true) {
+      return operation !== 'pasteAll';
+    }
+
+    // 对象配置
+    if (typeof cellOperations === 'object') {
+      const operationConfig = cellOperations[operation];
+      
+      // 如果操作被明确禁用
+      if (operationConfig === false) {
+        return false;
+      }
+      
+      // 如果操作被明确启用或未配置，默认允许（除了pasteAll）
+      if (operationConfig === true || operationConfig === undefined) {
+        return operation !== 'pasteAll';
+      }
+      
+      // 函数配置
+      if (typeof operationConfig === 'function') {
+        try {
+          return operationConfig({ operation });
+        } catch (error) {
+          console.warn(`${operation}操作权限验证函数执行错误:`, error);
+          return false;
+        }
+      }
+    }
+    
+    // 默认允许（除了pasteAll）
+    return operation !== 'pasteAll';
+  },
+
     // 检查粘贴权限
     checkPastePermission(row, column) {
+      // 优先使用新的cellOperations配置
+      if (this.crudOptions.cellOperations) {
+        return this.checkCellOperationPermission('paste');
+      }
+      
+      // 向后兼容：检查旧的pasteAll配置
       if (this.crudOptions.pasteAll) return true;
+      
       const scope = { row, $index: row.$index };
       const { mode, disabled, isRowEdit } = this.editConfig;
       const canEdit =
@@ -491,7 +550,7 @@ export default {
           if (!column || !row) return;
 
           // 检查粘贴权限
-          if (!this.checkPastePermission(row, column)) return;
+          if (!this.checkPastePermission()) return;
 
           // 设置单元格值（值模式下跳过格式化）
           const success = isValueMode

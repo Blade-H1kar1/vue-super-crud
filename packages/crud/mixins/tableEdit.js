@@ -172,9 +172,8 @@ export default {
       // 评估列的编辑条件
       const canEdit =
         typeof col.isEdit === "function" ? col.isEdit(scope) : col.isEdit;
-      if (canEdit === false) return false;
+      if (canEdit === false || this.editConfig.disabled) return false;
       if (this.editConfig.mode) {
-        if (this.editConfig.disabled) return;
         return this._runWithoutDeps(() => {
           return this.editState.validateEdit(col, scope, canEdit);
         });

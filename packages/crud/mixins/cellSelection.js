@@ -80,6 +80,58 @@ export default {
   methods: {
     // ========== 公共方法 ==========
 
+    /**
+     * 检查单元格操作权限
+     * @param {String} operation - 操作类型 (copy, paste, cut, fill, select, pasteAll)
+     * @returns {Boolean} 是否允许操作
+     */
+    checkCellOperationPermission(operation) {
+      const cellOperations = this.crudOptions.cellOperations;
+      
+      // 如果没有配置cellOperations，使用默认值
+      if (!cellOperations) {
+        return operation !== 'pasteAll'; // pasteAll默认为false，其他操作默认为true
+      }
+
+      // 如果cellOperations为false，禁用所有操作
+      if (cellOperations === false) {
+        return false;
+      }
+
+      // 如果cellOperations为true，允许所有操作（除了pasteAll）
+      if (cellOperations === true) {
+        return operation !== 'pasteAll';
+      }
+
+      // 对象配置
+      if (typeof cellOperations === 'object') {
+        const operationConfig = cellOperations[operation];
+        
+        // 如果操作被明确禁用
+        if (operationConfig === false) {
+          return false;
+        }
+        
+        // 如果操作被明确启用或未配置，默认允许（除了pasteAll）
+        if (operationConfig === true || operationConfig === undefined) {
+          return operation !== 'pasteAll';
+        }
+        
+        // 函数配置
+        if (typeof operationConfig === 'function') {
+          try {
+            return operationConfig({ operation });
+          } catch (error) {
+            console.warn(`${operation}操作权限验证函数执行错误:`, error);
+            return false;
+          }
+        }
+      }
+      
+      // 默认允许（除了pasteAll）
+      return operation !== 'pasteAll';
+    },
+
     // 获取表格元素
     getTableElement() {
       return this.$refs.tableRef?.$el;
@@ -443,6 +495,12 @@ export default {
 
     // 选中单元格范围
     selectCellRange(startCell, endCell, keepExisting = false) {
+      // 检查选择操作权限
+      if (!this.checkCellOperationPermission('select')) {
+        console.warn('选择操作被禁用');
+        return;
+      }
+
       if (!startCell || !endCell) return;
 
       const startRow = Math.min(startCell.rowIndex, endCell.rowIndex);
@@ -567,6 +625,12 @@ export default {
     // 复制选中单元格的值
     async copyCellsValues() {
       try {
+        // 检查复制权限
+        if (!this.checkCellOperationPermission('copy')) {
+          console.warn('复制操作被禁用');
+          return;
+        }
+
         const cellsData = this.selectedCellsData.sort((a, b) => {
           if (a.rowIndex !== b.rowIndex) return a.rowIndex - b.rowIndex;
           return a.columnIndex - b.columnIndex;
@@ -659,6 +723,12 @@ export default {
     // 粘贴选中单元格的值
     async pasteCellsValues() {
       try {
+        // 检查粘贴权限
+        if (!this.checkCellOperationPermission('paste')) {
+          console.warn('粘贴操作被禁用');
+          return;
+        }
+
         const { textData, isValueMode } = await this.readClipboardData();
 
         if (!textData) {
@@ -890,6 +960,12 @@ export default {
     handleFillHandleMouseDown(event) {
       event.preventDefault();
       event.stopPropagation();
+
+      // 检查填充操作权限
+      if (!this.checkCellOperationPermission('fill')) {
+        console.warn('填充操作被禁用');
+        return;
+      }
 
       if (this.selectedCells.length === 0) return;
 

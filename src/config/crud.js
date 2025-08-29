@@ -477,17 +477,63 @@ export default {
         reset: presetButtonType,
         handles: {
           type: Array,
-          default: () => [],
+          // 自定义按钮
           arrayOf: buttonItem,
         },
       },
+      // 默认值
       default: () => ({
+        show: true,
+        hidden: false,
+        actionBtn: true,
         copy: true,
         mock: true,
         clearMock: true,
         reset: true,
-        actionBtn: true,
-        handles: [],
+      }),
+    },
+    // 单元格操作配置
+    cellOperations: {
+      type: [Boolean, Object],
+      strict: true,
+      properties: {
+        show: Boolean,
+        hidden: Boolean,
+        copy: {
+          type: Boolean,
+          default: true,
+        },
+        paste: {
+          type: Boolean,
+          default: true,
+        },
+        pasteAll: {
+          type: Boolean,
+          default: false,
+        },
+        cut: {
+          type: Boolean,
+          default: true,
+        },
+        fill: {
+          type: Boolean,
+          default: true,
+        },
+        select: {
+          type: Boolean,
+          default: true,
+        },
+      },
+      // 默认值
+      default: () => ({
+        show: true,
+        hidden: false,
+        copy: true,
+        paste: true,
+        pasteAll: false,
+        cut: true,
+        fill: true,
+        select: true,
       }),
     },
     // 渲染列配置
