@@ -178,6 +178,9 @@ export function calculateSelectionBounds(selectedCells, tableEl) {
   if (!tableBodyWrapper) return null;
 
   const wrapperRect = tableBodyWrapper.getBoundingClientRect();
+  // 获取滚动偏移量
+  const scrollLeft = tableBodyWrapper.scrollLeft;
+  const scrollTop = tableBodyWrapper.scrollTop;
 
   let minLeft = Infinity;
   let minTop = Infinity;
@@ -191,8 +194,9 @@ export function calculateSelectionBounds(selectedCells, tableEl) {
 
     if (cellElement) {
       const cellRect = cellElement.getBoundingClientRect();
-      const left = cellRect.left - wrapperRect.left;
-      const top = cellRect.top - wrapperRect.top;
+      // 计算相对于容器的位置，考虑滚动偏移量
+      const left = cellRect.left - wrapperRect.left + scrollLeft;
+      const top = cellRect.top - wrapperRect.top + scrollTop;
       const right = left + cellRect.width;
       const bottom = top + cellRect.height;
 

@@ -863,12 +863,16 @@ export default {
       const topLeftBounds = topLeftCell.getBoundingClientRect();
       const bottomRightBounds = bottomRightCell.getBoundingClientRect();
       const { left: wrapperLeft, top: wrapperTop } = wrapperBounds;
+      
+      // 获取滚动偏移量
+      const scrollLeft = tableWrapper.scrollLeft;
+      const scrollTop = tableWrapper.scrollTop;
 
-      // 计算扩展选中区域的像素坐标（相对于表格容器）
-      const left = topLeftBounds.left - wrapperLeft;
-      const top = topLeftBounds.top - wrapperTop;
-      const right = bottomRightBounds.right - wrapperLeft;
-      const bottom = bottomRightBounds.bottom - wrapperTop;
+      // 计算扩展选中区域的像素坐标（相对于表格容器，考虑滚动偏移量）
+      const left = topLeftBounds.left - wrapperLeft + scrollLeft;
+      const top = topLeftBounds.top - wrapperTop + scrollTop;
+      const right = bottomRightBounds.right - wrapperLeft + scrollLeft;
+      const bottom = bottomRightBounds.bottom - wrapperTop + scrollTop;
 
       const bounds = {
         left,
@@ -1089,6 +1093,30 @@ export default {
 
       // 隐藏扩展选中区域
       this.hideOverlay("extended");
+
+      // 如果填充成功，更新选中区域为整个填充区域
+      if (fillResult && fillResult.success && fillCells.length > 0) {
+        // 计算填充区域的边界
+        const fillBounds = {
+          minRow: Math.min(...fillCells.map(cell => cell.rowIndex)),
+          maxRow: Math.max(...fillCells.map(cell => cell.rowIndex)),
+          minCol: Math.min(...fillCells.map(cell => cell.columnIndex)),
+          maxCol: Math.max(...fillCells.map(cell => cell.columnIndex))
+        };
+
+        // 清除当前选中区域并选中整个填充区域
+        this.clearCellSelection();
+        this.selectCellRange(
+          { rowIndex: fillBounds.minRow, columnIndex: fillBounds.minCol },
+          { rowIndex: fillBounds.maxRow, columnIndex: fillBounds.maxCol }
+        );
+
+        // 更新遮罩层显示
+        this.$nextTick(() => {
+          this.updateCellStyles();
+          this.updateSelectionOverlay();
+        });
+      }
 
       // 触发填充完成事件，包含所有填充区域的单元格信息
       this.$emit("fill-drag-end", {
