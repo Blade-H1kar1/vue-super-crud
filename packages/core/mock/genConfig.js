@@ -4,10 +4,13 @@ export function getComponentConfig(vnode) {
 
   const name = instance.$options.name;
   const props = instance.$props || {};
+  const attrs = instance.$attrs || {};
 
+  
   // 公共配置
   const commonConfig = {
     ...props,
+    ...attrs,
     disabled: !!instance.disabled,
   };
 

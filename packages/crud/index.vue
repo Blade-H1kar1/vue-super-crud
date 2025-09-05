@@ -165,6 +165,8 @@ import columnHandler from "./mixins/columnHandler";
 import cacheHandler from "./mixins/cacheHandler";
 import searchHandler from "./mixins/searchHandler";
 import mockData from "./mixins/mockData";
+import cellSelection from "./mixins/areaSelection/index.js";
+import cellSelectionDataProcessor from "./mixins/areaSelection/dataProcessor.js";
 // 组件
 import search from "./search.vue";
 import menuBar from "./menuBar.vue";
@@ -221,6 +223,8 @@ export default create({
     cacheHandler,
     searchHandler,
     mockData,
+    cellSelection,
+    cellSelectionDataProcessor,
   ],
   props: {
     // 防止scope中携带实例时，拷贝合并报错
@@ -372,7 +376,13 @@ export default create({
       return toTreeArray(this.columns);
     },
     trueRenderColumns() {
-      return this.flatColumns.filter((i) => !i.children);
+      const columns = [
+        ...this.defaultColumns,
+        ...this.flatColumns.filter((i) => !i.children),
+      ];
+
+      // 根据固定列配置进行排序
+      return this.sortColumnsByFixed(columns);
     },
     columnsMap() {
       const map = {};
@@ -593,6 +603,54 @@ export default create({
         this.setOptions.fixedWidth[column.property] = newWidth;
         this.saveLocalCache(false); // 不刷新表格，避免死循环
       }
+    },
+    cellMouseEnter(row, column, cell, event) {
+      // 触发校验提示
+      this.triggerValidateTooltip(row, column, cell, event);
+    },
+    cellMouseLeave(row, column, cell, event) {
+      // 移除校验提示
+      this.removeValidateTooltip(row, column, cell, event);
+    },
+
+    // 根据固定列配置对列进行排序
+    sortColumnsByFixed(columns) {
+      // 获取固定列配置的辅助函数
+      const getFixedType = (column) => {
+        // 1. 检查列配置中的fixed属性
+        if (column.fixed === true || column.fixed === "left") {
+          return "left";
+        }
+        if (column.fixed === "right") {
+          return "right";
+        }
+
+        // 2. 检查setOptions.fixed配置
+        if (column.prop && this.setOptions.fixed[column.prop]) {
+          return this.setOptions.fixed[column.prop];
+        }
+
+        return null;
+      };
+
+      // 分类列
+      const leftColumns = [];
+      const centerColumns = [];
+      const rightColumns = [];
+
+      columns.forEach((column) => {
+        const fixedType = getFixedType(column);
+        if (fixedType === "left") {
+          leftColumns.push(column);
+        } else if (fixedType === "right") {
+          rightColumns.push(column);
+        } else {
+          centerColumns.push(column);
+        }
+      });
+
+      // 按顺序合并：左固定列 + 普通列 + 右固定列
+      return [...leftColumns, ...centerColumns, ...rightColumns];
     },
   },
 });

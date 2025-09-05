@@ -101,7 +101,11 @@
   // 编辑框透明-单元格样式
   .edit-cell {
     .cell {
-      padding: 0 !important;
+      // padding: 0 !important;
+      .el-input__icon {
+        // 隐藏日期样式前缀图标
+        display: none;
+      }
     }
     input {
       border: 0px;
@@ -110,10 +114,11 @@
     .el-input,
     .el-select {
       .el-input__inner {
-        padding: 0 15px;
+        padding: 0 15px 0 0;
+        transform: translateX(7.5px);
       }
       .el-input__suffix {
-        right: -5px;
+        right: -13px;
       }
     }
   }
@@ -206,16 +211,6 @@
     > .el-cascader,
     > .el-input-number {
       width: 100% !important;
-    }
-
-    > .el-input-number {
-      .el-input {
-        width: inherit;
-
-        .el-input__inner {
-          text-align: left;
-        }
-      }
     }
   }
   .sc-crud-cell--center {
@@ -326,16 +321,6 @@
   > .el-cascader,
   > .el-input-number {
     width: 100% !important;
-  }
-
-  > .el-input-number {
-    .el-input {
-      width: inherit;
-
-      .el-input__inner {
-        text-align: left;
-      }
-    }
   }
   display: flex;
   align-items: center;

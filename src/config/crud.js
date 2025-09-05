@@ -490,6 +490,79 @@ export default {
         handles: [],
       }),
     },
+    // 区域选取配置
+    areaSelection: {
+      type: [Boolean, Object],
+      strict: true,
+      properties: {
+        show: Boolean,
+        hidden: Boolean,
+        operationType: {
+          // 数据操作类型，'all'为所有数据，'edit'为仅可编辑数据
+          type: String,
+          enum: ["all", "edit"],
+          default: "edit",
+        },
+        selectAll: {
+          // 全选
+          type: Boolean,
+          default: true,
+        },
+        copy: {
+          // 复制
+          type: Boolean,
+          default: true,
+        },
+        paste: {
+          // 粘贴
+          type: Boolean,
+          default: true,
+        },
+        cut: {
+          // 剪切
+          type: Boolean,
+          default: true,
+        },
+        fill: {
+          // 填充
+          type: Boolean,
+          default: true,
+        },
+        undo: {
+          // 撤销
+          type: Boolean,
+          default: true,
+        },
+        redo: {
+          // 重做
+          type: Boolean,
+          default: true,
+        },
+        selection: {
+          // 区域选择
+          type: Boolean,
+          default: true,
+        },
+        fillCustomLists: {
+          // 自定义填充列表
+          type: Array,
+          default: () => [],
+        },
+      },
+      // 默认值
+      default: () => ({
+        show: true,
+        hidden: false,
+        copy: true,
+        paste: true,
+        cut: true,
+        fill: true,
+        undo: true,
+        redo: true,
+        selection: true,
+        selectAll: true,
+      }),
+    },
     // 渲染列配置
     renderColumns: {
       type: Array,

@@ -56,7 +56,7 @@ export default {
         prop;
       this.handleValidateError(null, targetPath, "", true);
     },
-    cellMouseEnter(row, column, cell, event) {
+    triggerValidateTooltip(row, column, cell, event) {
       const el = cell.querySelector("[data-full-prop]");
       if (!el) return;
       this.showErrorTooltip(el);
@@ -73,7 +73,7 @@ export default {
       tooltip.setExpectedState(true);
       this.activateTooltip(tooltip);
     },
-    cellMouseLeave() {
+    removeValidateTooltip() {
       const tooltip = this.$refs.tooltip;
       if (tooltip) {
         tooltip.setExpectedState(false);

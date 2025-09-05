@@ -32,8 +32,10 @@ export default {
     }
   },
   beforeDestroy() {
-    window.removeEventListener("keydown", this.keyDown);
-    window.removeEventListener("keyup", this.keyUp);
+    if (this.selection) {
+      window.removeEventListener("keydown", this.keyDown);
+      window.removeEventListener("keyup", this.keyUp);
+    }
   },
   watch: {
     // 监听外部传入的选中值变化
