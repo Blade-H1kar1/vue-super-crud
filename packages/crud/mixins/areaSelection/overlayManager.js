@@ -1,4 +1,4 @@
-import { calculateSelectionBounds } from "./utils.js";
+import { calculateSelectionBounds, getCellElement } from "./utils.js";
 
 /**
  * 遮罩层管理器类
@@ -347,25 +347,7 @@ export class OverlayManager {
   // 获取指定容器中的单元格元素
   getCellElementInContainer(rowIndex, columnIndex, containerType) {
     if (!this.tableEl) return null;
-
-    const containerSelectors = {
-      body: ".el-table__body-wrapper",
-      left: ".el-table__fixed .el-table__fixed-body-wrapper",
-      right: ".el-table__fixed-right .el-table__fixed-body-wrapper",
-    };
-
-    const container = this.tableEl.querySelector(
-      containerSelectors[containerType]
-    );
-    if (!container) return null;
-
-    const tbody = container.querySelector("tbody");
-    if (!tbody) return null;
-
-    const tr = tbody.children[rowIndex];
-    if (!tr) return null;
-
-    return tr.children[columnIndex] || null;
+    return getCellElement(this.tableEl, rowIndex, columnIndex, containerType);
   }
 
   /**

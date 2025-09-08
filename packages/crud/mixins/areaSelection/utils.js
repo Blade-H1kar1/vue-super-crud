@@ -118,6 +118,77 @@ export function getColumnIndexByCell(cellElement, tableEl) {
   return -1;
 }
 
+// 单元格映射表缓存
+const cellMapCache = new WeakMap();
+const CELL_MAP_CACHE_DURATION = 200; // 200ms缓存时间
+
+function buildCellMap(tbody) {
+  const cellMap = new Map();
+  const rows = Array.from(tbody.children);
+
+  rows.forEach((tr, rowIndex) => {
+    let columnIndex = 0;
+    Array.from(tr.children).forEach((cell) => {
+      const colspan = parseInt(cell.getAttribute("colspan") || "1");
+      const rowspan = parseInt(cell.getAttribute("rowspan") || "1");
+
+      // 跳过已被占用的位置
+      while (cellMap.has(`${rowIndex}-${columnIndex}`)) {
+        columnIndex++;
+      }
+
+      // 标记所有被此单元格占用的位置
+      for (let r = rowIndex; r < rowIndex + rowspan; r++) {
+        for (let c = columnIndex; c < columnIndex + colspan; c++) {
+          cellMap.set(`${r}-${c}`, cell);
+        }
+      }
+
+      columnIndex += colspan;
+    });
+  });
+
+  return cellMap;
+}
+
+/**
+ * 获取缓存的单元格映射表
+ * @param {Element} tableEl - 表格DOM元素
+ * @param {string} fixedType - 固定列类型
+ * @returns {Map} 单元格映射表
+ */
+function getCachedCellMap(tableEl, fixedType) {
+  const now = Date.now();
+  const cacheKey = `${fixedType}`;
+  const cached = cellMapCache.get(tableEl);
+
+  if (
+    cached &&
+    cached[cacheKey] &&
+    now - cached[cacheKey].timestamp < CELL_MAP_CACHE_DURATION
+  ) {
+    return cached[cacheKey].cellMap;
+  }
+
+  const tbody = tableEl
+    .querySelector(containerSelectors[fixedType])
+    .querySelector("tbody");
+
+  if (!tbody) return null;
+
+  const cellMap = buildCellMap(tbody);
+
+  // 更新缓存
+  const tableCache = cached || {};
+  tableCache[cacheKey] = {
+    cellMap,
+    timestamp: now,
+  };
+  cellMapCache.set(tableEl, tableCache);
+
+  return cellMap;
+}
+
 // 获取单元格DOM元素
 export function getCellElement(
   tableEl,
@@ -127,38 +198,16 @@ export function getCellElement(
 ) {
   if (!tableEl) return null;
 
-  const tbody = tableEl
-    .querySelector(containerSelectors[fixedType])
-    .querySelector("tbody");
+  // 使用缓存的映射表
+  const cellMap = getCachedCellMap(tableEl, fixedType);
+  if (!cellMap) return null;
 
-  if (!tbody) return null;
-
-  const tr = tbody.children[rowIndex];
-  if (!tr) return null;
-
-  // 首先尝试通过class名称查找单元格（兼容合并单元格）
-  const thead = tableEl.querySelector(".el-table__header thead");
-  if (thead) {
-    const headerRow = thead.querySelector("tr");
-    if (headerRow && headerRow.children[columnIndex]) {
-      const headerCell = headerRow.children[columnIndex];
-      const columnClass = Array.from(headerCell.classList).find((cls) =>
-        cls.match(/^el-table_\d+_column_\d+$/)
-      );
-      if (columnClass) {
-        const cellWithClass = tr.querySelector(`.${columnClass}`);
-        if (cellWithClass) return cellWithClass;
-      }
-    }
-  }
-
-  // 回退到索引方法
-  return tr.children[columnIndex];
+  return cellMap.get(`${rowIndex}-${columnIndex}`) || null;
 }
 
 // getBoundingClientRect 缓存
 const rectCache = new WeakMap();
-const RECT_CACHE_DURATION = 100; // 100ms缓存时间
+const RECT_CACHE_DURATION = 200; // 100ms缓存时间
 
 /**
  * 获取缓存的 getBoundingClientRect 结果
@@ -431,6 +480,27 @@ function calculateTargetIndex(
   return Math.max(0, Math.min(targetIndex, allElements.length - 1));
 }
 
+export function getCellInfoFromEvent(event, tableEl) {
+  let target = event.target?.classList?.contains("el-table__cell")
+    ? event.target
+    : event?.target?.closest(".el-table__cell");
+
+  if (!target) return null;
+
+  // 获取行索引
+  const tr = target.parentElement;
+  const tbody = tr.parentElement;
+  const rowIndex = Array.from(tbody.children).indexOf(tr);
+
+  // 获取列索引
+  const columnIndex = getColumnIndexByCell(target, tableEl);
+  return {
+    rowIndex,
+    columnIndex,
+    element: target,
+  };
+}
+
 /**
  * 根据鼠标位置计算边界单元格
  * @param {MouseEvent} event - 鼠标事件
@@ -439,6 +509,10 @@ function calculateTargetIndex(
  */
 export function getBoundaryCellFromMousePosition(event, tableEl) {
   if (!tableEl) return null;
+
+  if (tableEl.querySelector(".el-table").contains(event.target)) {
+    return getCellInfoFromEvent(event, tableEl);
+  }
 
   // 检测鼠标所在的容器
   const containerInfo = detectContainerFromMousePosition(event, tableEl);
@@ -723,6 +797,13 @@ export function convertRowsToTableData(rows) {
 
   const textData = tableData.map((row) => row.join("\t")).join("\n");
   return { tableData, textData };
+}
+
+// 获取表格列数
+export function getColumnCount(tableEl) {
+  if (!tableEl) return 0;
+  return tableEl.querySelector(".el-table__header thead").querySelectorAll("th")
+    .length;
 }
 
 // 读取剪贴板数据

@@ -9,8 +9,9 @@ import {
   getCellsBounds,
   convertRowsToTableData,
   readClipboardData,
+  getColumnCount,
 } from "./utils.js";
-import { selectCells } from "./selectionEngine";
+
 import { analyzePattern, generateSmartFillData } from "./smartFillEngine";
 import { UndoRedoManager } from "./undoRedoManager.js";
 import { debounce } from "lodash-es";
@@ -218,10 +219,15 @@ export default {
           const tableEl = this.getTableElement();
           if (!tableEl) return;
 
-          // 全选所有单元格
-          this.selectCells({
-            type: "all",
-          });
+          // 全选
+          const rowCount = this.list?.length || 0;
+          const columnCount = getColumnCount(this.getTableElement());
+          if (rowCount > 0 && columnCount > 0) {
+            this.selectCells({
+              startCell: { rowIndex: 0, columnIndex: 0 },
+              endCell: { rowIndex: rowCount - 1, columnIndex: columnCount - 1 },
+            });
+          }
         });
       }
     },
@@ -310,9 +316,15 @@ export default {
           return;
         }
         event.preventDefault();
-        this.selectCells({
-          type: "all",
-        });
+        // 全选
+        const rowCount = this.list?.length || 0;
+        const columnCount = getColumnCount(this.getTableElement());
+        if (rowCount > 0 && columnCount > 0) {
+          this.selectCells({
+            startCell: { rowIndex: 0, columnIndex: 0 },
+            endCell: { rowIndex: rowCount - 1, columnIndex: columnCount - 1 },
+          });
+        }
         return;
       }
 
@@ -497,10 +509,16 @@ export default {
       this.dragState.headerStartColumnIndex = cellInfo.columnIndex;
 
       // 选择整列
-      this.selectCells({
-        type: "column",
-        columnIndex: cellInfo.columnIndex,
-      });
+      const rowCount = this.list?.length || 0;
+      if (rowCount > 0) {
+        this.selectCells({
+          startCell: { rowIndex: 0, columnIndex: cellInfo.columnIndex },
+          endCell: {
+            rowIndex: rowCount - 1,
+            columnIndex: cellInfo.columnIndex,
+          },
+        });
+      }
     },
 
     // 处理单元格点击逻辑
@@ -515,15 +533,36 @@ export default {
 
       // 检查列配置是否存在type属性，如果存在则选择整行
       if (columnConfig && columnConfig.type) {
-        this.selectCells({
-          type: "row",
-          rowIndex: cellInfo.rowIndex,
-        });
+        // 获取rowspan属性，默认为1
+        let rowspan = 1;
+        if (cellInfo.element) {
+          const rowspanAttr = cellInfo.element.getAttribute("rowspan");
+          if (rowspanAttr) {
+            rowspan = parseInt(rowspanAttr, 10) || 1;
+          }
+        }
+
+        const columnCount = getColumnCount(this.getTableElement());
+
+        if (columnCount > 0) {
+          this.selectCells({
+            startCell: { rowIndex: cellInfo.rowIndex, columnIndex: 0 },
+            endCell: {
+              rowIndex: cellInfo.rowIndex + rowspan - 1, // 根据rowspan选择多行
+              columnIndex: columnCount - 1,
+            },
+          });
+        }
       } else {
         this.selectCells({
-          type: "cell",
-          rowIndex: cellInfo.rowIndex,
-          columnIndex: cellInfo.columnIndex,
+          startCell: {
+            rowIndex: cellInfo.rowIndex,
+            columnIndex: cellInfo.columnIndex,
+          },
+          endCell: {
+            rowIndex: cellInfo.rowIndex,
+            columnIndex: cellInfo.columnIndex,
+          },
         });
       }
 
@@ -568,15 +607,14 @@ export default {
       const minCol = Math.min(headerStartColumnIndex, columnIndex);
       const maxCol = Math.max(headerStartColumnIndex, columnIndex);
 
-      const columnIndices = [];
-      for (let col = minCol; col <= maxCol; col++) {
-        columnIndices.push(col);
+      // 整列选择
+      const rowCount = this.list?.length || 0;
+      if (rowCount > 0) {
+        this.selectCells({
+          startCell: { rowIndex: 0, columnIndex: minCol },
+          endCell: { rowIndex: rowCount - 1, columnIndex: maxCol },
+        });
       }
-
-      this.selectCells({
-        type: "column",
-        columnIndices,
-      });
     },
 
     // 处理单元格拖拽移动
@@ -607,20 +645,46 @@ export default {
               cellInfo.rowIndex
             );
             const endRowIndex = Math.max(startCell.rowIndex, cellInfo.rowIndex);
-            const rowIndices = [];
 
-            for (let row = startRowIndex; row <= endRowIndex; row++) {
-              rowIndices.push(row);
+            // 获取起始单元格的rowspan以确定实际的结束行
+            let startRowspan = 1;
+            if (this.dragState.startCell.element) {
+              const rowspanAttr =
+                this.dragState.startCell.element.getAttribute("rowspan");
+              if (rowspanAttr) {
+                startRowspan = parseInt(rowspanAttr, 10) || 1;
+              }
             }
 
-            this.selectCells({
-              type: "row",
-              rowIndices,
-            });
+            // 获取结束单元格的rowspan
+            let endRowspan = 1;
+            if (cellInfo.element) {
+              const rowspanAttr = cellInfo.element.getAttribute("rowspan");
+              if (rowspanAttr) {
+                endRowspan = parseInt(rowspanAttr, 10) || 1;
+              }
+            }
+
+            // 计算实际的结束行索引，考虑rowspan
+            const actualEndRowIndex = Math.max(
+              startRowIndex + startRowspan - 1,
+              endRowIndex + endRowspan - 1
+            );
+
+            // 整行选择
+            const columnCount = getColumnCount(this.getTableElement());
+            if (columnCount > 0) {
+              this.selectCells({
+                startCell: { rowIndex: startRowIndex, columnIndex: 0 },
+                endCell: {
+                  rowIndex: actualEndRowIndex,
+                  columnIndex: columnCount - 1,
+                },
+              });
+            }
           } else {
             // 普通列按范围选择
             this.selectCells({
-              type: "range",
               startCell,
               endCell: cellInfo,
             });
@@ -665,32 +729,51 @@ export default {
       }
     },
 
-    // 通用选择函数
-    selectCells(options = {}) {
+    // 简化的选择函数
+    selectCells({ startCell, endCell }) {
       const tableEl = this.getTableElement();
       if (!tableEl) return;
 
       this.clearCellSelection();
 
-      // 计算行数和列数
-      const rowCount = this.list?.length || 0;
-      const columnCount = this.trueRenderColumns.length;
+      // 选择引擎核心逻辑
+      if (startCell && endCell) {
+        // 创建新的选中单元格数组
+        let newSelectedCells = [...this.selectedCells];
 
-      // 调用选择引擎获取新的选中单元格
-      const newSelectedCells = selectCells(
-        options,
-        tableEl,
-        this.selectedCells,
-        rowCount,
-        columnCount
-      );
+        const addCellToSelection = (row, col) => {
+          const cellInfo = createCellInfo(row, col);
+          // 检查是否已存在相同的单元格
+          const exists = newSelectedCells.some(
+            (cell) => cell.rowIndex === row && cell.columnIndex === col
+          );
+          if (!exists) {
+            newSelectedCells.push(cellInfo);
+          }
+        };
 
-      // 更新响应式数据
-      this.selectedCells.splice(
-        0,
-        this.selectedCells.length,
-        ...newSelectedCells
-      );
+        // 统一的范围选择逻辑
+        const startRow = Math.min(startCell.rowIndex, endCell.rowIndex);
+        const endRow = Math.max(startCell.rowIndex, endCell.rowIndex);
+        const startCol = Math.min(startCell.columnIndex, endCell.columnIndex);
+        const endCol = Math.max(startCell.columnIndex, endCell.columnIndex);
+
+        for (let row = startRow; row <= endRow; row++) {
+          for (let col = startCol; col <= endCol; col++) {
+            const cellElement = getCellElement(tableEl, row, col);
+            if (cellElement) {
+              addCellToSelection(row, col);
+            }
+          }
+        }
+
+        // 更新响应式数据
+        this.selectedCells.splice(
+          0,
+          this.selectedCells.length,
+          ...newSelectedCells
+        );
+      }
 
       // 更新覆盖层
       this.updateOverlays();
@@ -895,7 +978,6 @@ export default {
           if (result.pasteBounds) {
             const { minRow, maxRow, minCol, maxCol } = result.pasteBounds;
             this.selectCells({
-              type: "range",
               startCell: { rowIndex: minRow, columnIndex: minCol },
               endCell: { rowIndex: maxRow, columnIndex: maxCol },
             });
@@ -1174,7 +1256,6 @@ export default {
         const fillBounds = getCellsBounds(fillCells);
 
         this.selectCells({
-          type: "range",
           startCell: {
             rowIndex: fillBounds.minRow,
             columnIndex: fillBounds.minCol,
@@ -1384,7 +1465,6 @@ export default {
           getCellsBounds(affectedCells);
 
         this.selectCells({
-          type: "range",
           startCell: { rowIndex: minRow, columnIndex: minCol },
           endCell: { rowIndex: maxRow, columnIndex: maxCol },
         });
