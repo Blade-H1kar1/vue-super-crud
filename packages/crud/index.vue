@@ -68,6 +68,7 @@
           @cell-click="cellClick"
           @cell-dblclick="cellDblclick"
           @header-dragend="headerDragend"
+          @expand-change="expandChange"
           :row-key="rowKey_"
           :row-style="defineRowIndex"
           :cell-class-name="cellClassName_"
@@ -651,6 +652,9 @@ export default create({
 
       // 按顺序合并：左固定列 + 普通列 + 右固定列
       return [...leftColumns, ...centerColumns, ...rightColumns];
+    },
+    expandChange(row, expandedRows) {
+      this.updateOverlays();
     },
   },
 });

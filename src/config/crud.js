@@ -644,6 +644,7 @@ export default {
         "toolbar",
         "action",
         "contextMenu",
+        "areaSelection",
       ];
       if (showKeys.includes(key)) {
         // 传入布尔值时，直接设置show

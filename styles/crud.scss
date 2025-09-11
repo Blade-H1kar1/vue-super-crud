@@ -76,6 +76,40 @@
     }
   }
   .el-table {
+    // 固定行高优化 - 防止单元格内容变化时行高改变
+    .el-table__row {
+      td {
+        padding: 0 !important;
+        .cell {
+          min-height: 30px;
+          line-height: 30px;
+          vertical-align: middle;
+          // 确保表单组件不会撑开行高
+          .el-input,
+          .el-select,
+          .el-date-editor,
+          .el-cascader,
+          .el-input-number {
+            height: 29px;
+
+            .el-input__inner {
+              height: 29px;
+              line-height: 29px;
+            }
+          }
+
+          // 多行文本处理
+          .el-textarea {
+            .el-textarea__inner {
+              height: 29px;
+              resize: none;
+              overflow: hidden;
+            }
+          }
+        }
+      }
+    }
+
     // 表头必填样式
     .sc-crud-column--header.is-required::before {
       left: -8px;
@@ -120,6 +154,11 @@
       .el-input__suffix {
         right: -13px;
       }
+    }
+    .el-input-number__decrease,
+    .el-input-number__increase {
+      width: 16px;
+      border: 0px;
     }
   }
   .edit-cell:before {

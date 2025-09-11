@@ -68,7 +68,6 @@ export default {
                 : prop;
             setTimeout(() => {
               this.focusInput(rowKey, prop);
-              this.updateOverlays();
             }, 100);
           }
           this.$emit("editStatusChange", {

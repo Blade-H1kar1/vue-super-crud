@@ -10,25 +10,32 @@ export default {
       componentConfigs: {},
     };
   },
+  computed: {
+    tableData() {
+      return this.$refs?.tableRef?.data || [];
+    },
+    flatTableData() {
+      return toTreeArray(this.tableData);
+    },
+    rowCount() {
+      return this.flatTableData?.length || 0;
+    },
+  },
   methods: {
     // 根据columnIndex获取对应的列配置
     getColumnByIndex(columnIndex) {
-      const allColumns = this.trueRenderColumns.filter(
-        (i) => !(i.hidden || this.setOptions.hidden.includes(i.prop))
-      );
-      return allColumns[columnIndex];
+      const column = this.getColumnByIndexFromTable(columnIndex);
+      return column?.col;
     },
-
+    getColumnByIndexFromTable(columnIndex) {
+      const tableRef = this.$refs.tableRef;
+      const { store } = tableRef;
+      const columns = store.states.columns || store.states._columns;
+      return columns[columnIndex] || null;
+    },
     // 根据索引获取对应的数据行
     getRowDataByIndex(rowIndex) {
-      if (this.isTree) {
-        const flatData = toTreeArray(this.list);
-        if (rowIndex < 0 || rowIndex >= flatData.length) {
-          return null;
-        }
-        return flatData[rowIndex];
-      }
-      return this.list[rowIndex];
+      return this.flatTableData[rowIndex];
     },
 
     /**
@@ -547,98 +554,6 @@ export default {
         errors,
         pasteBounds,
       };
-    },
-
-    /**
-     * 从剪贴板读取数据
-     * @returns {Promise<string>} 剪贴板文本内容
-     */
-    async readFromClipboard() {
-      try {
-        if (navigator.clipboard && window.isSecureContext) {
-          return await navigator.clipboard.readText();
-        } else {
-          // 降级方案：提示用户手动粘贴
-          throw new Error(
-            "当前环境不支持自动读取剪贴板，请使用 Ctrl+V 手动粘贴"
-          );
-        }
-      } catch (error) {
-        console.warn("读取剪贴板失败:", error);
-        throw error;
-      }
-    },
-
-    /**
-     * 完整的粘贴处理流程
-     * @param {string} clipboardText - 剪贴板文本（可选，如果不提供则自动读取）
-     * @param {Array} selectedCells - 当前选中的单元格
-     * @returns {Promise<Object>} 粘贴结果
-     */
-    async processPaste(clipboardText = null, selectedCells = null) {
-      try {
-        // 如果没有提供剪贴板文本，则尝试读取
-        if (!clipboardText) {
-          clipboardText = await this.readFromClipboard();
-        }
-
-        // 使用当前选中的单元格或传入的选中单元格
-        const targetCells = selectedCells || this.selectedCells || [];
-        if (targetCells.length === 0) {
-          return {
-            success: false,
-            message: "请先选择要粘贴的目标区域",
-          };
-        }
-
-        // 获取选中区域边界
-        const selectionBounds = this.getSelectedCellsBounds(targetCells);
-        if (!selectionBounds || selectionBounds.success === false) {
-          return {
-            success: false,
-            message: selectionBounds?.message || "无法确定选中区域边界",
-          };
-        }
-        // 解析剪贴板数据
-        const clipboardData = this.parseClipboardData(
-          clipboardText,
-          selectionBounds.minRow,
-          selectionBounds.minCol
-        );
-
-        if (clipboardData.length === 0) {
-          return {
-            success: false,
-            message: "剪贴板数据为空或格式无效",
-          };
-        }
-
-        // 获取剪贴板数据维度
-        const clipboardDimensions =
-          this.getClipboardDataDimensions(clipboardText);
-
-        // 根据Excel规则计算填充数据
-        const pasteData = this.calculatePasteDataWithFill(
-          clipboardData,
-          clipboardDimensions,
-          selectionBounds
-        );
-        // 应用粘贴数据
-        const result = this.applyPasteData(pasteData);
-
-        return {
-          ...result,
-          clipboardDimensions,
-          selectionBounds,
-          pasteDataCount: pasteData.length,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          message: `粘贴失败: ${error.message}`,
-          error,
-        };
-      }
     },
   },
 };

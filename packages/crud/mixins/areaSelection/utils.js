@@ -86,36 +86,25 @@ export function getCellText(element) {
   return element.textContent?.trim() || "";
 }
 
-// 通过单元格获取列索引
-export function getColumnIndexByCell(cellElement, tableEl) {
-  if (!cellElement || !tableEl) return -1;
+// 通过单元格获取索引
+export function getCellIndexFromElement(
+  cellElement,
+  tableEl,
+  fixedType = "body"
+) {
+  if (!cellElement || !tableEl) return null;
+  const cellMap = getCachedCellMap(tableEl, fixedType);
+  if (!cellMap) return null;
 
-  // 从单元格class中提取列标识符
-  const classList = Array.from(cellElement.classList);
-  const columnClass = classList.find((cls) =>
-    cls.match(/^el-table_\d+_column_\d+$/)
-  );
-
-  if (!columnClass) {
-    // 回退到DOM位置索引
-    const tr = cellElement.parentElement;
-    return Array.from(tr.children).indexOf(cellElement);
-  }
-
-  // 在表头中查找对应的列索引
-  const thead = tableEl.querySelector(".el-table__header thead");
-  if (thead) {
-    const headerRow = thead.querySelector("tr");
-    if (headerRow) {
-      const headerCells = Array.from(headerRow.children);
-      const columnIndex = headerCells.findIndex((cell) =>
-        cell.classList.contains(columnClass)
-      );
-      if (columnIndex !== -1) return columnIndex;
+  // 遍历映射表找到匹配的单元格元素
+  for (const [key, element] of cellMap.entries()) {
+    if (element === cellElement) {
+      const [rowIndex, columnIndex] = key.split("-").map(Number);
+      return { rowIndex, columnIndex };
     }
   }
 
-  return -1;
+  return null;
 }
 
 // 单元格映射表缓存
@@ -253,14 +242,8 @@ export function calculateSelectionBounds(
   const wrapperRect = getCachedBoundingClientRect(tableBodyWrapper);
 
   // 根据容器类型决定是否需要滚动偏移量
-  let scrollLeft = 0;
-  let scrollTop = 0;
-
-  if (fixedType === "body") {
-    // 只有主表格容器需要考虑滚动偏移
-    scrollLeft = tableBodyWrapper.scrollLeft;
-    scrollTop = tableBodyWrapper.scrollTop;
-  }
+  let scrollLeft = tableBodyWrapper.scrollLeft;
+  let scrollTop = tableBodyWrapper.scrollTop;
 
   // 找出边界单元格的行列索引
   let minRowIndex = Infinity;
@@ -290,18 +273,47 @@ export function calculateSelectionBounds(
     maxColumnIndex,
     fixedType
   );
-  const bottomLeftCell = getCellElement(
+  let bottomLeftCell = getCellElement(
     tableEl,
     maxRowIndex,
     minColumnIndex,
     fixedType
   );
-  const bottomRightCell = getCellElement(
+  let bottomRightCell = getCellElement(
     tableEl,
     maxRowIndex,
     maxColumnIndex,
     fixedType
   );
+
+  // 如果底部单元格不可见，一直向上查找直到找到可见的单元格
+  let searchRowIndex = maxRowIndex;
+  while (
+    (!bottomLeftCell || bottomLeftCell.offsetParent === null) &&
+    searchRowIndex > minRowIndex
+  ) {
+    searchRowIndex--;
+    bottomLeftCell = getCellElement(
+      tableEl,
+      searchRowIndex,
+      minColumnIndex,
+      fixedType
+    );
+  }
+
+  searchRowIndex = maxRowIndex;
+  while (
+    (!bottomRightCell || bottomRightCell.offsetParent === null) &&
+    searchRowIndex > minRowIndex
+  ) {
+    searchRowIndex--;
+    bottomRightCell = getCellElement(
+      tableEl,
+      searchRowIndex,
+      maxColumnIndex,
+      fixedType
+    );
+  }
 
   if (!topLeftCell || !bottomRightCell) return null;
 
@@ -480,25 +492,32 @@ function calculateTargetIndex(
   return Math.max(0, Math.min(targetIndex, allElements.length - 1));
 }
 
-export function getCellInfoFromEvent(event, tableEl) {
+export function getCellInfoFromEvent(event, tableEl, containerType) {
   let target = event.target?.classList?.contains("el-table__cell")
     ? event.target
     : event?.target?.closest(".el-table__cell");
 
   if (!target) return null;
-
-  // 获取行索引
-  const tr = target.parentElement;
-  const tbody = tr.parentElement;
-  const rowIndex = Array.from(tbody.children).indexOf(tr);
-
-  // 获取列索引
-  const columnIndex = getColumnIndexByCell(target, tableEl);
+  const { rowIndex, columnIndex } = getCellIndexFromElement(
+    target,
+    tableEl,
+    containerType
+  );
   return {
     rowIndex,
     columnIndex,
     element: target,
   };
+}
+
+// 检查鼠标是否在表格内部
+export function isInnerCell(event, tableEl) {
+  if (!tableEl) return false;
+  const isInner = tableEl.querySelector(".el-table").contains(event.target);
+  const isEmpty =
+    event.target.classList.contains("el-table__body-wrapper") ||
+    event.target.classList.contains("el-table__fixed-body-wrapper");
+  return isInner && !isEmpty;
 }
 
 /**
@@ -510,13 +529,16 @@ export function getCellInfoFromEvent(event, tableEl) {
 export function getBoundaryCellFromMousePosition(event, tableEl) {
   if (!tableEl) return null;
 
-  if (tableEl.querySelector(".el-table").contains(event.target)) {
-    return getCellInfoFromEvent(event, tableEl);
-  }
-
   // 检测鼠标所在的容器
   const containerInfo = detectContainerFromMousePosition(event, tableEl);
   if (!containerInfo.container) return null;
+
+  if (
+    isInnerCell(event, tableEl) &&
+    !tableEl.querySelector(".el-table__header-wrapper").contains(event.target)
+  ) {
+    return getCellInfoFromEvent(event, tableEl, containerInfo.type);
+  }
 
   // 获取容器内的表格体
   const tbody = containerInfo.container.querySelector("tbody");
@@ -609,7 +631,7 @@ function detectContainerFromMousePosition(event, tableEl) {
       const fixedBodyWrapper = fixedLeft.querySelector(
         ".el-table__fixed-body-wrapper"
       );
-      return { container: fixedBodyWrapper, type: "fixed-left" };
+      return { container: fixedBodyWrapper, type: "left" };
     }
   }
 
@@ -620,7 +642,7 @@ function detectContainerFromMousePosition(event, tableEl) {
       const fixedBodyWrapper = fixedRight.querySelector(
         ".el-table__fixed-body-wrapper"
       );
-      return { container: fixedBodyWrapper, type: "fixed-right" };
+      return { container: fixedBodyWrapper, type: "right" };
     }
   }
 
@@ -655,19 +677,6 @@ function calculateRelativePosition(event, containerInfo) {
   }
 
   return { relativeMouseX, relativeMouseY };
-}
-
-/**
- * 检查元素是否为表头单元格
- * @param {HTMLElement} element - DOM元素
- * @returns {boolean} 是否为表头单元格
- */
-export function isHeaderCell(element) {
-  if (!element) return false;
-  const cell = element.closest(".el-table__cell");
-  if (!cell) return false;
-  const row = cell.closest("tr");
-  return row && row.closest(".el-table__header");
 }
 
 // 获取表头文本

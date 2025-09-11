@@ -78,6 +78,7 @@ module.exports = {
             "crud/summary",
             "crud/optimize",
             "crud/expandFunction",
+            "crud/areaSelection",
           ],
         },
         {
