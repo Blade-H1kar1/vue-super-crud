@@ -816,7 +816,7 @@ export function getColumnCount(tableEl) {
 }
 
 // 读取剪贴板数据
-export async function readClipboardData() {
+export async function readClipboardData(applicationType) {
   try {
     const clipboardItems = await navigator.clipboard.read();
 

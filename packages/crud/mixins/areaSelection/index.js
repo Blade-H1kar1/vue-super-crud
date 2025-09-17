@@ -931,7 +931,9 @@ export default {
     async pasteCellsValues() {
       try {
         if (!this.selectedCells.length) return;
-        const { textData, isValueMode } = await readClipboardData();
+        const { textData, isValueMode } = await readClipboardData(
+          applicationType
+        );
 
         if (!textData) {
           console.warn("无法获取剪贴板数据");
