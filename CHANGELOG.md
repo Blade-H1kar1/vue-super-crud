@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.10.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.9.3...v1.10.0) (2025-09-17)
+
+
+### ✨ 新功能
+
+* **collapse-splitter:** 新增 collapseSplitter 组件 ([6c98f20](https://github.com/Blade-H1kar1/vue-super-crud/commit/6c98f20b17d099db38b4a69464bad458529dda6b))
+* **crud:** 实现表格区域选择功能 ([8bf9804](https://github.com/Blade-H1kar1/vue-super-crud/commit/8bf9804cab80cf81c6a31db61451340a9524a8ed))
+* **crud:** 新增api快捷使用、功能配置的组件级存储 ([13127ea](https://github.com/Blade-H1kar1/vue-super-crud/commit/13127eaee0e41fe762872806ca9e181b1f3324c0))
+* **dialog:** 优化扩展功能并完善文档 ([5ce96f4](https://github.com/Blade-H1kar1/vue-super-crud/commit/5ce96f430203c4c1181b9062aa568c1ff518167e))
+* **table-select:** 新增 tableSelect 组件 ([a23c490](https://github.com/Blade-H1kar1/vue-super-crud/commit/a23c4907014298d5df2a776401410d31dab51208))
+
+
+### 🐛 问题修复
+
+* **build:**  减少组件打包体积 ([05b2e9a](https://github.com/Blade-H1kar1/vue-super-crud/commit/05b2e9af5633c90d620187e90e5bf00f025473d5))
+* **crud:** 表格区域选择兼容合并单元格 ([e063a5e](https://github.com/Blade-H1kar1/vue-super-crud/commit/e063a5eaab4f3cbebcc6499cffd767b5b507d766))
+* **crud:** 新增表格区域选择文档并修复bug ([de1a28a](https://github.com/Blade-H1kar1/vue-super-crud/commit/de1a28adf217a1799cadd63281d97c00eefb58a0))
+* **crud:** 优化表格选中数据代码及完善文档说明 ([ad2e42c](https://github.com/Blade-H1kar1/vue-super-crud/commit/ad2e42c23edbb8168c77a91d418392863ddf937f))
+* **dialog,crud,button:** 修复与优化 ([8dd66b0](https://github.com/Blade-H1kar1/vue-super-crud/commit/8dd66b0dd50a0628f619fec23a21a075f9e7108f))
+* **grid:** 优化grid组件代码及完善文档说明 ([a120ef0](https://github.com/Blade-H1kar1/vue-super-crud/commit/a120ef025a37997d6e51d7423b1bdf66b442cb6e))
+
 ### [1.9.3](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.9.2...v1.9.3) (2025-07-25)
 
 
