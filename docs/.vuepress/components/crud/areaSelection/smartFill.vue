@@ -113,11 +113,6 @@ export default {
       return {
         index: true,
         areaSelection: {
-          enabled: true,
-          fill: true,
-          selection: true,
-          copy: true,
-          paste: true,
           fillCustomLists: [
             [
               "星期一",
@@ -147,7 +142,6 @@ export default {
         },
         editConfig: {
           mode: "cell",
-          autofocus: true,
         },
         height: "500px",
         renderColumns: [

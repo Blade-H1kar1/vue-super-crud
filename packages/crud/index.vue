@@ -13,6 +13,7 @@
       height: wrapperHeight,
     }"
     ref="wrapper"
+    tabindex="0"
     @click="handleWrapperClick"
   >
     <position slotName="title" :slots="$scopedSlots"
@@ -238,7 +239,6 @@ export default create({
     },
     total: {
       type: Number,
-      default: 0,
     },
     search: {
       type: Object,
@@ -581,22 +581,30 @@ export default create({
       this.selectRowClick(row, column, event);
       if (!column) return;
       if (column.col?.type === "action") return;
-      this.handleRowClick({ row, $index: row.$index }, column.col.prop);
+      this.handleRowClick(
+        { row, $index: row.$index },
+        column.col.prop,
+        "click"
+      );
     },
     rowDblclick(row, column, event) {
       if (!column) return;
       if (column.col?.type === "action") return;
-      this.handleRowClick({ row, $index: row.$index }, column.col.prop);
+      this.handleRowClick(
+        { row, $index: row.$index },
+        column.col.prop,
+        "dblclick"
+      );
     },
     cellClick(row, column, cell, event) {
       if (!column) return;
       if (column.col?.type === "action") return;
-      this.handleCellClick({ row, $index: row.$index }, column.col);
+      this.handleCellClick({ row, $index: row.$index }, column.col, "click");
     },
     cellDblclick(row, column, cell, event) {
       if (!column) return;
       if (column.col?.type === "action") return;
-      this.handleCellClick({ row, $index: row.$index }, column.col);
+      this.handleCellClick({ row, $index: row.$index }, column.col, "dblclick");
     },
     // 保存拖动后的宽度
     headerDragend(newWidth, oldWidth, column, event) {

@@ -212,16 +212,31 @@ export function filterButtons(
 }
 
 // 获取组件实例
-export function findComponentInstance(instance, componentName, maxDepth = 3) {
+export function findComponentInstance(
+  instance,
+  componentName,
+  maxDepth = 3,
+  direction = "both"
+) {
   if (!instance) return;
   let currentDepth = 0;
+
+  // 将单个组件名转换为数组形式，统一处理
+  const componentNames = Array.isArray(componentName)
+    ? componentName
+    : [componentName];
+
+  // 检查组件名称是否匹配
+  const isNameMatch = (name) => {
+    return componentNames.includes(name);
+  };
 
   // 向下查找
   const findDown = (instance, depth = 0) => {
     if (!instance || depth >= maxDepth) return;
 
     const name = instance.$options.name;
-    if (name === componentName) return instance;
+    if (name && isNameMatch(name)) return instance;
 
     const children = instance.$children || [];
     for (const child of children) {
@@ -235,7 +250,7 @@ export function findComponentInstance(instance, componentName, maxDepth = 3) {
     if (!instance || depth >= maxDepth) return;
 
     const name = instance.$options.name;
-    if (name === componentName) return instance;
+    if (name && isNameMatch(name)) return instance;
 
     const parent = instance.$parent;
     if (parent) {
@@ -244,15 +259,24 @@ export function findComponentInstance(instance, componentName, maxDepth = 3) {
   };
 
   // 先检查当前实例
-  if (instance.$options.name === componentName) {
+  const currentName = instance.$options.name;
+  if (currentName && isNameMatch(currentName)) {
     return instance;
   }
 
-  // 向下查找
-  const downResult = findDown(instance, currentDepth);
-  if (downResult) return downResult;
+  // 根据direction参数决定搜索方向
+  if (direction === "both" || direction === "down") {
+    // 向下查找
+    const downResult = findDown(instance, currentDepth);
+    if (downResult) return downResult;
+  }
 
-  // 向上查找
-  const upResult = findUp(instance, currentDepth);
-  if (upResult) return upResult;
+  if (direction === "both" || direction === "up") {
+    // 向上查找
+    const upResult = findUp(instance, currentDepth);
+    if (upResult) return upResult;
+  }
+
+  // 未找到匹配的组件实例
+  return undefined;
 }

@@ -67,8 +67,9 @@ export default create({
       if (fixed) return fixed;
     },
     showSearchHeader() {
-      if (this.col.search?.hidden) return false;
+      if (this.col.searchHeader === false) return;
       if (this.col.searchHeader?.hidden) return false;
+      if (this.col.search?.hidden) return false;
       const show = checkVisibility(this.ctx.crudOptions.searchHeader);
       return (this.col.search && show) || (this.col.searchHeader && show);
     },

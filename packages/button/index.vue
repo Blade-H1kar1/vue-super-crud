@@ -87,6 +87,16 @@ export default create({
       return attrs;
     },
     getIsShow(attrs) {
+      // 检查权限
+      const permission = attrs.hasPermi;
+
+      if (
+        permission &&
+        this.$scOpt.checkPermission &&
+        !this.$scOpt.checkPermission(permission)
+      ) {
+        return false;
+      }
       if (attrs.hidden !== undefined) {
         return typeof attrs.hidden === "function"
           ? !attrs.hidden(this.scope)
@@ -101,15 +111,6 @@ export default create({
         return typeof attrs.show === "function"
           ? attrs.show(this.scope)
           : attrs.show;
-      }
-      // 检查权限
-      const permission = attrs.hasPermi;
-      if (
-        permission &&
-        this.$scOpt.checkPermission &&
-        !this.$scOpt.checkPermission(permission)
-      ) {
-        return false;
       }
       return true;
     },

@@ -4,7 +4,12 @@ import { omit, pick, mergeWith, isFunction } from "lodash-es";
 import { batchMerge } from "utils/mergeTemp";
 import Render from "core/components/render";
 import scButton from "pak/button";
-import { checkVisibility, setPx, resolveRender } from "utils";
+import {
+  checkVisibility,
+  setPx,
+  resolveRender,
+  findComponentInstance,
+} from "utils";
 
 export const vnodes = {};
 export default (options = {}) => {
@@ -93,6 +98,15 @@ export default (options = {}) => {
           this.visible = false;
           this.confirmCb(this, p);
         };
+        const validateComponent = findComponentInstance(
+          this,
+          ["sc-crud", "sc-form", "ElForm"],
+          10,
+          "down"
+        );
+        if (validateComponent && validateComponent.validate) {
+          await validateComponent.validate();
+        }
         if (typeof this.dialogOptions.confirm === "function") {
           this.dialogOptions.confirm(cb, this, params);
         } else {

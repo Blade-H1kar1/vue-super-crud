@@ -248,9 +248,6 @@ export default {
         // 启用行编辑
         editConfig: {
           mode: "row",
-          trigger: "manual",
-          exclusive: true,
-          autofocus: true,
         },
         // 工具栏配置
         toolbar: {

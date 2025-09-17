@@ -124,6 +124,7 @@ export default {
         delete: deleteBtn || editConfig.delete,
         isRowEdit: editConfig.isRowEdit || isRowEdit,
       };
+      // 兼容旧版本配置
       if (this.crudOptions.freeEdit) {
         config.mode = "free";
       }
@@ -143,11 +144,19 @@ export default {
         config.rowEdit = config.rowEdit || {};
         config.batch = config.batch || {};
       }
+      // 设置默认编辑配置
       if (
         config.mode === "cell" &&
         (config.trigger === "manual" || !config.trigger)
       ) {
-        config.trigger = "click";
+        config.trigger = "dblclick";
+      }
+      if (
+        config.mode === "row" &&
+        config.trigger === "manual" &&
+        config.rowEdit === undefined
+      ) {
+        config.rowEdit = {};
       }
       return config;
     },
@@ -260,8 +269,8 @@ export default {
     },
 
     // 行点击事件
-    handleRowClick(scope, prop) {
-      if (this.validateEditMode("row") && this.editConfig.trigger === "click") {
+    handleRowClick(scope, prop, trigger) {
+      if (this.validateEditMode("row") && this.editConfig.trigger === trigger) {
         if (this.editState.isRowEditing(scope.row)) return;
         const editRow = this.editState.getEditingRows()[0]?.row;
 
@@ -547,10 +556,10 @@ export default {
     },
 
     // 单元格点击事件
-    handleCellClick(scope, col) {
+    handleCellClick(scope, col, trigger) {
       if (
         this.validateEditMode("cell") &&
-        this.editConfig.trigger === "click"
+        this.editConfig.trigger === trigger
       ) {
         if (this.editState.isCellEditing(scope.row, col.prop)) return;
         const editCell = this.editState.getEditingCell();

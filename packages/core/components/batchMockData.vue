@@ -3,6 +3,7 @@
     :title="dialogTitle"
     :visible.sync="visible"
     width="800px"
+    append-to-body
     :close-on-click-modal="false"
     :before-close="handleClose"
     :class="[b(), 'sc-dialog']"
@@ -15,7 +16,6 @@
             <el-input-number
               v-model="form.count"
               :min="1"
-              :max="100"
               controls-position="right"
               :disabled="form.mode === 'fill'"
             ></el-input-number>
@@ -50,7 +50,7 @@
       <!-- 在字段配置标题部分添加添加字段按钮和重置按钮 -->
       <el-divider content-position="center">
         字段配置
-        <div style="display: inline-block; margin-left: 10px;">
+        <div style="display: inline-block; margin-left: 10px">
           <el-button
             type="text"
             icon="el-icon-plus"

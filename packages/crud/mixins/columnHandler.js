@@ -54,7 +54,7 @@ export default {
       }
     },
     extendsOption(item, current, extendsObj) {
-      if (current === false) return;
+      if (current === false) return false;
       // current 可能为 undefined || true 转换为 {}
       current = isPlainObject(current) ? current : {};
       current = mergeTemp("render", current.presetType, current);
@@ -67,17 +67,15 @@ export default {
         );
       }
       extendsObj = cloneDeep(extendsObj);
-      if (current.hidden !== true) {
-        return merge(
-          {
-            label: item.label,
-            prop: item.prop,
-            dict: item.dict,
-            ...extendsObj,
-          },
-          current
-        );
-      }
+      return merge(
+        {
+          label: item.label,
+          prop: item.prop,
+          dict: item.dict,
+          ...extendsObj,
+        },
+        current
+      );
     },
     isDefaultColumn(col) {
       return this._runWithoutDeps(() => {

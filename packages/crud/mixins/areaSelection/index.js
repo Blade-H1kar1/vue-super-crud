@@ -20,7 +20,6 @@ import { CellObserver } from "./cellObserver.js";
 import { checkVisibility } from "utils";
 
 const applicationType = "web application/super-crud-data";
-let focusedTable = null;
 
 export default {
   data() {
@@ -262,7 +261,7 @@ export default {
       });
     },
     // 更新所有遮罩层
-    updateOverlays(d) {
+    updateOverlays() {
       if (!this.overlayManager) return;
 
       this.$nextTick(() => {
@@ -310,20 +309,20 @@ export default {
 
     // 初始化事件
     initEvents() {
-      document.addEventListener("keydown", this.handleKeyDown);
+      this.getTableElement().addEventListener("keydown", this.handleKeyDown);
       document.addEventListener("mousedown", this.handleGlobalMouseDown);
     },
 
     // 移除事件
     removeEvents() {
-      document.removeEventListener("keydown", this.handleKeyDown);
+      this.getTableElement().removeEventListener("keydown", this.handleKeyDown);
       document.removeEventListener("mousedown", this.handleGlobalMouseDown);
     },
 
     // 键盘事件处理
     handleKeyDown(event) {
       const tableEl = this.getTableElement();
-      if (!tableEl || focusedTable !== tableEl) return;
+      if (!tableEl) return;
 
       // Ctrl+A 全选
       if (event.ctrlKey && event.key === "a") {
@@ -333,6 +332,7 @@ export default {
           return;
         }
         event.preventDefault();
+        event.stopPropagation();
         // 全选
         const columnCount = getColumnCount(this.getTableElement());
         if (this.rowCount > 0 && columnCount > 0) {
@@ -354,7 +354,6 @@ export default {
           console.warn("复制操作被禁用");
           return;
         }
-        event.preventDefault();
         this.copyCellsValues(false, true);
         return;
       }
@@ -366,7 +365,6 @@ export default {
           console.warn("复制操作被禁用");
           return;
         }
-        event.preventDefault();
         this.copyCellsValues();
       }
 
@@ -377,7 +375,6 @@ export default {
           console.warn("剪切操作被禁用");
           return;
         }
-        event.preventDefault();
         this.copyCellsValues(true);
       }
 
@@ -388,7 +385,6 @@ export default {
           console.warn("粘贴操作被禁用");
           return;
         }
-        event.preventDefault();
         this.pasteCellsValues();
       }
 
@@ -402,7 +398,6 @@ export default {
           console.warn("重做操作被禁用");
           return;
         }
-        event.preventDefault();
         this.executeRedo();
         return;
       }
@@ -414,13 +409,11 @@ export default {
           console.warn("撤销操作被禁用");
           return;
         }
-        event.preventDefault();
         this.executeUndo();
       }
 
       // Escape 清除选择
       if (event.key === "Escape") {
-        event.preventDefault();
         this.clearCellSelection();
       }
     },
@@ -456,9 +449,6 @@ export default {
       const tableEl = this.getTableElement();
       if (!tableEl) {
         return;
-      }
-      if (tableEl.contains(event.target)) {
-        focusedTable = tableEl;
       }
       // 检查点击是否在表格内
       if (!isInnerCell(event, tableEl)) {
@@ -835,6 +825,7 @@ export default {
     // 复制选中单元格的值
     async copyCellsValues(isCut = false, includeHeaders = false) {
       try {
+        if (!this.selectedCells.length) return;
         this.isCutMode = isCut;
         this.copiedCells = [...this.selectedCells];
         const cellsData = this.copiedCells.sort((a, b) => {
@@ -939,6 +930,7 @@ export default {
     // 粘贴选中单元格的值
     async pasteCellsValues() {
       try {
+        if (!this.selectedCells.length) return;
         const { textData, isValueMode } = await readClipboardData();
 
         if (!textData) {

@@ -1,4 +1,5 @@
 .sc-crud {
+  outline: none;
   //header
   .el-table thead th,
   .el-table thead.is-group th {
@@ -7,10 +8,6 @@
   .el-table th.el-table__cell.is-sortable {
     cursor: auto;
   }
-
-  // .el-table__body tr.current-row > td {
-  //   background-color: #ecf5ff;
-  // }
 
   &__maximize {
     position: fixed;
@@ -84,27 +81,14 @@
           min-height: 30px;
           line-height: 30px;
           vertical-align: middle;
-          // 确保表单组件不会撑开行高
-          .el-input,
-          .el-select,
-          .el-date-editor,
-          .el-cascader,
-          .el-input-number {
+          .el-form-item__content {
             height: 29px;
-
-            .el-input__inner {
-              height: 29px;
-              line-height: 29px;
-            }
+            line-height: 29px;
           }
-
-          // 多行文本处理
-          .el-textarea {
-            .el-textarea__inner {
-              height: 29px;
-              resize: none;
-              overflow: hidden;
-            }
+          // 确保表单组件不会撑开行高
+          .el-input__inner {
+            height: 29px;
+            line-height: 29px;
           }
         }
       }
@@ -135,7 +119,6 @@
   // 编辑框透明-单元格样式
   .edit-cell {
     .cell {
-      // padding: 0 !important;
       .el-input__icon {
         // 隐藏日期样式前缀图标
         display: none;

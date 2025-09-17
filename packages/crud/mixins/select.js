@@ -26,15 +26,15 @@ export default {
     };
   },
   mounted() {
-    if (this.selection) {
-      window.addEventListener("keydown", this.keyDown, { passive: true });
-      window.addEventListener("keyup", this.keyUp, { passive: true });
+    if (this.showSelection) {
+      this.$el.addEventListener("keydown", this.keyDown, { passive: true });
+      this.$el.addEventListener("keyup", this.keyUp, { passive: true });
     }
   },
   beforeDestroy() {
-    if (this.selection) {
-      window.removeEventListener("keydown", this.keyDown);
-      window.removeEventListener("keyup", this.keyUp);
+    if (this.showSelection) {
+      this.$el.removeEventListener("keydown", this.keyDown);
+      this.$el.removeEventListener("keyup", this.keyUp);
     }
   },
   watch: {
@@ -130,14 +130,6 @@ export default {
           document.onselectstart = () => false;
           document.body.style.userSelect = "none";
           break;
-        case 18: // Alt键
-          this.shiftOrAltDown = true;
-          // 改变鼠标样式为多选
-          document.body.style.cursor = "cell";
-          // 禁止文本选中
-          document.onselectstart = () => false;
-          document.body.style.userSelect = "none";
-          break;
         case 27: // Esc键
           this.EscDown = true;
           break;
@@ -153,14 +145,6 @@ export default {
           document.body.style.cursor = "";
           break;
         case 16: // Shift键
-          this.shiftOrAltDown = false;
-          // 恢复默认鼠标样式
-          document.body.style.cursor = "";
-          // 恢复文本选中
-          document.onselectstart = null;
-          document.body.style.userSelect = "";
-          break;
-        case 18: // Alt键
           this.shiftOrAltDown = false;
           // 恢复默认鼠标样式
           document.body.style.cursor = "";

@@ -133,7 +133,6 @@ export default {
         index: true,
         areaSelection: {},
         editConfig: {
-          trigger: "click",
           mode: "cell",
         },
         height: "400px",

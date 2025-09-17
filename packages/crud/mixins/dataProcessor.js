@@ -13,7 +13,7 @@ export default {
       pageVisibilityMap: new Map(), // 存储每页的可见状态范围
       // 数据验证结果缓存
       invalidRows: new Map(), // 存储有问题的行：index -> errorType
-      internalTotal: 0, // 内部获取的总数
+      internalTotal: undefined, // 内部获取的总数
     };
   },
 
