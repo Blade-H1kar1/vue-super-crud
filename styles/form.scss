@@ -21,20 +21,20 @@
         }
       }
     }
-    .is-required {
-      .el-form-item__label:before {
-        display: none;
-      }
-      .form-label {
-        position: relative;
-      }
-      .form-label:before {
-        position: absolute;
-        content: "*";
-        color: var(--color-danger);
-        left: -8px;
-        top: 0;
-      }
+  }
+  .el-form-item__label {
+    position: relative;
+  }
+  .el-form-item.is-required {
+    .form-label {
+      max-width: calc(100% - 11px);
+    }
+  }
+  .el-form-item.colon {
+    .el-form-item__label:after {
+      position: absolute;
+      content: "：";
+      width: 12px;
     }
   }
   .hidden-label {

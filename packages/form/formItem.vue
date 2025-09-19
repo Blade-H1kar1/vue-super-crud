@@ -116,7 +116,20 @@ export default create({
       if (this.rules.required) names.push("is-required");
       if (this.isDetail) names.push("is-detail");
       if (this.isFirstRow) names.push("is-first-row");
+      if (this.formOptions.colon) names.push("colon");
       return names;
+    },
+    hasTooltip() {
+      return (
+        this.item.tooltip ||
+        this.item.tooltipRender ||
+        this.formCtx.slots[`${this.item.prop}-tooltip`]
+      );
+    },
+    labelMaxWidth() {
+      const calcRequired = this.rules.required ? "11px" : "0px";
+      const calcTip = this.hasTooltip ? "18px" : "0px";
+      return `calc(100% - ${calcRequired} - ${calcTip})`;
     },
     hasFormChildren() {
       return this.item.formItems && Array.isArray(this.item.formItems);
@@ -189,6 +202,9 @@ export default create({
         >
           <position
             class="form-label"
+            style={{
+              maxWidth: this.labelMaxWidth,
+            }}
             ellipsis={this.labelOverTip ? true : false}
             slotName={this.item.prop}
             slotSuffixes={this.mode ? [this.mode, "label"] : ["label"]}

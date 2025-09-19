@@ -56,28 +56,70 @@
 ### Element UI 布局
 当 `layout="el-row"` 时，可以使用 Element UI 的栅格布局系统。
 
-## 详情模式
+## 校验功能
 
-通过设置 `detail` 属性开启详情模式，在详情模式下：
-- 表单将变为只读状态
-- 可以通过 `border` 属性开启边框样式
-- 每个字段可以单独配置 `detail` 属性来自定义详情展示
+`renderColumns` 项中支持以下校验配置：
+- `required` 必填
+- `rules` 校验规则
+- 支持异步校验
+- 支持自定义校验规则
 
-```js
-{
-  detail: true, // 开启详情模式
-  border: true, // 开启边框样式
-  renderColumns: [
-    {
-      prop: 'name',
-      label: '姓名',
-      detail: {
-        // 自定义详情展示配置
-      }
-    }
-  ]
-}
-```
+<ClientOnly>
+<common-code-format>
+  <form-baseUse-validate slot="source"></form-baseUse-validate>
+  
+<<< @/docs/.vuepress/components/form/baseUse/validate.vue
+</common-code-format>
+</ClientOnly>
+
+## 显示/隐藏控制
+
+`renderColumns` 项中支持：
+- `hidden` 隐藏字段
+- `show` 显示字段
+- 支持动态控制显示隐藏
+
+<ClientOnly>
+<common-code-format>
+  <form-baseUse-hidden slot="source"></form-baseUse-hidden>
+  
+<<< @/docs/.vuepress/components/form/baseUse/hidden.vue
+</common-code-format>
+</ClientOnly>
+
+## 提示功能
+
+`renderColumns` 项中支持：
+- `tooltip` 提示文本
+- `tooltipRender` 提示渲染函数
+- `#[prop]-tooltip` 提示插槽
+
+<ClientOnly>
+<common-code-format>
+  <form-baseUse-tooltip slot="source"></form-baseUse-tooltip>
+  
+<<< @/docs/.vuepress/components/form/baseUse/tooltip.vue
+</common-code-format>
+</ClientOnly>
+
+## 标签配置
+
+- `colon` 标签后面是否添加冒号
+
+`renderColumns` 项中支持：
+- `label` 标签文本
+- `labelRender` 标签渲染函数
+- `#[prop]-label` 标签插槽
+- `hiddenLabel` 隐藏标签
+- `labelOverTip` 标签超出隐藏
+
+<ClientOnly>
+<common-code-format>
+  <form-baseUse-label slot="source"></form-baseUse-label>
+  
+<<< @/docs/.vuepress/components/form/baseUse/label.vue
+</common-code-format>
+</ClientOnly>
 
 ## 草稿箱功能
 
@@ -138,68 +180,6 @@
 </common-code-format>
 </ClientOnly>
 
-## 校验功能
-
-`renderColumns` 项中支持以下校验配置：
-- `required` 必填
-- `rules` 校验规则
-- 支持异步校验
-- 支持自定义校验规则
-
-<ClientOnly>
-<common-code-format>
-  <form-baseUse-validate slot="source"></form-baseUse-validate>
-  
-<<< @/docs/.vuepress/components/form/baseUse/validate.vue
-</common-code-format>
-</ClientOnly>
-
-## 显示/隐藏控制
-
-`renderColumns` 项中支持：
-- `hidden` 隐藏字段
-- `show` 显示字段
-- 支持动态控制显示隐藏
-
-<ClientOnly>
-<common-code-format>
-  <form-baseUse-hidden slot="source"></form-baseUse-hidden>
-  
-<<< @/docs/.vuepress/components/form/baseUse/hidden.vue
-</common-code-format>
-</ClientOnly>
-
-## 提示功能
-
-`renderColumns` 项中支持：
-- `tooltip` 提示文本
-- `tooltipRender` 提示渲染函数
-- `#[prop]-tooltip` 提示插槽
-
-<ClientOnly>
-<common-code-format>
-  <form-baseUse-tooltip slot="source"></form-baseUse-tooltip>
-  
-<<< @/docs/.vuepress/components/form/baseUse/tooltip.vue
-</common-code-format>
-</ClientOnly>
-
-## 标签配置
-
-`renderColumns` 项中支持：
-- `label` 标签文本
-- `labelRender` 标签渲染函数
-- `#[prop]-label` 标签插槽
-- `hiddenLabel` 隐藏标签
-- `labelOverTip` 标签超出隐藏
-
-<ClientOnly>
-<common-code-format>
-  <form-baseUse-label slot="source"></form-baseUse-label>
-  
-<<< @/docs/.vuepress/components/form/baseUse/label.vue
-</common-code-format>
-</ClientOnly>
 
 
 ## API
@@ -229,6 +209,25 @@
 | labelOverTip  | 标签超出一行是否隐藏并显示隐藏内容 | boolean | false    |
 | contextMenu   | 右键菜单配置                       | object  |          |
 | action        | 操作列配置                         | object  |          |
+| colon         | 标签后面是否添加冒号               | boolean | false    |
+
+### renderColumns 配置
+
+| 参数          | 说明                               | 类型             | 默认值  |
+| ------------- | ---------------------------------- | ---------------- | ------- |
+| prop          | 表单字段名                         | string           | -       |
+| label         | 标签文本                           | string           | -       |
+| widthSize     | 占据列数                           | number \ string  | -       |
+| heightSize    | 占据行数                           | number \ string  | -       |
+| tooltip       | 提示文本                           | string           | -       |
+| tooltipRender | 提示渲染函数                       | function         | -       |
+| labelWidth    | 单独配置标签宽度                   | string           | '100px' |
+| labelRender   | 标签渲染函数                       | function         | -       |
+| labelOverTip  | 标签超出一行是否隐藏并显示隐藏内容 | boolean          | -       |
+| hiddenLabel   | 是否隐藏标签                       | boolean          | -       |
+| children      | 子表单项配置(分组时使用)           | array            | -       |
+| detail        | 详情模式配置                       | boolean \ object | -       |
+| initValue     | 初始值                             | any              | -       |
 
 
 ### contextMenu 配置
@@ -256,24 +255,6 @@
 | reset   | 重置按钮配置     | object  | -        |
 | handles | 自定义按钮       | array   | []       |
 | align   | 按钮对齐方式     | string  | 'center' |
-
-### Column 配置
-
-| 参数          | 说明                               | 类型             | 默认值  |
-| ------------- | ---------------------------------- | ---------------- | ------- |
-| prop          | 表单字段名                         | string           | -       |
-| label         | 标签文本                           | string           | -       |
-| widthSize     | 占据列数                           | number \ string  | -       |
-| heightSize    | 占据行数                           | number \ string  | -       |
-| tooltip       | 提示文本                           | string           | -       |
-| tooltipRender | 提示渲染函数                       | function         | -       |
-| labelWidth    | 单独配置标签宽度                   | string           | '100px' |
-| labelRender   | 标签渲染函数                       | function         | -       |
-| labelOverTip  | 标签超出一行是否隐藏并显示隐藏内容 | boolean          | -       |
-| hiddenLabel   | 是否隐藏标签                       | boolean          | -       |
-| children      | 子表单项配置(分组时使用)           | array            | -       |
-| detail        | 详情模式配置                       | boolean \ object | -       |
-| initValue     | 初始值                             | any              | -       |
 
 ### Events
 

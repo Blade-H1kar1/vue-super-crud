@@ -1,9 +1,7 @@
 <template>
   <div>
     <sc-form :options="options" :loading.sync="loading" v-model="data">
-      <template #slot-tooltip>
-        提示slot
-      </template>
+      <template #slot-tooltip> 提示slot </template>
     </sc-form>
   </div>
 </template>
@@ -18,9 +16,11 @@ export default {
         labelWidth: "120px",
         renderColumns: [
           {
-            label: "提示",
+            required: true,
+            label: "提示提示提示提示提示",
             prop: "tooltip",
             tooltip: "提示",
+            labelOverTip: true,
           },
           {
             label: "提示slot",

@@ -1,9 +1,7 @@
 <template>
   <div>
     <sc-form :options="options" :loading.sync="loading" v-model="data">
-      <template #slot-label>
-        label-slot
-      </template>
+      <template #slot-label> label-slot </template>
     </sc-form>
   </div>
 </template>
@@ -15,6 +13,7 @@ export default {
       loading: false,
       options: {
         columns: 2,
+        colon: true,
         hiddenLabel: false,
         labelOverTip: false,
         renderColumns: [
