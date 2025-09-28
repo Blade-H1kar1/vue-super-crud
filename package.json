@@ -60,7 +60,8 @@
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-merge": "^4.1.4",
     "xe-utils": "^3.5.28",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "el-table-excel-extends": "^1.1.1"
   },
   "peerDependencies": {
     "element-ui": "^2.15.14",

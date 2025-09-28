@@ -38,73 +38,81 @@
       @submit.native.prevent
     >
       <component
-        :is="virtualized ? 'virtualScroll' : 'div'"
-        :data="virtualized ? list : null"
-        :key-prop="valueKey"
-        :virtualized="virtualized"
-        v-bind="$attrs"
-        @change="(renderData) => (virtualList = renderData)"
+        :is="enabledAreaSelection ? 'ElTableExcelExtends' : 'div'"
+        ref="areaSelectionRef"
+        v-bind="areaSelection"
+        v-on="$listeners"
+        :customMapping="customMapping"
+        :getCellValueMethod="getCellValueMethod"
+        :setCellValueMethod="setCellValueMethod"
       >
-        <el-table
-          ref="tableRef"
-          :key="key"
-          v-loading="loadingStatus"
-          :element-loading-text="crudOptions.loadingText"
-          :element-loading-spinner="crudOptions.loadingSpinner"
-          :element-loading-background="crudOptions.loadingBackground"
-          highlight-current-row
-          highlight-selection-row
-          v-bind="tableProps"
-          v-on="tableListeners"
-          :data="virtualized ? virtualList : list"
-          @cell-mouse-enter="cellMouseEnter"
-          @cell-mouse-leave="cellMouseLeave"
-          @row-contextmenu="openContextMenu"
-          @header-contextmenu="openContextHerderMenu"
-          @selection-change="selectionChange"
-          @select="select"
-          @select-all="selectAll"
-          @row-click="rowClick"
-          @row-dblclick="rowDblclick"
-          @cell-click="cellClick"
-          @cell-dblclick="cellDblclick"
-          @header-dragend="headerDragend"
-          @expand-change="expandChange"
-          :row-key="rowKey_"
-          :row-style="defineRowIndex"
-          :cell-class-name="cellClassName_"
-          :row-class-name="rowClassName_"
-          :lazy="crudOptions.lazy || crudOptions.autoLazy"
-          :load="lazyLoad"
-          :spanMethod="spanMethod"
-          :summary-method="summaryMethod"
-          :show-summary="showSummary"
+        <component
+          :is="virtualized ? 'virtualScroll' : 'div'"
+          :data="virtualized ? list : null"
+          :key-prop="valueKey"
+          :virtualized="virtualized"
+          v-bind="$attrs"
+          @change="(renderData) => (virtualList = renderData)"
         >
-          <template slot="empty">
-            <div :class="b('empty')" v-if="showEmpty">
-              <slot name="empty" v-if="$scopedSlots.empty"></slot>
-              <el-empty
-                v-else
-                :image="crudOptions.empty.image"
-                :image-size="crudOptions.empty.size"
-                :description="crudOptions.empty.text"
-              ></el-empty>
-            </div>
-          </template>
-          <defaultColumn
-            v-for="col in defaultColumns"
-            :col="col"
-            :key="col.type"
-          />
-          <slot></slot>
-          <column
-            v-for="col in columns"
-            :col="col"
-            :key="col.prop || col.label"
-          />
-          <columnAction />
-        </el-table>
-      </component>
+          <el-table
+            ref="tableRef"
+            :key="key"
+            v-loading="loadingStatus"
+            :element-loading-text="crudOptions.loadingText"
+            :element-loading-spinner="crudOptions.loadingSpinner"
+            :element-loading-background="crudOptions.loadingBackground"
+            highlight-current-row
+            highlight-selection-row
+            v-bind="tableProps"
+            v-on="tableListeners"
+            :data="virtualized ? virtualList : list"
+            @cell-mouse-enter="cellMouseEnter"
+            @cell-mouse-leave="cellMouseLeave"
+            @row-contextmenu="openContextMenu"
+            @header-contextmenu="openContextHerderMenu"
+            @selection-change="selectionChange"
+            @select="select"
+            @select-all="selectAll"
+            @row-click="rowClick"
+            @row-dblclick="rowDblclick"
+            @cell-click="cellClick"
+            @cell-dblclick="cellDblclick"
+            @header-dragend="headerDragend"
+            :row-key="rowKey_"
+            :row-style="defineRowIndex"
+            :cell-class-name="cellClassName_"
+            :row-class-name="rowClassName_"
+            :lazy="crudOptions.lazy || crudOptions.autoLazy"
+            :load="lazyLoad"
+            :spanMethod="spanMethod"
+            :summary-method="summaryMethod"
+            :show-summary="showSummary"
+          >
+            <template slot="empty">
+              <div :class="b('empty')" v-if="showEmpty">
+                <slot name="empty" v-if="$scopedSlots.empty"></slot>
+                <el-empty
+                  v-else
+                  :image="crudOptions.empty.image"
+                  :image-size="crudOptions.empty.size"
+                  :description="crudOptions.empty.text"
+                ></el-empty>
+              </div>
+            </template>
+            <defaultColumn
+              v-for="col in defaultColumns"
+              :col="col"
+              :key="col.type"
+            />
+            <slot></slot>
+            <column
+              v-for="col in columns"
+              :col="col"
+              :key="col.prop || col.label"
+            />
+            <columnAction />
+          </el-table> </component
+      ></component>
       <el-tooltip
         effect="light"
         :popper-class="b('error-tip')"
@@ -167,8 +175,6 @@ import columnHandler from "./mixins/columnHandler";
 import cacheHandler from "./mixins/cacheHandler";
 import searchHandler from "./mixins/searchHandler";
 import mockData from "./mixins/mockData";
-import cellSelection from "./mixins/areaSelection/index.js";
-import cellSelectionDataProcessor from "./mixins/areaSelection/dataProcessor.js";
 // 组件
 import search from "./search.vue";
 import menuBar from "./menuBar.vue";
@@ -180,6 +186,8 @@ import group from "../group/index.vue";
 import selectBanner from "./selectBanner.vue";
 import virtualScroll from "el-table-virtual-scroll";
 import batchMockData from "core/components/batchMockData.vue";
+// import areaSelection from "C:/Users/Administrator/Desktop/el-table-excel-extends/src/index.vue";
+import ElTableExcelExtends from "el-table-excel-extends";
 import {
   toCamelCase,
   toTreeArray,
@@ -206,6 +214,7 @@ export default create({
     selectBanner,
     virtualScroll,
     batchMockData,
+    ElTableExcelExtends,
   },
   mixins: [
     init("crudOptions"),
@@ -225,8 +234,6 @@ export default create({
     cacheHandler,
     searchHandler,
     mockData,
-    cellSelection,
-    cellSelectionDataProcessor,
   ],
   props: {
     // 防止scope中携带实例时，拷贝合并报错
@@ -411,6 +418,13 @@ export default create({
         null,
         this.$scopedSlots.empty
       );
+    },
+    enabledAreaSelection() {
+      return checkVisibility(this.areaSelection);
+    },
+    // 区域选取配置
+    areaSelection() {
+      return this.crudOptions.areaSelection || {};
     },
   },
   watch: {
@@ -661,8 +675,83 @@ export default create({
       // 按顺序合并：左固定列 + 普通列 + 右固定列
       return [...leftColumns, ...centerColumns, ...rightColumns];
     },
-    expandChange(row, expandedRows) {
-      this.updateOverlays();
+    getCellValueMethod(params) {
+      const { row, column } = params;
+      const col = column.col;
+      const prop = col?.form?.prop || col?.prop;
+      if (!prop) return;
+      if (this.areaSelection.getCellValueMethod) {
+        return this.areaSelection.getCellValueMethod({
+          ...params,
+          value: this.getByProp(row, prop),
+        });
+      }
+      return this.getByProp(row, prop);
+    },
+    setCellValueMethod(params, setByProp) {
+      const { row, column, value } = params;
+      const col = column.col;
+      const prop = col?.form?.prop || col?.prop;
+      if (!prop) return;
+      if (!this.checkPastePermission(row, col)) return;
+      if (this.areaSelection.setCellValueMethod) {
+        return this.areaSelection.setCellValueMethod(params, setByProp);
+      }
+      setByProp(row, prop, value);
+      return true;
+    },
+    // 检查粘贴权限
+    checkPastePermission(row, column) {
+      if (this.areaSelection.pastePermission) {
+        return this.areaSelection.pastePermission(row, column);
+      }
+      if (this.areaSelection?.operationType === "all") return true;
+      const scope = { row, $index: row.$index };
+      const { mode, disabled, isRowEdit } = this.editConfig;
+      const canEdit =
+        typeof column.isEdit === "function"
+          ? column.isEdit(scope)
+          : column.isEdit;
+      if (mode === "row") {
+        if (
+          (isRowEdit ? isRowEdit(scope) !== false : true) &&
+          canEdit !== false &&
+          !disabled
+        ) {
+          this.setRowEdit(row);
+          return true;
+        } else {
+          return false;
+        }
+      }
+      if (["cell", "free"].includes(mode)) {
+        if (canEdit !== false && !disabled) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      return canEdit && !disabled ? true : false;
+    },
+    customMapping({ value, column, rowIndex, columnIndex }, cellInstance) {
+      if (cellInstance.comp.options || cellInstance.dictData) {
+        const options = cellInstance.comp.options || cellInstance.dictData;
+        const item = options.find((item) => item.label === value);
+        return item.value || value;
+      }
+      const instance = cellInstance.$children[0];
+      const options = instance.options;
+      if (options) {
+        const item = options?.find((item) => item.label === value);
+        return item?.value || value;
+      }
+      if (this.areaSelection.customMapping) {
+        return this.areaSelection.customMapping(
+          { value, column, rowIndex, columnIndex },
+          cellInstance
+        );
+      }
+      return value;
     },
   },
 });

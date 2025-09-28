@@ -8,13 +8,13 @@
 
 - **区域选择**：支持鼠标拖拽选择单元格区域
 - **整列选择**：点击、拖拽表头可选择整列数据
-- **整行选择**：针对特殊列（如序号列、选项列）支持点击、拖拽选择整行
+- **整行选择**：序号列支持点击、拖拽选择整行
 - **键盘操作**：支持 Ctrl+A 全选、Ctrl+C 复制、Ctrl+V 粘贴、Ctrl+X 剪切等快捷键
 - **智能填充**：支持数值序列、日期序列、文本序列的智能识别和填充
 - **撤销重做**：支持 Ctrl+Z 撤销和 Ctrl+Y 重做操作
 - **复制粘贴**：支持单元格数据的复制粘贴，包括跨表格操作
 - **自定义填充**：支持自定义填充列表，如星期、月份等
-- **复杂表格兼容**：完美兼容固定列、合并单元格、树级折叠等复杂表格结构
+- **复杂表格兼容**：兼容固定列、合并单元格、树级折叠等复杂表格结构
 
 
 ## 快捷键操作
@@ -27,6 +27,7 @@
 | `Ctrl + C`                     | 复制       | 复制选中区域的数据           |
 | `Ctrl + Shift + C`             | 复制带表头 | 复制选中区域的数据并携带表头 |
 | `Ctrl + V`                     | 粘贴       | 粘贴剪贴板数据到选中区域     |
+| `Delete`                       | 清空       | 清空选中单元格内容           |
 | `Ctrl + X`                     | 剪切       | 剪切选中区域的数据           |
 | `Ctrl + Z`                     | 撤销       | 撤销上一步操作               |
 | `Ctrl + Y`、`Ctrl + Shift + Z` | 重做       | 重做上一步撤销的操作         |
@@ -116,33 +117,26 @@ areaSelection: {
 
 
 ### areaSelection 配置项
-
-| 参数            | 说明                 | 类型    | 默认值 |
-| --------------- | -------------------- | ------- | ------ |
-| show            | 是否显示区域选择功能 | boolean | true   |
-| hidden          | 是否隐藏区域选择功能 | boolean | false  |
-| operationType   | 数据操作类型         | string  | 'edit' |
-| selectAll       | 是否启用全选功能     | boolean | true   |
-| copy            | 是否启用复制功能     | boolean | true   |
-| paste           | 是否启用粘贴功能     | boolean | true   |
-| cut             | 是否启用剪切功能     | boolean | true   |
-| fill            | 是否启用填充功能     | boolean | true   |
-| undo            | 是否启用撤销功能     | boolean | true   |
-| redo            | 是否启用重做功能     | boolean | true   |
-| selection       | 是否启用区域选择     | boolean | true   |
-| fillCustomLists | 自定义填充列表       | Array   | []     |
-
-### operationType 说明
-
-- **'all'**：对所有数据进行操作，包括只读单元格
-- **'edit'**：仅对可编辑的单元格进行操作（默认）
-
-<!-- ### 自定义配置示例
-
-<ClientOnly>
-<common-code-format>
-  <crud-areaSelection-customConfig slot="source"></crud-areaSelection-customConfig>
-  
-<<< @/docs/.vuepress/components/crud/areaSelection/customConfig.vue
-</common-code-format>
-</ClientOnly> -->
+| 参数                | 类型     | 默认值 | 说明                                                                                |
+| ------------------- | -------- | ------ | ----------------------------------------------------------------------------------- |
+| operationType       | String   | 'edit' | 'all':对所有数据进行操作，包括只读单元格,'edit': 仅对可编辑的单元格进行操作（默认） |
+| copy                | Boolean  | true   | 是否启用复制功能                                                                    |
+| paste               | Boolean  | true   | 是否启用粘贴功能                                                                    |
+| cut                 | Boolean  | true   | 是否启用剪切功能                                                                    |
+| fill                | Boolean  | true   | 是否启用智能填充功能                                                                |
+| fillCustomLists     | Array    | []     | 自定义填充列表，用于智能填充的自定义序列                                            |
+| undo                | Boolean  | true   | 是否启用撤销功能                                                                    |
+| redo                | Boolean  | true   | 是否启用重做功能                                                                    |
+| selection           | Boolean  | true   | 是否启用区域选择功能                                                                |
+| allSelection        | Boolean  | true   | 是否启用全选功能（Ctrl+A）                                                          |
+| rowSelection        | Boolean  | true   | 是否启用行选择（点击序号列）                                                        |
+| columnSelection     | Boolean  | true   | 是否启用列选择（点击表头）                                                          |
+| autoScroll          | Boolean  | true   | 是否启用自动滚动                                                                    |
+| scrollSpeed         | Number   | 10     | 自动滚动速度（像素/帧）                                                             |
+| maxUndoSteps        | Number   | 50     | 最大撤销步数                                                                        |
+| getCellTextMethod   | Function | -      | 自定义获取单元格文本的方法（复制文本）                                              |
+| getCellValueMethod  | Function | -      | 自定义获取单元格值的方法（表格间值复制、获取值）                                    |
+| getClearValueMethod | Function | -      | 自定义返回清空值的方法                                                              |
+| setCellValueMethod  | Function | -      | 自定义设置单元格值的方法，可通过type参数判断操作类型                                |
+| textMappingConfig   | Object   | -      | 文本映射配置对象（外部Excel文本黏贴时映射到表格的值）                               |
+| customMapping       | Function | -      | 自定义文本映射函数 （外部Excel文本黏贴时映射到表格的值）                            |
