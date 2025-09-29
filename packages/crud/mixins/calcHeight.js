@@ -82,8 +82,8 @@ export default {
             if (isVisible) {
               const tableTop = tableRef?.getBoundingClientRect().top;
               if (this.tableTop !== tableTop) this.tableTop = tableTop;
-              const wrapperTop = this.$refs.wrapper?.getBoundingClientRect()
-                .top;
+              const wrapperTop =
+                this.$refs.wrapper?.getBoundingClientRect().top;
               if (this.wrapperHeight !== wrapperTop)
                 this.wrapperTop = wrapperTop;
             }
@@ -101,6 +101,7 @@ export default {
     handleResize() {
       this.innerHeight = innerHeight;
       this.getClientTop();
+      this.$refs.searchRef.calculateCollapsedHeight();
     },
   },
 };

@@ -44,6 +44,34 @@ export default {
             },
           },
           {
+            prop: "gender1",
+            label: "性别",
+            search: {
+              alwaysShow: true,
+              comp: {
+                name: "el-select", // 使用下拉选择
+                options: [
+                  { label: "男", value: "男" },
+                  { label: "女", value: "女" },
+                ],
+              },
+            },
+          },
+          {
+            prop: "gender2",
+            label: "性别",
+            search: {
+              alwaysShow: true,
+              comp: {
+                name: "el-select", // 使用下拉选择
+                options: [
+                  { label: "男", value: "男" },
+                  { label: "女", value: "女" },
+                ],
+              },
+            },
+          },
+          {
             prop: "age",
             label: "年龄",
           },
