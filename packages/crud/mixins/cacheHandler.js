@@ -8,7 +8,7 @@ export default {
         fixedWidth: {},
         sort: {},
         hidden: [],
-        pageSize: 10,
+        pageSize: null,
       },
       stateStorageManager: null,
     };

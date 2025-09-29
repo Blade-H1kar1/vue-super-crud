@@ -1,11 +1,19 @@
 <template>
   <div :class="b()">
-    <div v-if="showHandleRow" :class="b('handleRow')">
+    <div
+      v-if="showHandleRow"
+      :class="b('handleRow')"
+      :style="{ flex: hasRightPositionSlot ? null : 1 }"
+    >
       <position
         slotName="handleRow"
         :slots="ctx.$scopedSlots"
         :scope="ctx.crudOptions"
-        ><div v-if="handleRowButtons.length > 0">
+        style="width: 100%"
+        ><div
+          style="display: flex; width: 100%"
+          v-if="handleRowButtons.length > 0"
+        >
           <button_
             v-for="(btn, index) in handleRowButtons"
             :type="btn.type"
@@ -77,6 +85,10 @@ export default create({
     showToolbar() {
       return checkVisibility(this.toolbar, null, true);
     },
+    // 操作栏是否存在右侧方位插槽（不存在则占满剩余空间）
+    hasRightPositionSlot() {
+      return this.ctx.$scopedSlots["handleRow-right"];
+    },
     handleRow() {
       const handleRow = { ...(this.ctx.crudOptions.handleRow || {}) };
       const editConfig = this.ctx.editConfig;
@@ -134,7 +146,7 @@ export default create({
     },
     toolbarButtons() {
       const toolbar = this.toolbar;
-      if (!toolbar) return;
+      if (!toolbar) return [];
       let buttons = [];
       const merges = batchMerge(
         "btn.crud.toolbar",

@@ -19,10 +19,6 @@
     background-color: var(--color-white);
     z-index: 1001;
   }
-  &__handleRow,
-  &__toolbar {
-    display: flex;
-  }
   &__is-auto-height {
     display: flex;
     flex-direction: column;

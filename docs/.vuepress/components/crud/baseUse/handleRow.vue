@@ -1,8 +1,11 @@
 <template>
   <div>
     <sc-crud :search.sync="searchForm" :options="options" :data="data">
-      <template #handleRow-left="{size}">
-        <el-button :size="size">handleRow插槽</el-button>
+      <template #handleRow-left="{ size }">
+        <el-button :size="size">left 插槽</el-button>
+      </template>
+      <template #handleRow-right="{ size }">
+        <el-button :size="size">right 插槽</el-button>
       </template>
     </sc-crud>
   </div>

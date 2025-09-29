@@ -92,12 +92,14 @@ export default create({
       this.$set(
         this.ctx.query,
         this.props.pageNum,
-        this.ctx.search[this.props.pageNum] || 1
+        this.ctx.search[this.props.pageNum] || this.pagination.pageNum || 1
       );
       this.$set(
         this.ctx.query,
         this.props.pageSize,
-        this.ctx.search[this.props.pageSize] || this.ctx.setOptions.pageSize
+        this.ctx.search[this.props.pageSize] ||
+          this.ctx.setOptions.pageSize ||
+          this.pagination.pageSize
       );
     },
     // 保存当前页滚动位置
