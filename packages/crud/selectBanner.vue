@@ -74,7 +74,7 @@
           closable
           disable-transitions
           @close="ctx.removeSingleSelection"
-          >{{ selected[labelKey] }}</el-tag
+          >{{ singleLabelText }}</el-tag
         >
       </span>
       <div :class="b('banner-actions')">
@@ -106,7 +106,18 @@ export default create({
       }
     },
     selection() {
+      if (this.ctx.showSingleSelection) {
+        return this.ctx.singleSelection;
+      }
       return this.ctx.selection;
+    },
+    singleLabelText() {
+      return (
+        this.selected[this.labelKey] ||
+        this.ctx.flatList.find(
+          (item) => item[this.operateKey] == this.selected[this.operateKey]
+        )?.[this.labelKey]
+      );
     },
     labelKey() {
       return (

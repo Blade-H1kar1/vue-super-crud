@@ -18,7 +18,6 @@ export default {
   },
   data() {
     return {
-      singleSelect: null,
       selectionRow: [],
       shiftOrAltDown: false,
       CtrlDown: false,
@@ -45,12 +44,6 @@ export default {
           this.$nextTick(() => {
             this.updateSelection();
           });
-        } else if (this.showSingleSelection) {
-          if (newVal) {
-            this.singleSelect = newVal[this.operateKey];
-          } else {
-            this.singleSelect = null;
-          }
         }
       },
       immediate: true,
@@ -180,7 +173,6 @@ export default {
             return;
           }
         }
-        this.singleSelect = row[this.operateKey];
         this.$emit("update:selected", row);
         return;
       }
@@ -206,7 +198,7 @@ export default {
         refsElTable.clearSelection();
         this.clearSelection();
         for (let index = maxAndmin.min; index <= maxAndmin.max; index++) {
-          refsElTable.toggleRowSelection(this.list[index], true);
+          refsElTable.toggleRowSelection(this.flatList[index], true);
         }
         this.select(this.selectionRow, row);
         this.shiftOrAltDown = false;
@@ -262,7 +254,7 @@ export default {
 
       const updatedSelected = [];
       // 处理当前页数据
-      this.list.forEach((row) => {
+      this.flatList.forEach((row) => {
         const key = row[this.operateKey];
         if (key !== undefined && selectedKeyMap.has(key)) {
           const { item } = selectedKeyMap.get(key);
@@ -305,7 +297,7 @@ export default {
       }
 
       // 安全性检查
-      const rowIndex = this.list.findIndex((item) => item === row);
+      const rowIndex = this.flatList.findIndex((item) => item === row);
       if (rowIndex !== -1 && this.getRowErrorType) {
         const errorType = this.getRowErrorType(rowIndex);
         if (errorType) {
@@ -358,7 +350,7 @@ export default {
 
       const isAllSelected = this.$refs.tableRef.store.states.isAllSelected;
       const currentPageKeys = new Set(
-        this.list.map((item) => item[this.operateKey])
+        this.flatList.map((item) => item[this.operateKey])
       );
 
       // 批量处理以提高性能
@@ -367,7 +359,7 @@ export default {
         const rowsToAdd = [];
         selection.forEach((row) => {
           // 跳过有问题的行
-          const rowIndex = this.list.findIndex((item) => item === row);
+          const rowIndex = this.flatList.findIndex((item) => item === row);
           if (
             this.getRowErrorType &&
             rowIndex !== -1 &&
@@ -431,7 +423,7 @@ export default {
         const itemsToAdd = [];
         const itemsToSelect = [];
 
-        this.list.forEach((item) => {
+        this.flatList.forEach((item) => {
           if (item[this.operateKey] === operateKeyValue) {
             itemsToAdd.push(item);
             itemsToSelect.push(item);
@@ -532,7 +524,6 @@ export default {
     },
     removeSingleSelection() {
       this.$emit("update:selected", null);
-      this.singleSelect = null;
     },
     clearSelection() {
       this.$refs.tableRef.clearSelection();

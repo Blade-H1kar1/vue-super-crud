@@ -30,6 +30,7 @@ export default {
         singleSelection: {
           banner: true,
           ctrlSelect: true,
+          labelKey: "name",
           selectable: (row, index) => {
             return index !== 0;
           },

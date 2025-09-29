@@ -1,5 +1,6 @@
 import { isFunction, cloneDeep, uniqueId, get } from "lodash-es";
 import getSet from "core/getSet";
+import { toTreeArray } from "utils";
 
 export default {
   mixins: [getSet],
@@ -20,6 +21,9 @@ export default {
   computed: {
     list() {
       return this.filterData();
+    },
+    flatList() {
+      return toTreeArray(this.list);
     },
     // 判断是否为树形数据
     isTreeStructure() {
