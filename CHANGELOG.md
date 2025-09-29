@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.1](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.10.0...v1.10.1) (2025-09-29)
+
+
+### ♻️ 代码重构
+
+* **crud:** 抽离areaSelection功能逻辑，做成独立组件 ([3deae36](https://github.com/Blade-H1kar1/vue-super-crud/commit/3deae3616b018f106a6c82b145a99f67bf403789))
+
+
+### 🐛 问题修复
+
+* **crud:** 修复操作栏样式与右侧方位显示 ([40a1e16](https://github.com/Blade-H1kar1/vue-super-crud/commit/40a1e164ad5aae005be913db1adc82cb8db2565f))
+* **crud:** 修复尺寸变化时永久展示搜索样式问题 ([3ad78a8](https://github.com/Blade-H1kar1/vue-super-crud/commit/3ad78a8d97551f40db8e65667f5c98682fab1128))
+* **crud:** 修复单选banner文本显示 ([c4b6ff1](https://github.com/Blade-H1kar1/vue-super-crud/commit/c4b6ff13e92b3e7f3ee47cfc951e80ad7e2fdf66))
+* **crud:** 修复选中区域剪切板取值 ([07a355c](https://github.com/Blade-H1kar1/vue-super-crud/commit/07a355ce5bd8c62acc352196cf567484d2c02895))
+* **form:** 修复label换行样式问题、新增colon冒号配置 ([404b0f6](https://github.com/Blade-H1kar1/vue-super-crud/commit/404b0f6f34379722976375b8e25b6755f63959a3))
+
 ## [1.10.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.9.3...v1.10.0) (2025-09-17)
 
 
