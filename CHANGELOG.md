@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.2](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.10.1...v1.10.2) (2025-09-30)
+
+
+### ♻️ 代码重构
+
+* **form:** 重构表单详情模式，优化只读状态 ([6764f9d](https://github.com/Blade-H1kar1/vue-super-crud/commit/6764f9ddfcd2f52f4f3326f24df2f54f54b8ff1e))
+* **grid:** 优化布局组件 ([584b476](https://github.com/Blade-H1kar1/vue-super-crud/commit/584b476911c429354e90ce090df4c83337c5d034))
+
 ### [1.10.1](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.10.0...v1.10.1) (2025-09-29)
 
 
