@@ -1,0 +1,334 @@
+.grid-demo {
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* 控制面板样式 */
+.control-panel {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.control-row {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.control-row:last-child {
+  margin-bottom: 0;
+}
+
+.control-group {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+}
+
+/* 简单布局的控制组 */
+.control-group.simple {
+  margin-bottom: 15px;
+}
+
+.control-group.simple:last-child {
+  margin-bottom: 0;
+}
+
+.control-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #495057;
+  font-size: 14px;
+  width: 120px;
+  margin-right: 15px;
+  margin-bottom: 0;
+}
+
+/* 简单布局的标签样式 */
+.control-group.simple label {
+  width: 120px;
+  font-size: 14px;
+  color: #606266;
+  font-weight: 500;
+}
+
+/* 网格容器样式 */
+.grid-container {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.grid-container h4 {
+  margin: 0 0 15px 0;
+  color: #495057;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 10px;
+  background: #f5f7fa;
+  color: #606266;
+  border-radius: 4px;
+  text-align: center;
+  border: 1px solid #e4e7ed;
+}
+
+/* 基础网格项样式 */
+.grid-item {
+  background-color: #f5f7fa;
+  color: #909399;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  border: 1px solid #e4e7ed;
+  overflow: hidden;
+}
+
+.grid-item.simple {
+  background-color: #f5f7fa;
+  color: #909399;
+  font-size: 24px;
+}
+
+.item-content {
+  text-align: center;
+  padding: 5px;
+}
+
+.item-number {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.item-size {
+  font-size: 11px;
+  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.grid-item.width-span {
+  background-color: #e8f4fd;
+  color: #409eff;
+  border-color: #409eff;
+}
+
+.grid-item.height-span {
+  background-color: #f0f9ff;
+  color: #409eff;
+  border-color: #409eff;
+}
+
+.grid-item.span-both {
+  background-color: #f0f9ff;
+  color: #409eff;
+  border-color: #409eff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.grid-item.position {
+  background-color: #fdf6ec;
+  color: #e6a23c;
+  border-color: #e6a23c;
+}
+
+.grid-item.position-span {
+  background-color: #fef0f0;
+  color: #f56c6c;
+  border-color: #f56c6c;
+}
+
+.grid-item.position-end {
+  background-color: #f4f4f5;
+  color: #909399;
+  border-color: #909399;
+}
+
+/* Areas示例特殊样式 */
+.grid-item.header {
+  background-color: #e8f4fd;
+  color: #409eff;
+  border-color: #409eff;
+  height: 80px;
+}
+
+.grid-item.sidebar1 {
+  background-color: #f0f9ff;
+  color: #67c23a;
+  border-color: #67c23a;
+  height: 150px;
+}
+
+.grid-item.content {
+  background-color: #fdf6ec;
+  color: #e6a23c;
+  border-color: #e6a23c;
+  height: 150px;
+}
+
+.grid-item.footer {
+  background-color: #fef0f0;
+  color: #f56c6c;
+  border-color: #f56c6c;
+  height: 80px;
+}
+
+/* 信息面板样式 */
+.info-panel {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.info-panel h5 {
+  margin: 0 0 10px 0;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.info-label {
+  font-size: 13px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 13px;
+  color: #495057;
+  font-weight: 600;
+  background: #e9ecef;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+/* 描述信息样式 */
+.demo-desc {
+  color: #6c757d;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+  padding: 15px;
+  background: #f0f9ff;
+  border-radius: 6px;
+  border-left: 4px solid #007bff;
+}
+
+/* 简单描述样式（用于基础示例） */
+.demo-desc.simple {
+  margin-top: 10px;
+  color: #606266;
+  font-size: 14px;
+  background: #f0f9ff;
+  padding: 10px;
+  border-radius: 4px;
+  border-left: 4px solid #409eff;
+}
+
+/* Element UI 组件样式调整 */
+.el-slider {
+  flex: 1;
+  margin-right: 20px;
+  margin-top: 5px;
+}
+
+.el-select {
+  flex: 1;
+  margin-right: 20px;
+  width: 100%;
+}
+
+.el-input-number.is-controls-right .el-input__inner {
+  padding-right: 50px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .grid-demo {
+    padding: 15px;
+  }
+
+  .control-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .control-group {
+    min-width: 100%;
+  }
+
+  .control-panel,
+  .grid-container {
+    padding: 15px;
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.grid-demo {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 滚动条样式 */
+.grid-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.grid-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.grid-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.grid-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

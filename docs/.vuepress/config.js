@@ -62,7 +62,7 @@ module.exports = {
           children: ["mockData/base"],
         },
         {
-          title: "crud组件",
+          title: "Crud 组件",
           collapsable: true,
           children: [
             "crud/baseUse",
@@ -82,42 +82,42 @@ module.exports = {
           ],
         },
         {
-          title: "tableSelect组件",
+          title: "tableSelect 组件",
           collapsable: true,
           children: ["tableSelect/base"],
         },
         {
-          title: "form组件",
+          title: "Form 组件",
           collapsable: true,
           children: ["form/baseUse", "form/detail"],
         },
         {
-          title: "stepForm组件",
+          title: "StepForm 组件",
           collapsable: true,
           children: ["stepForm/base"],
         },
         {
-          title: "grid组件",
+          title: "Grid 布局组件",
           collapsable: true,
           children: ["grid/baseUse"],
         },
         {
-          title: "dialog组件",
+          title: "函数式 Dialog 组件",
           collapsable: true,
           children: ["dialog/baseUse"],
         },
         {
-          title: "button组件",
+          title: "Button 组件",
           collapsable: true,
           children: ["button/base"],
         },
         {
-          title: "tabs组件",
+          title: "Tabs 组件",
           collapsable: true,
           children: ["tabs/base"],
         },
         {
-          title: "collapseSplitter组件",
+          title: "CollapseSplitter 组件",
           collapsable: true,
           children: ["collapseSplitter/base"],
         },

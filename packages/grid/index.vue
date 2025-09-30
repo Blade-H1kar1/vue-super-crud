@@ -17,27 +17,13 @@ export default create({
       default: 1,
       validator: (value) => value > 0,
     },
-    // 自动填充模式：true, false, 'autoFit', 'autoFill', 'fixedWidth'
-    autoFill: {
-      type: [Boolean, String],
-      validator: (value) => {
-        if (typeof value === "boolean") return true;
-        return ["autoFit", "autoFill", "fixedWidth"].includes(value);
-      },
-    },
+    // 自动填充模式
+    autoFill: Boolean,
     // 是否填充空白单元格
     fillCell: Boolean,
     // 列宽配置
     columnWidth: {
-      type: [String, Number],
-    },
-    // 最小列宽
-    minColumnWidth: {
-      type: [String, Number],
-    },
-    // 最大列宽
-    maxColumnWidth: {
-      type: [String, Number],
+      type: [String, Number, Array, Object],
     },
     // 网格间隙（同时设置行列间隙）
     gap: {
@@ -146,60 +132,91 @@ export default create({
     gridTemplateColumns() {
       // 处理自动填充模式
       if (this.autoFill) {
-        const columnWidth = this.getAutoFillColumnWidth();
-        const autoFill = this.autoFill === "autoFit" ? "auto-fit" : "auto-fill";
-        return `repeat(${autoFill}, ${columnWidth})`;
+        const defaultWidth = "300px";
+        const width = this.columnWidth || defaultWidth;
+        const columnWidth = `minmax(${setPx(width)}, 1fr)`;
+        return `repeat(auto-fill, ${columnWidth})`;
       }
-
       // 处理固定列数模式
       return this.getFixedColumnsTemplate();
     },
   },
   methods: {
-    // 获取自动填充模式下的列宽
-    getAutoFillColumnWidth() {
-      const defaultWidth = "300px";
-      const width = this.columnWidth || defaultWidth;
-
-      // 固定宽度模式
-      if (this.autoFill === "fixedWidth") {
-        return setPx(width);
-      }
-
-      // 自适应宽度模式（默认）
-      return `minmax(${setPx(width)}, 1fr)`;
-    },
-
     //获取固定列数模式下的列模板
     getFixedColumnsTemplate() {
+      // 数组模式：独立列宽
+      if (Array.isArray(this.columnWidth)) {
+        return this.buildIndependentColumnsTemplate();
+      }
+
+      // 单值模式：统一列宽（原有逻辑）
+      return this.buildUniformColumnsTemplate();
+    },
+
+    // 构建独立列宽模板
+    buildIndependentColumnsTemplate() {
+      const widths = [];
+
+      for (let i = 0; i < this.columns; i++) {
+        const columnConfig = this.columnWidth[i];
+
+        if (!columnConfig || columnConfig === "1fr") {
+          widths.push("1fr");
+        } else if (
+          typeof columnConfig === "string" ||
+          typeof columnConfig === "number"
+        ) {
+          // 简单值：直接设置宽度
+          widths.push(setPx(columnConfig));
+        } else if (typeof columnConfig === "object" && columnConfig !== null) {
+          // 对象配置：支持 width, min, max
+          widths.push(this.buildColumnTemplate(columnConfig));
+        } else {
+          widths.push("1fr");
+        }
+      }
+
+      return widths.join(" ");
+    },
+
+    // 构建单列模板（支持最大最小宽度约束）
+    buildColumnTemplate(config) {
+      const { width, min, max } = config;
+      if (width && !min && !max) {
+        return setPx(width);
+      }
+      if (min || max) {
+        const minWidth = min ? setPx(min) : width ? setPx(width) : "auto";
+        const maxWidth = max ? setPx(max) : width ? setPx(width) : "1fr";
+        return `minmax(${minWidth}, ${maxWidth})`;
+      }
+      if (width) {
+        return setPx(width);
+      }
+      return "1fr";
+    },
+
+    // 构建统一列宽模板
+    buildUniformColumnsTemplate() {
+      if (this.columnWidth === "1fr") {
+        return `repeat(${this.columns}, 1fr)`;
+      }
+
+      // 对象形式：支持 {min, max, width} 配置
+      if (
+        typeof this.columnWidth === "object" &&
+        this.columnWidth !== null &&
+        !Array.isArray(this.columnWidth)
+      ) {
+        const template = this.buildColumnTemplate(this.columnWidth);
+        return `repeat(${this.columns}, ${template})`;
+      }
+
       // 优先使用columnWidth
       if (this.columnWidth) {
         return `repeat(${this.columns}, ${setPx(this.columnWidth)})`;
       }
 
-      // 同时设置了最小和最大列宽
-      if (this.minColumnWidth && this.maxColumnWidth) {
-        return `repeat(${this.columns}, minmax(${setPx(
-          this.minColumnWidth
-        )}, ${setPx(this.maxColumnWidth)}))`;
-      }
-
-      // 只设置了最小列宽
-      if (this.minColumnWidth) {
-        return `repeat(${this.columns}, minmax(${setPx(
-          this.minColumnWidth
-        )}, 1fr))`;
-      }
-
-      // 只设置了最大列宽
-      if (this.maxColumnWidth) {
-        const defaultMinWidth = "200px";
-        return `repeat(${this.columns}, minmax(${defaultMinWidth}, ${setPx(
-          this.maxColumnWidth
-        )}))`;
-      }
-
-      // 默认情况：平均分配空间
       return `repeat(${this.columns}, 1fr)`;
     },
 
@@ -214,24 +231,16 @@ export default create({
     // 处理行数值，转换为CSS grid-template-rows值
     frGetter(value) {
       if (!value) return undefined;
-
-      // 如果是数字，转换为重复的1fr
       if (typeof value === "number") {
         return `repeat(${value}, 1fr)`;
       }
-
-      // 如果是字符串，直接返回
       return value;
     },
 
     // 格式化网格区域
     formatAreas(areas) {
       if (!areas) return undefined;
-
-      // 如果是字符串，直接返回
       if (typeof areas === "string") return areas;
-
-      // 如果是数组，转换为CSS格式
       return areas.map((area) => `"${area}"`).join(" ");
     },
   },

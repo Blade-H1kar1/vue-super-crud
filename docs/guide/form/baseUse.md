@@ -24,15 +24,19 @@
 
 ## 布局
 
-### Grid布局（默认）基于Grid组件
-`layout="grid"` 时使用网格布局，支持以下配置：
+### Grid布局（默认）
+表单默认使用Grid网格布局，提供灵活的响应式布局能力：
 
-- `columns` 表单列数
-- `columnGap` 列间距
-- `rowGap` 行间距
-- `renderColumns`项中：
-  - `widthSize` 占据列数
-  - `heightSize` 占据行数
+**基础配置：**
+- `columns` - 设置表单列数，默认为1列
+- `columnGap` - 列间距
+- `rowGap` - 行间距
+
+**renderColumns项配置：**
+- `widthSize` - 表单项占据的列数（跨列）
+- `heightSize` - 表单项占据的行数（跨行）
+
+Grid布局支持表单项的跨行跨列显示，适合复杂的表单布局需求。更多Grid组件配置请参考 [Grid布局组件文档](/guide/grid/baseUse.html)
 
 <ClientOnly>
 <common-code-format>
@@ -42,16 +46,6 @@
 </common-code-format>
 </ClientOnly>
 
-### 固定列宽布局
-通过设置 `columnWidth` 来固定每列宽度，不固定数量：
-
-<ClientOnly>
-<common-code-format>
-  <form-baseUse-inlineLayout slot="source"></form-baseUse-inlineLayout>
-  
-<<< @/docs/.vuepress/components/form/baseUse/inlineLayout.vue
-</common-code-format>
-</ClientOnly>
 
 ### Element UI 布局
 当 `layout="el-row"` 时，可以使用 Element UI 的栅格布局系统。
@@ -112,6 +106,7 @@
 - `#[prop]-label` 标签插槽
 - `hiddenLabel` 隐藏标签
 - `labelOverTip` 标签超出隐藏
+- `labelWidth` 单独设置标签宽度
 
 <ClientOnly>
 <common-code-format>
@@ -203,6 +198,9 @@
 | labelWidth    | 标签宽度                           | string  | '100px'  |
 | labelPosition | 标签位置                           | 'right' | 'left'   | 'top'  | 'right' |
 | layout        | 布局类型                           | 'grid'  | 'el-row' | 'grid' |
+| columns       | 表单列数（Grid布局时）             | number  | 1        |
+| columnGap     | 列间距（Grid布局时）               | string  | -        |
+| rowGap        | 行间距（Grid布局时）               | string  | -        |
 | shrinkLabel   | 是否收缩标签                       | boolean | true     |
 | scrollError   | 是否滚动至错误信息                 | boolean | true     |
 | hiddenLabel   | 是否隐藏标签                       | boolean | false    |
@@ -217,8 +215,8 @@
 | ------------- | ---------------------------------- | ---------------- | ------- |
 | prop          | 表单字段名                         | string           | -       |
 | label         | 标签文本                           | string           | -       |
-| widthSize     | 占据列数                           | number \ string  | -       |
-| heightSize    | 占据行数                           | number \ string  | -       |
+| widthSize     | 占据列数（Grid布局时）             | number \ string  | 1       |
+| heightSize    | 占据行数（Grid布局时）             | number \ string  | 1       |
 | tooltip       | 提示文本                           | string           | -       |
 | tooltipRender | 提示渲染函数                       | function         | -       |
 | labelWidth    | 单独配置标签宽度                   | string           | '100px' |

@@ -37,43 +37,5 @@ export default {
 </script>
 
 <style scoped>
-.grid-demo {
-  width: 100%;
-  margin-bottom: 20px;
-}
-
-.grid-item {
-  height: 80px;
-  background-color: #f5f7fa;
-  border-radius: 4px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 18px;
-  color: #fff;
-}
-
-.header {
-  background-color: #409eff;
-}
-
-.sidebar1 {
-  background-color: #67c23a;
-  height: 150px;
-}
-
-.content {
-  background-color: #e6a23c;
-  height: 150px;
-}
-
-.footer {
-  background-color: #f56c6c;
-}
-
-.demo-desc {
-  margin-top: 10px;
-  color: #606266;
-  font-size: 14px;
-}
+@import "./common-styles.scss";
 </style>
