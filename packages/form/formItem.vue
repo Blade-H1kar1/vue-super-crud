@@ -1,6 +1,5 @@
 <script>
 import { create } from "core";
-import { omit } from "lodash-es";
 import grid from "../grid/index.vue";
 import cell from "pak/grid/cell.vue";
 import formItem from "./formItem";
@@ -15,9 +14,6 @@ export default create({
     isFirstRow: Boolean,
   },
   inject: ["formCtx", "elForm"],
-  provide() {
-    return this.provide;
-  },
   components: {
     cell,
     grid,
@@ -39,6 +35,16 @@ export default create({
       }
     });
   },
+  mounted() {
+    if (this.isDetail) {
+      this.handleDetailMode();
+    }
+  },
+  updated() {
+    if (this.isDetail) {
+      this.handleDetailMode();
+    }
+  },
   methods: {
     resetField() {
       this.$refs.formItem?.resetField();
@@ -48,24 +54,43 @@ export default create({
       callBack && callBack(config);
       return config;
     },
+    // 处理详情模式下的DOM操作
+    handleDetailMode() {
+      this.$nextTick(() => {
+        if (!this.$el) return;
+        // 移除所有tabIndex属性
+        const elementsWithTabIndex = this.$el.querySelectorAll("[tabindex]");
+        elementsWithTabIndex.forEach((el) => {
+          el.removeAttribute("tabindex");
+        });
+
+        // 设置所有input为readonly
+        const inputs = this.$el.querySelectorAll("input, textarea");
+        inputs.forEach((input) => {
+          input.setAttribute("readonly", "readonly");
+          input.setAttribute("tabindex", "-1");
+        });
+
+        // 处理其他可聚焦元素
+        const focusableElements = this.$el.querySelectorAll(
+          "select, button, [contenteditable]"
+        );
+        focusableElements.forEach((el) => {
+          el.setAttribute("tabindex", "-1");
+        });
+      });
+    },
   },
   computed: {
-    provide() {
-      // 控制子组件单个禁用
-      if (this.isDetail) {
-        return {
-          elForm: {
-            ...this.elForm,
-            disabled: true,
-          },
-        };
-      }
-    },
     disabled() {
-      return this.isDetail || this.item.disabled || this.elForm?.disabled;
+      return this.item.disabled || this.elForm?.disabled;
     },
     isDetail() {
-      if (this.col.isDetail === false) return false;
+      if (
+        this.col.detail === false ||
+        this.formCtx.formOptions.detail === false
+      )
+        return false;
       return this.formCtx.isDetail || this.col.detail;
     },
     item() {

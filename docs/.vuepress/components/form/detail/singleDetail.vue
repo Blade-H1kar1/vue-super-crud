@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div style="margin-bottom: 10px;">
+    <div style="margin-bottom: 10px">
       <el-button @click="detail = !detail" size="small">切换模式</el-button>
       <el-tag>当前模式：{{ detail ? "详情" : "编辑" }}</el-tag>
     </div>
@@ -49,7 +49,7 @@ export default {
           {
             label: "checkbox",
             prop: "checkbox",
-            isDetail: this.detail,
+            detail: this.detail,
             comp: {
               name: "sc-checkbox",
               options: this.dictData,
@@ -58,7 +58,7 @@ export default {
           {
             label: "select",
             prop: "select",
-            isDetail: this.detail,
+            detail: this.detail,
             comp: {
               name: "sc-select",
               options: this.dictData,

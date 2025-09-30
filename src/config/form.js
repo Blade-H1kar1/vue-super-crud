@@ -62,6 +62,8 @@ export default {
       type: String,
       default: "small",
     },
+    // 是否显示冒号
+    colon: Boolean,
     // 是否开启详情模式
     detail: Boolean,
     // 是否开启边框模式

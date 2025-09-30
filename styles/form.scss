@@ -69,91 +69,186 @@
     }
   }
 
-  // 表单详情模式
+  // 表单详情模式 - 纯样式只读
   .is-detail {
     margin-bottom: 0px;
+
     .el-collapse-item__header {
       margin-bottom: 0;
     }
-    .el-input.is-disabled .el-input__inner,
-    .el-textarea.is-disabled .el-textarea__inner,
-    .el-range-editor.is-disabled,
-    .el-range-editor.is-disabled input {
-      color: var(--color-text-regular);
-      background-color: #fff;
-      padding-left: 0;
-    }
-    .el-input-number__decrease,
-    .el-input-number__increase {
-      display: none;
-    }
-    .el-input-group__append,
-    .el-input-group__prepend {
-      background-color: transparent;
-      border: none;
-    }
-    .el-input__suffix,
-    .el-input__prefix {
-      display: none;
-    }
 
+    // 输入框样式
     .el-input__inner,
     .el-textarea__inner {
-      border: none;
+      border: none !important;
+      background-color: transparent !important;
+      color: var(--color-text-regular) !important;
+      padding-left: 0 !important;
+      cursor: default !important;
+
+      // 隐藏占位符
       &::-webkit-input-placeholder {
         color: transparent !important;
       }
       &::-moz-placeholder {
         color: transparent !important;
       }
-      &::-moz-placeholder {
-        color: transparent !important;
-      }
-      &::-ms-input-placeholder {
-        color: transparent !important;
-      }
       &::-ms-input-placeholder {
         color: transparent !important;
       }
     }
 
-    .el-checkbox__input.is-disabled.is-checked .el-checkbox__inner {
-      background-color: var(--color-primary);
-      border-color: var(--color-primary);
+    // 数字输入框
+    .el-input-number {
+      .el-input__inner {
+        text-align: left !important;
+      }
+      .el-input-number__decrease,
+      .el-input-number__increase {
+        display: none !important;
+      }
     }
-    .el-checkbox__input.is-disabled.is-checked .el-checkbox__inner::after {
-      border-color: #fff;
+
+    // 日期范围选择器
+    .el-range-editor {
+      background-color: transparent !important;
+      border: none !important;
+      pointer-events: none !important;
+
+      input {
+        background-color: transparent !important;
+        border: none !important;
+        color: var(--color-text-regular) !important;
+        pointer-events: none !important;
+      }
     }
-    .el-radio__input.is-disabled.is-checked .el-radio__inner {
-      background-color: var(--color-primary);
-      border-color: var(--color-primary);
+
+    // 隐藏输入框的前缀后缀图标
+    .el-input__suffix,
+    .el-input__prefix,
+    .el-input-group__append,
+    .el-input-group__prepend {
+      display: none !important;
     }
-    .el-radio__input.is-disabled.is-checked .el-radio__inner::after {
-      background-color: #fff;
+
+    // 下拉框样式
+    .el-select {
+      pointer-events: none !important;
+
+      .el-input__inner {
+        cursor: default !important;
+      }
+
+      .el-input__suffix {
+        display: none !important;
+      }
     }
-    .el-checkbox__input.is-disabled + span.el-checkbox__label,
-    .el-radio__input.is-disabled + span.el-radio__label {
-      color: var(--color-text-regular);
+
+    // 级联选择器
+    .el-cascader {
+      pointer-events: none !important;
+
+      .el-input__inner {
+        cursor: default !important;
+      }
     }
+
+    // 日期选择器
+    .el-date-editor {
+      pointer-events: none !important;
+
+      .el-input__inner {
+        cursor: default !important;
+      }
+    }
+
+    // 复选框样式 - 保持选中状态的视觉效果
+    .el-checkbox {
+      pointer-events: none !important;
+
+      .el-checkbox__input.is-checked .el-checkbox__inner {
+        background-color: var(--color-primary) !important;
+        border-color: var(--color-primary) !important;
+
+        &::after {
+          border-color: #fff !important;
+        }
+      }
+
+      .el-checkbox__label {
+        color: var(--color-text-regular) !important;
+      }
+    }
+
+    // 单选框样式 - 保持选中状态的视觉效果
+    .el-radio {
+      pointer-events: none !important;
+
+      .el-radio__input.is-checked .el-radio__inner {
+        background-color: var(--color-primary) !important;
+        border-color: var(--color-primary) !important;
+
+        &::after {
+          background-color: #fff !important;
+        }
+      }
+
+      .el-radio__label {
+        color: var(--color-text-regular) !important;
+      }
+    }
+
+    // 开关组件
+    .el-switch {
+      pointer-events: none !important;
+    }
+
+    // 滑块组件
+    .el-slider {
+      pointer-events: none !important;
+    }
+
+    // 评分组件
+    .el-rate {
+      pointer-events: none !important;
+    }
+
+    // 颜色选择器
+    .el-color-picker {
+      pointer-events: none !important;
+    }
+
+    // 上传组件
+    .el-upload {
+      pointer-events: none !important;
+    }
+
+    // 表单项布局
     .el-form-item__label,
     .el-form-item__content {
       padding: 2px 0;
     }
+
     .el-form-item__label {
-      padding-right: 20px;
       box-sizing: border-box;
+      padding-right: 10px;
     }
+
+    // 标签样式
     .el-tag {
       margin-left: 0 !important;
       margin-right: 6px !important;
+      pointer-events: none !important;
     }
+
+    // 嵌套表格
     .sc-crud {
       .el-form-item__content {
         border: none;
       }
     }
+
     .el-form-item__content {
-      padding-left: 20px;
       box-sizing: border-box;
       background-color: #fff;
     }
@@ -178,12 +273,6 @@
   }
 }
 
-// .sc-form--border:not(.sc-form--group) {
-//   // group 模式下，第一行不需要顶部边框
-//   .is-first-row {
-//     border-top: 1px solid var(--border-color-lighter);
-//   }
-// }
 // 表单详情模式边框
 .sc-form--border {
   .el-form {

@@ -7,7 +7,7 @@
     :style="{ padding: formOptions.gap }"
     @contextmenu="handleContextMenu"
   >
-    <div style="min-height: 0; position: relative;">
+    <div style="min-height: 0; position: relative">
       <position
         slotName="title"
         :render="formOptions.titleRender"
@@ -75,7 +75,7 @@
           <cell
             v-for="n in emptyCount"
             :key="'empty' + n"
-            style="visibility: hidden;"
+            style="visibility: hidden"
           />
           <formAction />
         </component>
@@ -202,7 +202,7 @@ export default create({
       return this.formOptions.border || this.formOptions.border === "";
     },
     isDisabled() {
-      return this.isDetail || this.loadingStatus || this.formOptions.disabled;
+      return this.loadingStatus || this.formOptions.disabled;
     },
     isLoading() {
       if (this.isDetail) return this.loadingStatus;

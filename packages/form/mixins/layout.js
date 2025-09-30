@@ -1,4 +1,4 @@
-import { omit, cloneDeep } from "lodash-es";
+import { omit, pick, cloneDeep } from "lodash-es";
 import {
   extendsOption,
   groupBy,
@@ -10,8 +10,18 @@ export default {
   methods: {
     // 初始化列配置
     initColumn(item, index) {
-      if (item.detail) {
-        item.detail = extendsOption(item, item.detail, omit(item, ["detail"]));
+      const detail = item.detail;
+      if (detail) {
+        // 详情存在渲染配置时，不继承原有渲染配置
+        const hasRenderConfig =
+          detail.formatter || detail.comp || detail.render;
+        item.detail = extendsOption(
+          item,
+          detail,
+          hasRenderConfig
+            ? pick(item, ["label", "prop", "required", "regular", "rules"])
+            : omit(item, ["detail"])
+        );
       }
     },
 
