@@ -40,14 +40,22 @@ export default {
     // 监听外部传入的选中值变化
     selected: {
       handler(newVal, oldVal) {
-        if (this.showSelection) {
+        if (this.showSelection && !this._isInternalUpdateSelection) {
           this.$nextTick(() => {
-            this.updateSelection();
+            if (
+              newVal &&
+              oldVal &&
+              !isEqual(
+                newVal.map((item) => item?.[this.operateKey]),
+                oldVal.map((item) => item?.[this.operateKey])
+              )
+            ) {
+              this.updateSelection();
+            }
           });
         }
       },
       immediate: true,
-      deep: true, // 添加深度监听，确保对象内部属性变化也能被捕获
     },
   },
   computed: {
@@ -237,12 +245,11 @@ export default {
      */
     updateSelection() {
       if (!this.$refs.tableRef) return;
-      if (this._isInternalUpdateSelection) return;
+      if (!this.selected?.length) return;
+      this._isInternalUpdateSelection = true;
       if (!this._isPaging) {
         this.$refs.tableRef.clearSelection();
       }
-      if (!this.selected?.length) return;
-
       // 创建操作键的映射，提高查找效率
       const selectedKeyMap = new Map();
       this.selected.forEach((item, index) => {
@@ -277,13 +284,17 @@ export default {
       // 更新选中数组
       if (updatedSelected.length > 0 || this.selected.length > 0) {
         this.selected.splice(0, this.selected.length, ...updatedSelected);
-        this.updateSelected();
       }
 
       this._isPaging = false;
+      setTimeout(() => {
+        this._isInternalUpdateSelection = false;
+      }, 100);
     },
     selectionChange(arr) {
+      if (this._isInternalUpdateSelection) return;
       this.selectionRow = arr;
+      this.$emit("selection-change", arr);
     },
     select(selection, row) {
       if (!this.selected) return;
@@ -383,7 +394,6 @@ export default {
         // 批量添加行
         if (rowsToAdd.length > 0) {
           this.selected.push(...rowsToAdd);
-          this.updateSelected();
         }
       } else {
         // 取消全选当前页 - 收集需要保留的行
@@ -401,7 +411,6 @@ export default {
         // 只有当数量变化时才更新
         if (rowsToKeep.length !== this.selected.length) {
           this.selected.splice(0, this.selected.length, ...rowsToKeep);
-          this.updateSelected();
         }
       }
     },
@@ -433,7 +442,6 @@ export default {
         // 批量添加和选中
         if (itemsToAdd.length > 0) {
           this.selected.push(...itemsToAdd);
-          this.updateSelected();
 
           this.$nextTick(() => {
             if (this.$refs.tableRef) {
@@ -447,7 +455,6 @@ export default {
         // 检查是否已存在
         if (this.selectedOperateKeys.indexOf(operateKeyValue) === -1) {
           this.selected.push(row);
-          this.updateSelected();
 
           this.$nextTick(() => {
             if (this.$refs.tableRef) {
@@ -493,8 +500,6 @@ export default {
             this.selected.splice(index, 1);
           });
 
-          this.updateSelected();
-
           // 取消表格选中状态
           this.$nextTick(() => {
             if (this.$refs.tableRef) {
@@ -509,7 +514,6 @@ export default {
         if (index > -1) {
           const itemToDeselect = this.selected[index];
           this.selected.splice(index, 1);
-          this.updateSelected();
 
           this.$nextTick(() => {
             if (this.$refs.tableRef) {
@@ -538,7 +542,6 @@ export default {
       // 只有当数量变化时才更新
       if (disabledSelection.length !== this.selected.length) {
         this.selected.splice(0, this.selected.length, ...disabledSelection);
-        this.updateSelected();
 
         // 恢复禁用的选中数据
         if (disabledSelection.length) {
@@ -560,39 +563,6 @@ export default {
         }
       }
       return true;
-    },
-    updateSelected() {
-      // 设置标志位，防止循环更新
-      this._isInternalUpdateSelection = true;
-      // 使用防抖处理，避免频繁触发更新
-      this._debounceUpdateSelected =
-        this._debounceUpdateSelected ||
-        this.debounceMethod(() => {
-          this.$emit("update:selected", this.selected);
-          this.$nextTick(() => {
-            this._isInternalUpdateSelection = false;
-          });
-        }, 50);
-      this._debounceUpdateSelected();
-    },
-
-    /**
-     * 防抖函数
-     * 在指定时间内多次调用只执行最后一次
-     * @param {Function} fn 需要防抖的函数
-     * @param {Number} delay 延迟时间（毫秒）
-     * @returns {Function} 防抖后的函数
-     */
-    debounceMethod(fn, delay) {
-      let timer = null;
-      return function () {
-        const context = this;
-        const args = arguments;
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-          fn.apply(context, args);
-        }, delay);
-      };
     },
   },
 };

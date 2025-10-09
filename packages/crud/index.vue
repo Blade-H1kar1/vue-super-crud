@@ -339,7 +339,14 @@ export default create({
       return props;
     },
     tableListeners() {
-      const handlers = { ...omit(this.$listeners, "input") };
+      const handlers = {
+        ...omit(
+          this.$listeners,
+          "input",
+          "selection-change",
+          "selectionChange"
+        ),
+      };
       Object.keys(this.crudOptions).forEach((key) => {
         if (typeof this.crudOptions[key] === "function") {
           handlers[key] = this.crudOptions[key];

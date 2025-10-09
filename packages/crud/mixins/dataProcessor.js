@@ -349,7 +349,13 @@ export default {
     updateTableState() {
       this.$nextTick(() => {
         this.$refs.tableRef.layout.updateElsHeight();
-        this.updateSelection();
+        if (
+          this.selected &&
+          this.selected.length > 0 &&
+          !this._isInternalUpdateSelection
+        ) {
+          this.updateSelection();
+        }
       });
     },
     // 获取本地分页数据
