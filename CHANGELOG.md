@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.4](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.10.3...v1.10.4) (2025-10-13)
+
+
+### 🚀 构建/工具
+
+* update el-table-excel-extends to v1.2.0 ([ca84187](https://github.com/Blade-H1kar1/vue-super-crud/commit/ca84187ec7d0dc61716c8017d30c133b6676d67f))
+
+
+### 🐛 问题修复
+
+* **form:**  修复label样式 ([eda8ba8](https://github.com/Blade-H1kar1/vue-super-crud/commit/eda8ba83e9315d8d543764e4f3ff62e7298af1ef))
+
 ### [1.10.3](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.10.2...v1.10.3) (2025-10-10)
 
 
