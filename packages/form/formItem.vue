@@ -152,6 +152,9 @@ export default create({
       );
     },
     labelMaxWidth() {
+      if (this.formOptions.labelPosition === "top") {
+        return null;
+      }
       const calcRequired = this.rules.required ? "11px" : "0px";
       const calcTip = this.hasTooltip ? "18px" : "0px";
       return `calc(100% - ${calcRequired} - ${calcTip})`;

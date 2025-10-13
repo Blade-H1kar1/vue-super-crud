@@ -25,11 +25,6 @@
   .el-form-item__label {
     position: relative;
   }
-  .el-form-item.is-required {
-    .form-label {
-      max-width: calc(100% - 11px);
-    }
-  }
   .el-form-item.colon {
     .el-form-item__label:after {
       position: absolute;
