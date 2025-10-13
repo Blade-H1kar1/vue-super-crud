@@ -186,7 +186,6 @@ import group from "../group/index.vue";
 import selectBanner from "./selectBanner.vue";
 import virtualScroll from "el-table-virtual-scroll";
 import batchMockData from "core/components/batchMockData.vue";
-// import areaSelection from "C:/Users/Administrator/Desktop/el-table-excel-extends/src/index.vue";
 import ElTableExcelExtends from "el-table-excel-extends";
 import {
   toCamelCase,
@@ -741,13 +740,13 @@ export default create({
       return canEdit && !disabled ? true : false;
     },
     customMapping({ value, column, rowIndex, columnIndex }, cellInstance) {
-      if (cellInstance.comp.options || cellInstance.dictData) {
-        const options = cellInstance.comp.options || cellInstance.dictData;
+      if (cellInstance?.comp?.options || cellInstance?.dictData) {
+        const options = cellInstance?.comp?.options || cellInstance?.dictData;
         const item = options.find((item) => item.label === value);
         return item.value || value;
       }
-      const instance = cellInstance.$children[0];
-      const options = instance.options;
+      const instance = cellInstance?.$children?.[0];
+      const options = instance?.options;
       if (options) {
         const item = options?.find((item) => item.label === value);
         return item?.value || value;
