@@ -1,6 +1,6 @@
 {
   "name": "vue-super-crud",
-  "version": "1.10.5",
+  "version": "1.10.6",
   "main": "lib/super-crud.min.js",
   "files": [
     "lib",
@@ -32,7 +32,7 @@
     "cross-env": "^7.0.3",
     "css-loader": "^5.2.0",
     "dayjs": "^1.11.13",
-    "el-table-excel-extends": "^1.2.1",
+    "el-table-excel-extends": "^1.2.2",
     "el-table-virtual-scroll": "^1.4.6",
     "element-ui": "^2.15.14",
     "gulp": "^4.0.0",
