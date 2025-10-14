@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.9](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.10.8...v1.10.9) (2025-10-14)
+
+
+### 🐛 问题修复
+
+* **crud:** bug ([8be30eb](https://github.com/Blade-H1kar1/vue-super-crud/commit/8be30eb687ae585e169cf79096cb3ce4d5e1864e))
+
 ### [1.10.8](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.10.7...v1.10.8) (2025-10-14)
 
 ### [1.10.7](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.10.6...v1.10.7) (2025-10-13)
