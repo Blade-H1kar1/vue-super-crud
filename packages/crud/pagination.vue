@@ -99,7 +99,8 @@ export default create({
         this.props.pageSize,
         this.ctx.search[this.props.pageSize] ||
           this.ctx.setOptions.pageSize ||
-          this.pagination.pageSize
+          this.pagination.pageSize ||
+          10
       );
     },
     // 保存当前页滚动位置
