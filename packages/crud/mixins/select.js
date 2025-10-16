@@ -42,12 +42,15 @@ export default {
       handler(newVal, oldVal) {
         if (this.showSelection && !this._isInternalUpdateSelection) {
           this.$nextTick(() => {
+            if (oldVal?.length && (!newVal || newVal?.length == 0)) {
+              this.clearSelection();
+              return;
+            }
             if (
-              newVal &&
-              oldVal &&
+              newVal?.length &&
               !isEqual(
                 newVal.map((item) => item?.[this.operateKey]),
-                oldVal.map((item) => item?.[this.operateKey])
+                (oldVal || [])?.map((item) => item?.[this.operateKey])
               )
             ) {
               this.updateSelection();
@@ -182,6 +185,7 @@ export default {
           }
         }
         this.$emit("update:selected", row);
+        this.emitSelectionChange(row);
         return;
       }
       if (!this.showSelection) return;
@@ -292,11 +296,17 @@ export default {
       }, 100);
     },
     selectionChange(arr) {
-      if (this._isInternalUpdateSelection) return;
       this.selectionRow = arr;
-      this.$emit("selection-change", arr);
+    },
+    emitSelectionChange(selection, row) {
+      this.$nextTick(() => {
+        if (!this._isInternalUpdateSelection) {
+          this.$emit("selection-change", selection, row);
+        }
+      });
     },
     select(selection, row) {
+      this.emitSelectionChange(selection, row);
       if (!this.selected) return;
 
       // 基础验证
@@ -336,6 +346,7 @@ export default {
       }
     },
     selectAll(selection) {
+      this.emitSelectionChange(selection);
       if (!this.selected) return;
 
       // 检查是否有问题行
@@ -528,10 +539,12 @@ export default {
     },
     removeSingleSelection() {
       this.$emit("update:selected", null);
+      this.emitSelectionChange(null);
     },
     clearSelection() {
       this.$refs.tableRef.clearSelection();
       this.selectionRow = [];
+      this.emitSelectionChange([]);
       if (!this.selected) return;
 
       // 获取禁用的选中数据

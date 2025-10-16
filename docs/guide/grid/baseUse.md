@@ -34,7 +34,7 @@
 
 ## 自动填充模式
 
-类 flex 布局，但是可以自动充满剩余空间。
+自动填充响应式网格布局。
 `autoFill` 开启自动填充，`columnWidth` 设置每列最小宽度。
 
 <ClientOnly>
