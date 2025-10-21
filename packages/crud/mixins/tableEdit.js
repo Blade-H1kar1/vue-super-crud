@@ -67,7 +67,7 @@ export default {
                 ? this.editConfig.autofocus
                 : prop;
             setTimeout(() => {
-              this.focusInput(rowKey, prop);
+              this.focusInput(rowKey || row._internalId, prop);
             }, 100);
           }
           this.$emit("editStatusChange", {
@@ -685,7 +685,6 @@ export default {
       const cell = this.$el
         .querySelector(".el-table__body")
         .querySelector(`[data-row-key="${rowKey}"][data-prop="${prop}"]`);
-
       if (!cell) return;
       focusFormElement(cell);
     },

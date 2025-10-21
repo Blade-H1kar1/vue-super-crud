@@ -76,7 +76,7 @@ export function cellRender(
           return defaultRender.input;
         }
       }}
-      data-row-key={scope.row[topProps.valueKey]}
+      data-row-key={scope.row[topProps.valueKey] || scope.row._internalId}
       data-full-prop={formProp}
       data-prop={item.prop}
     ></Render>

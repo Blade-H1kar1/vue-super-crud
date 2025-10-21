@@ -3,7 +3,6 @@ import {
   extendsOption,
   groupBy,
   getFirstRowLastCellIndex,
-  calcEmptyCount,
 } from "../utils/formHelpers";
 
 export default {
@@ -43,19 +42,6 @@ export default {
     // 计算第一行最后一个单元格的索引
     getFirstRowLastCellIndex(columns = [], columnsNumber = 1) {
       return getFirstRowLastCellIndex(columns, columnsNumber);
-    },
-
-    // 计算空单元格数量
-    calcEmptyCount() {
-      const getGridColumnCount = () => {
-        const grid = this.$refs.gridRef.$el;
-        if (!grid) return 1;
-        const style = window.getComputedStyle(grid);
-        const columns = style.gridTemplateColumns;
-        return columns.split(" ").length;
-      };
-
-      return calcEmptyCount(this.trueRenderColumns, getGridColumnCount);
     },
   },
 };

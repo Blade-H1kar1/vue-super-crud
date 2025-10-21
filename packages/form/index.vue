@@ -72,11 +72,6 @@
             :is-first-row="index <= firstRowLastCellIndex"
             :ref="item.prop"
           ></formItem>
-          <cell
-            v-for="n in emptyCount"
-            :key="'empty' + n"
-            style="visibility: hidden"
-          />
           <formAction />
         </component>
       </el-form>
@@ -139,7 +134,6 @@ export default create({
     loading: {
       type: Boolean,
     },
-    actionInLastCell: Boolean,
   },
   provide() {
     return {
@@ -161,7 +155,6 @@ export default create({
     return {
       key: 1,
       loadingStatus: false,
-      emptyCount: 0,
       mockDialogVisible: false,
     };
   },
@@ -170,20 +163,6 @@ export default create({
   },
   mounted() {
     this.extendMethod(this.$refs.formRef);
-    if (this.actionInLastCell) {
-      this.emptyCount = this.calcEmptyCount();
-      this.resizeObserver = new ResizeObserver(() => {
-        this.emptyCount = this.calcEmptyCount();
-      });
-      this.resizeObserver.observe(this.$el);
-    }
-  },
-  updated() {
-    if (this.actionInLastCell) {
-      this.$nextTick(() => {
-        this.emptyCount = this.calcEmptyCount();
-      });
-    }
   },
   beforeDestroy() {
     this.resizeObserver && this.resizeObserver.disconnect();

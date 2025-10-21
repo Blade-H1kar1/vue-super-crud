@@ -4,16 +4,19 @@
     :class="b([action.align])"
     :is="layoutCell"
     :widthSize="widthSize"
+    :cellStyle="{ 'grid-column-end': -1 }"
   >
     <el-form-item label-width="0px">
-      <button_
-        v-for="(item, index) in formActionButtons"
-        :key="index"
-        :size="formCtx.formOptions.size"
-        :loading="formCtx.loadingStatus"
-        :scope="scope"
-        v-bind="item"
-      ></button_>
+      <div style="text-align: right">
+        <button_
+          v-for="(item, index) in formActionButtons"
+          :key="index"
+          :size="formCtx.formOptions.size"
+          :loading="formCtx.loadingStatus"
+          :scope="scope"
+          v-bind="item"
+        ></button_>
+      </div>
     </el-form-item>
   </component>
 </template>

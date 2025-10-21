@@ -131,15 +131,6 @@ export function getFirstRowLastCellIndex(columns = [], columnsNumber = 1) {
   return lastIndex === -1 ? columns.length - 1 : lastIndex;
 }
 
-// 计算空单元格数量
-export function calcEmptyCount(trueRenderColumns, getGridColumnCount) {
-  const total = trueRenderColumns.length;
-  const col = getGridColumnCount();
-  const remain = total % col;
-  if (remain === col - 1 || col === 1) return 0;
-  return remain === 0 ? col - 1 : col - remain - 1;
-}
-
 // 转换表单属性为驼峰格式并筛选
 export function getFormProps(formOptions) {
   const obj = {};

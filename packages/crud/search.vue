@@ -215,8 +215,12 @@ export default create({
 
       // 获取 renderColumns 中 alwaysShow 为 true 的数量
       const renderColumns = this.ctx.getRenderColumns("search");
-      const alwaysShowCount = renderColumns.filter((col) => col.alwaysShow)
-        .length;
+      const alwaysShowCount = renderColumns.filter(
+        (col) => col.alwaysShow
+      ).length;
+      const widthSizeCount = renderColumns
+        .filter((col) => col.widthSize && col.widthSize >= 2)
+        .reduce((acc, col) => acc + (col.widthSize - 1), 0);
 
       // 计算一行能容纳多少个元素
       const itemsPerRow = this.getItemsPerRow();
@@ -224,7 +228,7 @@ export default create({
 
       // 计算需要展示的行数
       const rowsNeeded = Math.ceil(
-        (alwaysShowCount + actionCount) / itemsPerRow
+        (alwaysShowCount + actionCount + widthSizeCount) / itemsPerRow
       );
 
       // 获取单个 .sc-cell 元素的高度

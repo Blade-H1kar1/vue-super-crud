@@ -256,7 +256,7 @@ export default {
               const fullProp = `list.${pathStr}.${col.prop}`;
               // 触发高亮
               this.handleValidateError(
-                row[this.valueKey],
+                row[this.valueKey] || row._internalId,
                 fullProp,
                 err[0].message,
                 false,

@@ -101,7 +101,6 @@ export default {
     handleResize() {
       this.innerHeight = innerHeight;
       this.getClientTop();
-      this.$refs.searchRef.calculateCollapsedHeight();
     },
   },
 };
