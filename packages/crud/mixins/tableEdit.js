@@ -662,7 +662,7 @@ export default {
                 if (editCell) {
                   this.handleCellSave(
                     { row: editCell.row, $index: editCell.row.$index },
-                    editCell.prop,
+                    this.columnsMap[editCell.prop],
                     () => {
                       this.editState.clearAllEditStatus();
                     }

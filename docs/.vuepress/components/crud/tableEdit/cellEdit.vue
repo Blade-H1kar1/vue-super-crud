@@ -187,9 +187,9 @@ export default {
       console.log(scope, "edit");
       done();
     },
-    save(done, scope) {
+    save(done, value, scope) {
       this.$message.success("保存");
-      console.log(scope, "save");
+      console.log(value, scope, "save");
       done();
     },
   },
