@@ -399,12 +399,14 @@ import {
 import { getComponentConfig } from "core/mock/genConfig";
 import { generateMockData } from "core/mock/genData";
 import cache from "utils/cache.js";
-import { uniqueId } from "lodash-es";
+import { uniqueId, get } from "lodash-es";
 import { isEmptyData, findComponentInstance } from "utils";
 import { create } from "core";
+import getSet from "../getSet";
 
 export default create({
   name: "batch-mock-dialog",
+  mixins: [getSet],
   props: {
     visible: {
       type: Boolean,
@@ -648,25 +650,25 @@ export default create({
     // 刷新预览
     refreshPreview(field) {
       // 设置加载状态
-      this.$set(this.loadingPreviews, field.prop, true);
+      this.setByProp(this.loadingPreviews, field.prop, true);
 
       // 使用setTimeout来模拟异步操作，让UI有时间显示加载状态
       setTimeout(() => {
         try {
           const value = this.generateFieldValue(field);
-          this.$set(this.previewValues, field.prop, value);
+          this.setByProp(this.previewValues, field.prop, value);
         } catch (e) {
           console.error("预览生成错误:", e);
-          this.$set(this.previewValues, field.prop, "生成错误");
+          this.setByProp(this.previewValues, field.prop, "生成错误");
         } finally {
-          this.$set(this.loadingPreviews, field.prop, false);
+          this.setByProp(this.loadingPreviews, field.prop, false);
         }
       }, 100);
     },
 
     // 获取预览类型
     getPreviewType(prop) {
-      const value = this.previewValues[prop];
+      const value = get(this.previewValues, prop);
 
       if (value === undefined || value === null) {
         return "unknown";
@@ -698,7 +700,7 @@ export default create({
 
     // 获取预览值
     getPreviewValue(field) {
-      const value = this.previewValues[field.prop];
+      const value = get(this.previewValues, field.prop);
 
       if (value === undefined || value === null) {
         return "-";
@@ -781,7 +783,7 @@ export default create({
       if (this.instanceType === "table" && this.data && this.data.length > 0) {
         // 表格模式：从现有数据中分析
         const existingValues = this.data
-          .map((item) => item[field.prop])
+          .map((item) => get(item, field.prop))
           .filter((value) => !isEmptyData(value));
 
         if (existingValues.length > 0) {
@@ -913,7 +915,10 @@ export default create({
       const newKey = `prop${
         Object.keys(field.manualConfig.properties).length + 1
       }`;
-      this.$set(field.manualConfig.properties, newKey, { key: "", value: "" });
+      this.setByProp(field.manualConfig.properties, newKey, {
+        key: "",
+        value: "",
+      });
       this.$nextTick(() => this.refreshPreview(field));
     },
 
@@ -944,7 +949,7 @@ export default create({
           const obj = {};
           Object.values(config.properties).forEach((prop) => {
             if (prop.key && prop.value !== "") {
-              obj[prop.key] = prop.value;
+              this.setByProp(obj, prop.key, prop.value);
             }
           });
           return obj;
@@ -993,7 +998,7 @@ export default create({
 
       // 为每个字段生成数据
       this.fields.forEach((field) => {
-        data[field.prop] = this.generateFieldValue(field);
+        this.setValue(data, field);
       });
 
       return data;
@@ -1009,7 +1014,7 @@ export default create({
 
         // 为每个字段生成数据
         this.fields.forEach((field) => {
-          row[field.prop] = this.generateFieldValue(field);
+          this.setValue(row, field);
         });
 
         // 标记为mock数据
@@ -1026,8 +1031,8 @@ export default create({
         // 表单模式：处理单个对象
         const filledData = { ...sourceData };
         this.fields.forEach((field) => {
-          if (isEmptyData(filledData[field.prop])) {
-            filledData[field.prop] = this.generateFieldValue(field);
+          if (isEmptyData(get(filledData, field.prop))) {
+            this.setValue(filledData, field);
           }
         });
         return filledData;
@@ -1036,13 +1041,17 @@ export default create({
         const filledData = [...sourceData];
         filledData.forEach((row) => {
           this.fields.forEach((field) => {
-            if (isEmptyData(row[field.prop])) {
-              row[field.prop] = this.generateFieldValue(field);
+            if (isEmptyData(get(row, field.prop))) {
+              this.setValue(row, field);
             }
           });
         });
         return filledData;
       }
+    },
+
+    setValue(data, field) {
+      this.setByProp(data, field.prop, this.generateFieldValue(field));
     },
 
     // 加载本地缓存
@@ -1238,6 +1247,8 @@ export default create({
 
     // 确认删除字段 - 修改提示信息
     confirmDeleteField(index, field) {
+      this.deleteField(index);
+      return;
       const message = field.isCustom
         ? `确定要删除自定义字段 "${field.label || field.prop}" 吗?`
         : `确定要删除原始字段 "${
