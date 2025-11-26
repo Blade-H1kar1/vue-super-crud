@@ -15,6 +15,7 @@ export default {
       // 数据验证结果缓存
       invalidRows: new Map(), // 存储有问题的行：index -> errorType
       internalTotal: undefined, // 内部获取的总数
+      innerData: undefined, // 用于传入listApi时的data数据监听
     };
   },
 
@@ -42,16 +43,13 @@ export default {
   watch: {
     data: {
       handler(newVal, oldVal) {
-        // 是否完全更新数据
-        const isUpdated = newVal !== oldVal;
-        // 更新树形状态
-        this.updateTreeStatus();
-        if (isUpdated) {
-          this.transformData();
-          this.getListResolve();
-        }
-        // 通知底层渲染组件进行格式化数据处理
-        this.$emit("dataChange");
+        this.handleWatchData(newVal, oldVal);
+      },
+      immediate: true,
+    },
+    innerData: {
+      handler(newVal, oldVal) {
+        this.handleWatchData(newVal, oldVal);
       },
       immediate: true,
     },
@@ -73,6 +71,18 @@ export default {
     },
   },
   methods: {
+    handleWatchData(newVal, oldVal) {
+      // 是否完全更新数据
+      const isUpdated = newVal !== oldVal;
+      // 更新树形状态
+      this.updateTreeStatus();
+      if (isUpdated) {
+        this.transformData();
+        this.getListResolve();
+      }
+      // 通知底层渲染组件进行格式化数据处理
+      this.$emit("dataChange");
+    },
     // 更新树形状态
     updateTreeStatus() {
       this.isTree =
@@ -435,6 +445,7 @@ export default {
           data.length;
       }
       this.updatedData(data);
+      this.innerData = data;
       this.internalTotal = total;
       this.$emit("getList", {
         data,

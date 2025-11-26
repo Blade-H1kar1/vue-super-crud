@@ -30,6 +30,7 @@ export default create({
   name: "crud-column",
   props: {
     col: Object,
+    lastColumn: Boolean,
   },
   inject: ["ctx"],
   mixins: [calcColumnWidth],
@@ -160,8 +161,8 @@ export default create({
         fixed={fixed}
         header-align={col.headerAlign || col.align || "center"}
         align={col.align || "center"}
-        width={fixedWidth || col.width}
-        min-width={col.minWidth}
+        width={(!this.lastColumn && fixedWidth) || col.width}
+        min-width={(this.lastColumn && fixedWidth) || col.minWidth}
         show-overflow-tooltip={showOverflowTooltip}
         scopedSlots={{
           default: !isDefaultColumn ? (scope) => cellRender(scope) : null,

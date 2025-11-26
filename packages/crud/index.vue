@@ -106,9 +106,10 @@
             />
             <slot></slot>
             <column
-              v-for="col in columns"
+              v-for="(col, index) in columns"
               :col="col"
               :key="col.prop || col.label"
+              :lastColumn="index === columns.length - 1"
             />
             <columnAction />
           </el-table> </component

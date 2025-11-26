@@ -206,9 +206,12 @@ export default create({
           this.$nextTick(() => {
             this.instance?.$el.querySelector("input")?.focus();
           });
+          this.hasSearchValue = this.isSearch();
         }}
         onHide={() => {
-          this.isSearch && this.search();
+          if (this.hasSearchValue || this.isSearch()) {
+            this.search();
+          }
           if (this.ctx.showPopperNum > 0) {
             this.ctx.showPopperNum--;
           }
