@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.13](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.10.12...v1.10.13) (2025-12-29)
+
+
+### 🐛 问题修复
+
+* **crud:** 优化 ([0f8eba5](https://github.com/Blade-H1kar1/vue-super-crud/commit/0f8eba5ee85966fbfc2604297295a3fa24204af9))
+* **dialog:** 优化 ([6b52572](https://github.com/Blade-H1kar1/vue-super-crud/commit/6b525725865172df85596e8d39ac3d3e15b3a313))
+* **mock:** 数据模拟支持层级数据 ([97718f1](https://github.com/Blade-H1kar1/vue-super-crud/commit/97718f1a49dae9e23d0e15dedee3a4f749911edb))
+
 ### [1.10.12](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.10.11...v1.10.12) (2025-10-30)
 
 
