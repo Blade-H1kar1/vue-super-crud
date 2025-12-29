@@ -86,7 +86,6 @@ export default (options = {}) => {
       omitProps() {
         return omit(this.dialogOptions, [
           "size",
-          "beforeClose",
           "title",
           "fullscreen",
         ]);
