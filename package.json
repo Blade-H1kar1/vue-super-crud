@@ -1,21 +1,27 @@
 {
   "name": "vue-super-crud",
   "version": "1.10.13",
-  "main": "lib/super-crud.min.js",
+  "main": "lib/super-crud.common.js",
   "files": [
     "lib",
-    "src"
+    "packages",
+    "src",
+    "styles"
   ],
   "scripts": {
     "serve": "vue-cli-service serve",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
     "lib": "vue-cli-service build --target lib --dest lib src/index.js",
-    "dev": "cross-env TARGET=dev gulp watch",
-    "build": "cross-env TARGET=prod gulp build",
+    "dev": "cross-env gulp watch",
+    "dev:umd": "cross-env gulp watch:umd",
+    "dev:common": "cross-env gulp watch:common",
+    "build": "cross-env gulp build",
+    "build:umd": "cross-env gulp webpack",
+    "build:common": "cross-env gulp webpack.common",
     "deploy": "deploy.bat",
     "release": "standard-version",
-    "analyze": "cross-env TARGET=prod ANALYZE=true gulp build"
+    "analyze": "cross-env ANALYZE=true gulp build"
   },
   "devDependencies": {
     "@babel/core": "^7.13.14",
@@ -31,17 +37,11 @@
     "cache-loader": "^4.1.0",
     "cross-env": "^7.0.3",
     "css-loader": "^5.2.0",
-    "dayjs": "^1.11.13",
-    "el-table-excel-extends": "^1.2.5",
-    "el-table-virtual-scroll": "^1.4.6",
-    "element-ui": "^2.15.14",
     "gulp": "^4.0.0",
     "gulp-autoprefixer": "^4.0.0",
     "gulp-cssmin": "^0.1.7",
     "gulp-postcss": "^6.1.1",
     "gulp-sass": "^5.1.0",
-    "lodash-es": "^4.17.21",
-    "mockjs": "^1.1.0",
     "progress-bar-webpack-plugin": "^2.1.0",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
@@ -52,22 +52,25 @@
     "vue-loader": "^15.9.6",
     "vue-router": "^3.2.0",
     "vue-template-compiler": "^2.6.11",
-    "vuedraggable": "^2.24.3",
     "vuepress": "^1.9.10",
     "vuepress-plugin-code-copy": "^1.0.6",
     "vuepress-plugin-fulltext-search": "^2.2.1",
     "vuepress-theme-reco": "^1.6.17",
     "webpack": "^4.27.0",
     "webpack-bundle-analyzer": "^4.10.2",
-    "webpack-merge": "^4.1.4",
-    "xe-utils": "^3.5.28",
-    "xlsx": "^0.18.5"
+    "webpack-merge": "^4.1.4"
   },
-  "peerDependencies": {
+  "dependencies": {
     "element-ui": "^2.15.14",
     "mockjs": "^1.1.0",
     "vue": "^2.6.11",
     "vue-contextmenujs": "^1.4.11",
-    "vuedraggable": "^2.24.3"
+    "vuedraggable": "^2.24.3",
+    "xe-utils": "^3.5.28",
+    "xlsx": "^0.18.5",
+    "dayjs": "^1.11.13",
+    "el-table-excel-extends": "^1.2.5",
+    "el-table-virtual-scroll": "^1.4.6",
+    "lodash-es": "^4.17.21"
   }
 }

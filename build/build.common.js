@@ -1,14 +1,15 @@
 const merge = require("webpack-merge");
+const webpack = require("webpack");
 const { VueLoaderPlugin } = require("vue-loader");
 const ProgressBarPlugin = require("progress-bar-webpack-plugin");
-const TerserPlugin = require("terser-webpack-plugin");
-const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 const alias = require("./alias");
 let config = require("./config");
 const path = require("path");
-const isAnalyze = process.env.ANALYZE === "true";
 
 module.exports = merge(config, {
+  output: {
+    filename: "super-crud.common.js",
+  },
   resolve: {
     extensions: [".js", ".vue", ".json"],
     alias: alias,
@@ -42,29 +43,8 @@ module.exports = merge(config, {
       },
     ],
   },
-  plugins: [
-    new VueLoaderPlugin(),
-    new ProgressBarPlugin(),
-    ...(isAnalyze
-      ? [
-          new BundleAnalyzerPlugin({
-            analyzerMode: "server",
-            openAnalyzer: true,
-            generateStatsFile: true,
-            statsFilename: "stats.json",
-          }),
-        ]
-      : []),
-  ],
+  plugins: [new VueLoaderPlugin(), new ProgressBarPlugin()],
   optimization: {
-    minimizer: [
-      new TerserPlugin({
-        terserOptions: {
-          output: {
-            comments: false,
-          },
-        },
-      }),
-    ],
+    minimize: false,
   },
 });

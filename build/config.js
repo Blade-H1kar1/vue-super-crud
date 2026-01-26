@@ -1,6 +1,5 @@
 const path = require("path");
 const aliases = require("./alias");
-const prd = process.env.TARGET;
 
 const externals = {
   vue: {
@@ -29,43 +28,20 @@ const resolve = (p) => {
   }
 };
 
-const builds = {
-  prod: {
-    entry: resolve("src/index.js"),
-    dest: resolve("lib"),
+module.exports = {
+  mode: "production",
+  entry: {
+    app: resolve("src/index.js"),
+  },
+  output: {
+    path: resolve("lib"),
     filename: "super-crud.min.js",
-    env: "production",
-    externals: externals,
+    chunkFilename: "[id].js",
+    libraryExport: "default",
+    libraryTarget: "umd",
+    library: "super-crud",
+    umdNamedDefine: true,
+    globalObject: "this",
   },
-  dev: {
-    entry: resolve("src/index.js"),
-    dest: resolve("lib"),
-    filename: "super-crud.js",
-    env: "development",
-    externals: externals,
-  },
+  externals: externals,
 };
-function genConfig(name) {
-  const opts = builds[name];
-  const config = {
-    entry: {
-      app: [opts.entry],
-    },
-    output: {
-      filename: opts.filename,
-      path: opts.dest,
-      chunkFilename: "[id].js",
-      libraryExport: "default",
-      libraryTarget: "umd",
-      library: "super-crud",
-      umdNamedDefine: true,
-      globalObject: "this",
-    },
-    externals: opts.externals,
-    devtool: name === "dev" ? "cheap-module-eval-source-map" : false,
-  };
-  config.mode = builds[name].env;
-  return config;
-}
-
-module.exports = genConfig(prd || "prod");
