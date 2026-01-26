@@ -441,8 +441,7 @@ export default {
         total =
           response.total ||
           response.count ||
-          response[this.crudOptions.props.total] ||
-          data.length;
+          response[this.crudOptions.props.total];
       }
       this.updatedData(data);
       this.innerData = data;

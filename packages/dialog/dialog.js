@@ -84,11 +84,7 @@ export default (options = {}) => {
         );
       },
       omitProps() {
-        return omit(this.dialogOptions, [
-          "size",
-          "title",
-          "fullscreen",
-        ]);
+        return omit(this.dialogOptions, ["size", "title", "fullscreen"]);
       },
     },
     methods: {
@@ -235,7 +231,12 @@ export default (options = {}) => {
             title,
           }}
         >
-          <div class={[this.b("body"), this.showFooter ? "has-footer" : ""]}>
+          <div
+            class={[
+              this.b("body"),
+              this.showFooter && !this.dialogOptions.drawer ? "has-footer" : "",
+            ]}
+          >
             {content(h)}
           </div>
           {footer(h)}

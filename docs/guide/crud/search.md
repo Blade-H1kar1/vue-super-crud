@@ -39,10 +39,10 @@ searchForm: {
   labelWidth: "100px",  // 标签宽度
   action: {
     search: {
-      text: "查询"  // 自定义按钮文本
+      label: "查询"  // 自定义按钮文本
     },
     reset: {
-      text: "重置"
+      label: "重置"
     }
   }
 }

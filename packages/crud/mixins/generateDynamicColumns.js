@@ -55,8 +55,11 @@ export default {
       }
 
       // 按数据路径提取数据
-      return rawData.flatMap((item) => {
+      return rawData.flatMap((item, index) => {
         const result = item[currentConfig.path || "children"];
+        result.forEach((r) => {
+          r.$parentIndex = index;
+        });
         return Array.isArray(result) ? result : [];
       });
     },
@@ -95,17 +98,20 @@ export default {
               : item[config.label];
 
           if (!prop) return;
-
           // 去重并收集源数据项
           if (!uniqueMap.has(prop)) {
+            const source = {};
+            source[item.$parentIndex] = item;
+            delete item.$parentIndex;
             uniqueMap.set(prop, {
               ...config,
               prop,
               label: label || `未命名-${prop}`,
-              sourceItems: [item],
+              sourceItems: source,
             });
           } else {
-            uniqueMap.get(prop).sourceItems.push(item);
+            uniqueMap.get(prop).sourceItems[item.$parentIndex] = item;
+            delete item.$parentIndex;
           }
         });
 
