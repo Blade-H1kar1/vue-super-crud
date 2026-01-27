@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.14](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.10.13...v1.10.14) (2026-01-27)
+
+
+### 🐛 问题修复
+
+* **crud:** 表格单选 ([ba8a520](https://github.com/Blade-H1kar1/vue-super-crud/commit/ba8a520299bc7dd1b9c8b8fc5a2fd97f21a37605))
+* **crud:** 动态列子数据来源 ([cb5ef9c](https://github.com/Blade-H1kar1/vue-super-crud/commit/cb5ef9c2f59429412cdb65784e44ed64f6960ee9))
+
 ### [1.10.13](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.10.12...v1.10.13) (2025-12-29)
 
 
