@@ -65,7 +65,7 @@
         </el-button>
       </div>
     </div>
-    <div :class="b('banner-content')" v-else-if="selected">
+    <div :class="b('banner-content')" v-else-if="hasSingleSelected">
       <span>已选择</span>
       <span :class="b('selected-items')">
         <el-tag
@@ -115,7 +115,7 @@ export default create({
       return (
         this.selected[this.labelKey] ||
         this.ctx.flatList.find(
-          (item) => item[this.operateKey] == this.selected[this.operateKey]
+          (item) => item[this.labelKey] == this.selected[this.labelKey]
         )?.[this.labelKey]
       );
     },
@@ -139,9 +139,12 @@ export default create({
       }
 
       if (this.ctx.showSingleSelection) {
-        return this.selected;
+        return this.hasSingleSelected;
       }
       return false;
+    },
+    hasSingleSelected() {
+      return this.selected && Object.keys(this.selected)?.length > 0;
     },
   },
   methods: {},

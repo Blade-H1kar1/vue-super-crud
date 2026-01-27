@@ -69,8 +69,8 @@ export default {
           }
           return (
             <el-radio
-              value={this.ctx.selected[this.ctx.operateKey]}
-              label={scope.row[this.ctx.operateKey]}
+              value={this.ctx.selected?.[this.ctx.operateKey]}
+              label={scope.row?.[this.ctx.operateKey]}
               disabled={selectable}
               onChange={() => {
                 this.ctx.$emit("update:selected", scope.row);
