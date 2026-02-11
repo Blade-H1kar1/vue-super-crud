@@ -70,6 +70,11 @@ export default {
     border: Boolean,
     // 是否分组
     group: Boolean,
+    // 是否开启编辑主题
+    editTheme: {
+      type: Boolean,
+      default: true,
+    },
     // 标签宽度
     labelWidth: {
       type: String,

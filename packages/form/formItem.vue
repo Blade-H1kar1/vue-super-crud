@@ -80,6 +80,18 @@ export default create({
         });
       });
     },
+    // 显示错误提示
+    handleMouseEnter(e) {
+      const formItemComp = this.$refs.formItem;
+      if (formItemComp && formItemComp.validateState === 'error') {
+        const errorMsg = formItemComp.validateMessage;
+        const formContent = e.target.querySelector('.el-form-item__content');
+        this.formCtx.showErrorTooltip(formContent, errorMsg);
+      }
+    },
+    handleMouseLeave() {
+      this.formCtx.removeValidateTooltip();
+    }
   },
   computed: {
     disabled() {
@@ -142,6 +154,9 @@ export default create({
       if (this.isDetail) names.push("is-detail");
       if (this.isFirstRow) names.push("is-first-row");
       if (this.formOptions.colon) names.push("colon");
+      if (this.formOptions.editTheme !== false && this.formCtx.isBorder) {
+        names.push("edit-cell")
+      }
       return names;
     },
     hasTooltip() {
@@ -284,6 +299,10 @@ export default create({
           rules={this.rules}
           scopedSlots={{
             label: labelRender,
+          }}
+          nativeOn={this.formCtx.isBorder && this.rules.length && {
+            mouseenter: this.handleMouseEnter,
+            mouseleave: this.handleMouseLeave
           }}
         >
           {cellRender()}

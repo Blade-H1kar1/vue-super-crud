@@ -1,10 +1,10 @@
 <template>
   <div>
     <div style="margin-bottom: 10px;">
-      <el-button @click="detail = !detail" size="small">切换模式</el-button>
-      <el-tag>当前模式：{{ detail ? "详情" : "编辑" }}</el-tag>
+      <el-button @click="border = !border" size="small">切换模式</el-button>
+      <el-tag>当前模式：{{ border ? "边框" : "普通" }}</el-tag>
     </div>
-    <sc-form :options="options" v-model="data" border> </sc-form>
+    <sc-form :options="options" v-model="data"> </sc-form>
   </div>
 </template>
 
@@ -12,7 +12,7 @@
 export default {
   data() {
     return {
-      detail: true,
+      border: true,
       dictData: [
         {
           value: "1",
@@ -37,13 +37,14 @@ export default {
   computed: {
     options() {
       return {
-        detail: this.detail,
+        border: this.border,
         columns: 3,
         // columnGap: "10px",
         renderColumns: [
           {
             label: "姓名",
             prop: "name",
+            required: true,
           },
           {
             label: "性别",
@@ -59,11 +60,10 @@ export default {
             contentTip: "111111111",
           },
           {
-            label: "checkbox",
-            prop: "checkbox",
+            label: "date",
+            prop: "date",
             comp: {
-              name: "sc-checkbox",
-              options: this.dictData,
+              name: "el-date-picker",
             },
           },
           {

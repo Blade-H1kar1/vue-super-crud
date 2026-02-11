@@ -2,7 +2,7 @@
   <div
     :class="[
       b(),
-      { 'sc-form--border': isDetail && isBorder, 'sc-form--group': isGroup },
+      { 'sc-form--border': isBorder, 'sc-form--group': isGroup },
     ]"
     :style="{ padding: formOptions.gap }"
     @contextmenu="handleContextMenu"
@@ -74,6 +74,15 @@
           ></formItem>
           <formAction />
         </component>
+        <el-tooltip
+          v-if="isBorder"
+          effect="light"
+          :popper-class="b('error-tip')"
+          placement="top"
+          ref="tooltip"
+          :content="errorContent"
+        >
+        </el-tooltip>
       </el-form>
     </div>
     <draftDrawer ref="draftDrawer" />
@@ -156,6 +165,7 @@ export default create({
       key: 1,
       loadingStatus: false,
       mockDialogVisible: false,
+      errorContent: ""
     };
   },
   created() {
@@ -282,6 +292,23 @@ export default create({
         this.$set(this.value, key, data[key]);
       }
       this.$message.success("已生成测试数据");
+    },
+    showErrorTooltip(el, errorMsg) {
+      this.errorContent = errorMsg;
+      const tooltip = this.$refs.tooltip;
+      tooltip.referenceElm = el;
+      tooltip.$refs.popper && (tooltip.$refs.popper.style.display = "none");
+      tooltip.doDestroy();
+      if (!this.errorContent) return;
+      tooltip.setExpectedState(true);
+      tooltip.handleShowPopper();
+    },
+    removeValidateTooltip() {
+      const tooltip = this.$refs.tooltip;
+      if (tooltip) {
+        tooltip.setExpectedState(false);
+        tooltip.handleClosePopper();
+      }
     },
   },
 });
