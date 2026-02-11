@@ -8,9 +8,7 @@ import position from "core/components/position";
 import { get } from "lodash-es";
 import { bem } from "src/utils/bem";
 import { checkVisibility } from "utils";
-// 调试时element-ui导入地址需要改成引入项目下的node_modules地址
 import { TableColumn } from "element-ui";
-// import { TableColumn } from "C:/Users/Administrator/Desktop/jhfCloud2/ruoyi-ui/lib";
 
 TableColumn.destroyed = function () {
   if (!this.$parent) return;

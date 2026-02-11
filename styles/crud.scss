@@ -110,15 +110,14 @@
   }
   // 编辑框透明-单元格样式
   .edit-cell {
-    .cell {
-      .el-input__icon {
-        // 隐藏日期样式前缀图标
-        display: none;
-      }
-    }
     input {
       border: 0px;
       background-color: transparent;
+    }
+    .el-date-editor {
+      .el-input__prefix {
+        display: none;
+      }
     }
     .el-input,
     .el-select {
@@ -157,7 +156,7 @@
     transform: rotate(45deg);
   }
   .edit-cell.error-badge {
-    background: #fee6e6 !important;
+    background: var(--color-danger-light) !important;
     .el-input__inner::placeholder {
       color: var(--color-danger) !important;
     }

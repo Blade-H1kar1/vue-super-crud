@@ -455,21 +455,25 @@ export default {
     // 调用内置删除API
     async callDeleteApi(rowData) {
       if (!this.crudOptions.deleteApi) return;
-      try {
-        this.changeLoading(true);
-        if (Array.isArray(rowData)) {
-          await this.crudOptions.deleteApi(
-            rowData.map((item) => item[this.valueKey]).join(",")
-          );
-        } else {
-          await this.crudOptions.deleteApi(rowData[this.valueKey]);
+      return new Promise(async (resolve, reject) => {
+        try {
+          this.changeLoading(true);
+          if (Array.isArray(rowData)) {
+            await this.crudOptions.deleteApi(
+              rowData.map((item) => item[this.valueKey]).join(",")
+            );
+          } else {
+            await this.crudOptions.deleteApi(rowData[this.valueKey]);
+          }
+          this.changeLoading(false);
+          resolve();
+        } catch (error) {
+          this.changeLoading(false);
+          console.error("删除API调用失败:", error);
+          reject();
+          throw error;
         }
-        this.changeLoading(false);
-      } catch (error) {
-        this.changeLoading(false);
-        console.error("删除API调用失败:", error);
-        throw error;
-      }
+      });
     },
     initRow(row) {
       this.trueRenderColumns.forEach((column) => {

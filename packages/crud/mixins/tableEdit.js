@@ -474,11 +474,11 @@ export default {
     },
 
     // 批量行删除事件
-    handleBatchDelete() {
+   handleBatchDelete() {
       if (this.selectionRow.length === 0) {
         return this.$message.warning("请选择要删除的数据");
       }
-      const handleDelete = () => {
+      const handleDelete = async () => {
         this.changeLoading(true);
         const callBack = () => {
           this.selectionRow
@@ -498,7 +498,7 @@ export default {
             });
           this.changeLoading();
         };
-        this.callDeleteApi(this.selectionRow);
+        await this.callDeleteApi(this.selectionRow);
         this.runBefore(
           ["batchDelete"],
           callBack,
@@ -511,7 +511,7 @@ export default {
 
     // 行删除事件
     handleDelete(scope) {
-      const handleDelete = () => {
+      const handleDelete = async () => {
         this.changeLoading(true);
         const callBack = () => {
           if (scope.row.$parent) {
@@ -524,7 +524,7 @@ export default {
           }
           this.changeLoading();
         };
-        this.callDeleteApi(scope.row);
+        await this.callDeleteApi(scope.row);
         this.runBefore(["delete"], callBack, scope, this.changeLoading);
       };
       handleDelete();
