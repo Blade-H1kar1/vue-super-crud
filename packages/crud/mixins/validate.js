@@ -17,30 +17,37 @@ export default {
   },
   methods: {
     handleValidateError(key, fullProp, msg, isValid = true, showTip = true) {
-      const cell = this.$el
-        .querySelector(".el-table__body")
-        .querySelector(
+      const cells = this.$el
+        .querySelectorAll(
           key
             ? `[data-full-prop="${fullProp}"][data-row-key="${key}"]`
             : `[data-full-prop="${fullProp}"]`
         );
-      if (!cell) return;
+      if (!cells) return;
 
       // 向上查找父元素直到找到 el-table__cell
-      let targetCell = cell.closest(".el-table__cell");
+      let targetCells = [];
+      cells.forEach((cell) => {
+        targetCells.push(cell.closest('.el-table__cell'));
+      });
+
       let loopCount = 0;
       const maxLoops = 5;
 
-      if (!targetCell || loopCount >= maxLoops) return;
+      if (!targetCells || loopCount >= maxLoops) return;
 
       if (!isValid) {
         // 添加错误状态
-        targetCell.classList.add("error-badge");
+        targetCells.forEach((targetCell) => {
+          targetCell.classList.add("error-badge");
+        });
         this.errorMap.set(fullProp, msg);
-        showTip && this.showErrorTooltip(cell);
+        showTip && this.showErrorTooltip(targetCells[targetCells.length -1]);
       } else {
         // 移除错误状态
-        targetCell.classList.remove("error-badge");
+        targetCells.forEach((targetCell) => {
+          targetCell.classList.remove("error-badge");
+        });
         this.errorMap.delete(fullProp);
         showTip && this.cellMouseLeave();
       }
@@ -218,9 +225,7 @@ export default {
       this.errorMap.clear();
       this.errorContent = "";
       const cells =
-        this.$el
-          .querySelector(".el-table__body")
-          .querySelectorAll(".error-badge") || [];
+        this.$el.querySelectorAll(".error-badge") || [];
       cells.forEach((c) => {
         c.classList.remove("error-badge");
       });
