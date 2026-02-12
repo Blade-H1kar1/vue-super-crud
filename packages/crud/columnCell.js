@@ -178,6 +178,7 @@ export function delayColumnCell(h, { col, scope, ctx, topProps }) {
             onVisible: () => {
               scope.row.$delay.push(col.prop);
             },
+            delay: 300,
             rootClass: "el-table__body-wrapper",
             // 分批渲染配置
             batchConfig: topProps.delayRenderConfig,
