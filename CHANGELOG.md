@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.11.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.10.14...v1.11.0) (2026-02-12)
+
+
+### ✨ 新功能
+
+* **crud:** delayRender ([85655fc](https://github.com/Blade-H1kar1/vue-super-crud/commit/85655fcf9fe20bbddb5935e77e957481b2251435))
+* **form:** boder模式优化 ([0c4edcf](https://github.com/Blade-H1kar1/vue-super-crud/commit/0c4edcfc1af8bd50743ae13e41b64c923ccd0cac))
+
+
+### 🐛 问题修复
+
+* **crud:** deleteApi ([318dce5](https://github.com/Blade-H1kar1/vue-super-crud/commit/318dce5b16cbf4c2ce3308c46f6e9ed5e1cea6d1))
+* **crud:** validate ([670bd80](https://github.com/Blade-H1kar1/vue-super-crud/commit/670bd807f3adcedd29fc5d1dc177fce7c24b1972))
+
 ### [1.10.14](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.10.13...v1.10.14) (2026-01-27)
 
 
