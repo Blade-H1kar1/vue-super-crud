@@ -6,7 +6,9 @@
     "lib",
     "packages",
     "src",
-    "styles"
+    "styles",
+    "skills",
+    "bin"
   ],
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -72,5 +74,8 @@
     "el-table-excel-extends": "^1.2.5",
     "el-table-virtual-scroll": "^1.4.6",
     "lodash-es": "^4.17.21"
+  },
+  "bin": {
+    "vue-super-crud": "./bin/install-skills.js"
   }
 }

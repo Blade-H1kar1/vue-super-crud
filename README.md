@@ -11,10 +11,10 @@
 
 ## 特性
 
-- 🚀 **快速开发**：基于 Element UI 二次封装，极少的代码即可完成一个crud页面
+- 🚀 **快速开发**：基于 Element UI 二次封装，极少的代码即可完成一个 CRUD 页面
 - 📦 **模板复用**：配置并复用代码模板，减少重复开发，提升开发效率
-- 🎨 **高度自定义**：支持更灵活、丰富的组件配置，以满足不同项目的高度自定义需求
-<!-- - ⚡ **极致优化**：表格更新渲染性能 -->
+- 🎨 **高度自定义**：支持更灵活、丰富的组件配置，满足不同项目的差异化需求
+- 🤖 **AI 辅助开发**：内置 Cursor Agent Skills，让 AI 更了解组件 API，提升开发体验
 
 ## 安装
 
@@ -48,6 +48,16 @@ Vue.use(VueSuperCrud, {
 })
 ```
 
+## Cursor Agent Skills
+
+本项目内置了 Cursor Agent Skills，安装后 AI 可以更准确地理解组件 API，辅助你编写代码。
+
+```bash
+npx vue-super-crud install-skills
+```
+
+安装后在 Cursor 的 Agent 模式下，AI 将自动加载这些 skills 来辅助开发。
+
 ## 开发指南
 
 ```bash
@@ -57,7 +67,7 @@ git clone https://github.com/blade-h1kar1/vue-super-crud.git
 # 安装依赖
 npm install
 
-# 启动开发服务
+# 启动开发服务器
 npm run serve
 
 # 构建文档

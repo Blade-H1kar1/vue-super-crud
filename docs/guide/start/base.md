@@ -1,27 +1,12 @@
 # 快速开始
 
-## 使用 CDN 引入
-
-### 引入 JS 和 CSS
-
-在 HTML 文件中直接引入：
-
-```html
-<!-- 引入样式 -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vue-super-crud@latest/lib/index.css">
-<!-- 引入组件库 -->
-<script src="https://cdn.jsdelivr.net/npm/vue-super-crud@latest/lib/super-crud.min.js"></script>
-```
-
-## 使用 npm 安装
-
-如果你使用 npm 管理项目，可以通过以下命令安装：
+## 使用 npm 安装（推荐）
 
 ```bash
 npm install vue-super-crud
 ```
 
-然后在项目中引入：
+在项目入口文件中引入：
 
 ```js
 import Vue from 'vue'
@@ -34,6 +19,17 @@ Vue.use(ElementUI)
 Vue.use(SuperCrud, {
   // 全局配置
 })
+```
+
+## 使用 CDN 引入
+
+在 HTML 文件中直接引入：
+
+```html
+<!-- 引入样式 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vue-super-crud@latest/lib/index.css">
+<!-- 引入组件库 -->
+<script src="https://cdn.jsdelivr.net/npm/vue-super-crud@latest/lib/super-crud.min.js"></script>
 ```
 
 ## 本地引入
@@ -56,6 +52,15 @@ Vue.use(SuperCrud, {
 })
 ```
 
+## 安装 Cursor Agent Skills（可选）
+
+本项目内置了 Cursor Agent Skills，安装后可以让 Cursor AI 更准确地理解组件 API，在 Agent 模式下自动生成高质量的组件代码。
+
+```bash
+npx vue-super-crud install-skills
+```
+
 ## 注意事项
 
 - 使用前请确保已引入 Vue 和 Element UI
+- Cursor Agent Skills 需要在 Cursor IDE 中使用才能生效
