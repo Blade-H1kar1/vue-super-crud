@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.12.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.11.0...v1.12.0) (2026-03-06)
+
+
+### ✨ 新功能
+
+* **skill:** 新增skills辅助编码 ([43630ed](https://github.com/Blade-H1kar1/vue-super-crud/commit/43630edc0a6bb0142ddab065034b5514f4cc80ae))
+
 ## [1.11.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.10.14...v1.11.0) (2026-02-12)
 
 
