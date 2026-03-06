@@ -42,7 +42,7 @@
     <slot />
 
     <!-- 标签页内容区 -->
-    <div :class="[b('content'), { [b('is-refresh')]: isRefreshing }]">
+    <div :class="[b('content'), { [b('is-refresh')]: isRefreshing }]" v-if="showContent">
       <transition-group name="fade-transform" mode="out-in">
         <template v-for="(item, index) in tabList">
           <div
@@ -57,7 +57,7 @@
               :name="getItemName(item, index)"
             />
             <Render
-              v-else
+              v-else-if="item.render"
               v-bind="item"
               :item="item"
               :scope="{
@@ -131,6 +131,13 @@ export default create({
       return isPlainObject(this.all)
         ? { ...defaultConfig, ...this.all }
         : defaultConfig;
+    },
+
+    showContent() {
+      return (
+        Object.keys(this.$scopedSlots).filter((i) => i !== "default").length ||
+        this.tabList.some((i) => i.render)
+      );
     },
   },
 
