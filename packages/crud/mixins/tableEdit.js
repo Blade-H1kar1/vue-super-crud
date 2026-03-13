@@ -474,7 +474,7 @@ export default {
     },
 
     // 批量行删除事件
-   handleBatchDelete() {
+    handleBatchDelete() {
       if (this.selectionRow.length === 0) {
         return this.$message.warning("请选择要删除的数据");
       }
@@ -593,14 +593,7 @@ export default {
           this.changeLoading();
           callback && callback();
         };
-        this.runBefore(
-          ["save"],
-          callBack,
-          scope.row[col.prop],
-          scope,
-          col,
-          this.changeLoading
-        );
+        this.runBefore(["save"], callBack, scope, col, this.changeLoading);
       });
     },
 

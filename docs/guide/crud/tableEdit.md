@@ -170,7 +170,7 @@ editConfig: {
 #### 事件处理
 
 `@edit(done, scope, column)` 点击编辑触发，参数`done(params)`，可设置编辑后的数据 </br>
-`@save(done, value, scope, column, unLoading)` 点击保存触发，参数`done(params)`，可设置保存后的数据 </br>
+`@save(done, scope, column, unLoading)` 点击保存触发，参数`done(params)`，可设置保存后的数据 </br>
 
 <ClientOnly>
 <common-code-format>
