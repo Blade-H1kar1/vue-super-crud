@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.12.1](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.12.0...v1.12.1) (2026-03-13)
+
+
+### 🐛 问题修复
+
+* **crud:** 参数传递 ([f3da197](https://github.com/Blade-H1kar1/vue-super-crud/commit/f3da197efbd2c7112d4edee1921a513391041eb5))
+* **form:** 边框模式下禁用 ([d67a686](https://github.com/Blade-H1kar1/vue-super-crud/commit/d67a6861c225ad1f7949511118003e7e90e7a2f6))
+
 ## [1.12.0](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.11.0...v1.12.0) (2026-03-06)
 
 
