@@ -248,8 +248,11 @@
       background-color: #fff;
     }
   }
-  .is-detail.el-form-item.is-required:not(.is-no-asterisk) .el-form-item__label-wrap > .el-form-item__label:before,
-  .is-detail.el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label:before {
+  .is-detail.el-form-item.is-required:not(.is-no-asterisk)
+    .el-form-item__label-wrap
+    > .el-form-item__label:before,
+  .is-detail.el-form-item.is-required:not(.is-no-asterisk)
+    > .el-form-item__label:before {
     display: none;
   }
   .is-detail.el-form-item--medium.el-form-item,
@@ -278,6 +281,7 @@
       background: var(--background-color-base);
       box-sizing: border-box;
       height: 100%;
+      position: relative;
       .el-form-item__label {
         width: var(--label-width);
         background: var(--background-color-base);
@@ -335,6 +339,46 @@
         .el-input__inner::placeholder {
           color: var(--color-danger) !important;
         }
+      }
+    }
+    // 禁用样式
+    .is-disabled:not(.el-checkbox) {
+      // 输入框样式
+      .el-input__inner,
+      .el-textarea__inner {
+        color: var(--color-text-regular) !important;
+        // 隐藏占位符
+        &::-webkit-input-placeholder {
+          color: transparent !important;
+        }
+        &::-moz-placeholder {
+          color: transparent !important;
+        }
+        &::-ms-input-placeholder {
+          color: transparent !important;
+        }
+      }
+      // 禁用条纹背景
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: repeating-linear-gradient(
+          135deg,
+          transparent,
+          transparent 10px,
+          rgba(0, 0, 0, 0.02) 10px,
+          rgba(0, 0, 0, 0.02) 20px
+        );
+      }
+    }
+    // 复选框样式
+    .is-disabled.el-checkbox {
+      .el-checkbox__label {
+        color: var(--color-text-regular) !important;
       }
     }
   }
