@@ -78,6 +78,8 @@ export default {
       if (this.isAutoHeight) {
         this.$nextTick(() => {
           const tableRef = this.$refs.tableRef?.$el;
+          if (!tableRef) return;
+          this.observer.disconnect();
           this.observeVisibility(tableRef, (isVisible) => {
             if (isVisible) {
               const tableTop = tableRef?.getBoundingClientRect().top;
