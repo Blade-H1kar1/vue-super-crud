@@ -291,9 +291,9 @@
       }
       .el-form-item__content {
         flex: 1;
+        min-width: 0; /* 允许 flex 子项收缩，避免内容撑破边框格子 */
         display: flex;
         align-items: center;
-        overflow: hidden;
         margin-left: 0 !important;
         border-left: 1px solid var(--border-color-lighter);
         box-sizing: border-box;
@@ -308,7 +308,6 @@
       .el-textarea__inner,
       input {
         border: 0px;
-        background-color: transparent;
       }
       .el-textarea__inner {
         padding: 2px 0;
@@ -339,46 +338,6 @@
         .el-input__inner::placeholder {
           color: var(--color-danger) !important;
         }
-      }
-    }
-    // 禁用样式
-    .is-disabled:not(.el-checkbox) {
-      // 输入框样式
-      .el-input__inner,
-      .el-textarea__inner {
-        color: var(--color-text-regular) !important;
-        // 隐藏占位符
-        &::-webkit-input-placeholder {
-          color: transparent !important;
-        }
-        &::-moz-placeholder {
-          color: transparent !important;
-        }
-        &::-ms-input-placeholder {
-          color: transparent !important;
-        }
-      }
-      // 禁用条纹背景
-      &::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: repeating-linear-gradient(
-          135deg,
-          transparent,
-          transparent 10px,
-          rgba(0, 0, 0, 0.02) 10px,
-          rgba(0, 0, 0, 0.02) 20px
-        );
-      }
-    }
-    // 复选框样式
-    .is-disabled.el-checkbox {
-      .el-checkbox__label {
-        color: var(--color-text-regular) !important;
       }
     }
   }
