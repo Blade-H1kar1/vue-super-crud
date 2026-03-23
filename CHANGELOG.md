@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.12.3](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.12.2...v1.12.3) (2026-03-23)
+
+
+### 🐛 问题修复
+
+* **crud:** 高度计算 ([1801419](https://github.com/Blade-H1kar1/vue-super-crud/commit/1801419e6a696dd438bdd6667c51ac07990aeb76))
+
 ### [1.12.2](https://github.com/Blade-H1kar1/vue-super-crud/compare/v1.12.0...v1.12.2) (2026-03-17)
 
 
